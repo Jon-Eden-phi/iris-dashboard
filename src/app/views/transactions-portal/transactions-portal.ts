@@ -768,9 +768,25 @@ export class TransactionsPortalComponent {
     this.showToast('Funds requested — client notified', 'ti-cash');
   }
 
+  private addToDataRoom(p: { id: string; stage: string }, docType: string, fileName: string, note: string): void {
+    this.dataRoom.update(list => [...list, {
+      id: 'dr_' + Date.now(),
+      propertyId: p.id,
+      stage: p.stage,
+      docType,
+      fileName,
+      uploadedBy: this.auth.currentUser()?.name ?? 'TX Team',
+      uploadedAt: new Date().toLocaleDateString('en-GB'),
+      note,
+    }]);
+    this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
+  }
+
   approveAuthorityToExchange(): void {
     const p = this.selectedProperty();
     if (!p) return;
+    const today = new Date().toLocaleDateString('en-GB');
+    this.addToDataRoom(p, 'Authority to Exchange (Client)', 'Authority_to_Exchange_Client.pdf', `Client authority received on ${today}`);
     this.data.addActivity(p.id, {
       id: 'auth_exc_' + Date.now(),
       text: 'Authority to exchange and complete — client signed',
@@ -788,6 +804,8 @@ export class TransactionsPortalComponent {
   approveInvestorAuthority(): void {
     const p = this.selectedProperty();
     if (!p) return;
+    const today = new Date().toLocaleDateString('en-GB');
+    this.addToDataRoom(p, 'Authority to Exchange (Investor)', 'Authority_to_Exchange_Investor.pdf', `Investor authority received on ${today}`);
     this.data.addActivity(p.id, {
       id: 'inv_auth_' + Date.now(),
       text: 'Authority to exchange and complete — investor approved',
@@ -810,6 +828,7 @@ export class TransactionsPortalComponent {
       ? new Date(dateRaw).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
       : new Date().toLocaleDateString('en-GB');
     this.setTxData(p.id, { exchangeDate: dateFormatted });
+    this.addToDataRoom(p, 'Exchange Confirmation', 'Exchange_Confirmation.pdf', `Contracts exchanged on ${dateFormatted}`);
     this.data.addActivity(p.id, {
       id: 'exchange_' + Date.now(),
       text: `Contracts exchanged on ${dateFormatted}`,
@@ -833,6 +852,7 @@ export class TransactionsPortalComponent {
       ? new Date(dateRaw).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
       : new Date().toLocaleDateString('en-GB');
     this.setTxData(p.id, { completionDate: dateFormatted });
+    this.addToDataRoom(p, 'Completion Confirmation', 'Completion_Confirmation.pdf', `Completion confirmed on ${dateFormatted}`);
     this.data.addActivity(p.id, {
       id: 'completion_' + Date.now(),
       text: `Completion confirmed on ${dateFormatted}`,
