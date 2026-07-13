@@ -67,4 +67,5 @@ export interface Property {
   lostReason?: string;
   lostDate?: string;
   completedDate?: string;
+  isInvestorDeal?: boolean;
 }
