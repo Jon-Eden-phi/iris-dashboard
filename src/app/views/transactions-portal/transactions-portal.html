@@ -524,12 +524,6 @@
                 <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showQueryModal.set(true)">
                   <i class="ti ti-message-question" style="font-size:13px;"></i> Raise query
                 </button>
-                <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showSurveyModal.set(true)">
-                  <i class="ti ti-clipboard-plus" style="font-size:13px;"></i> Instruct survey
-                </button>
-                <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showUploadModal.set(true)">
-                  <i class="ti ti-upload" style="font-size:13px;"></i> Upload document
-                </button>
                 @if (txStages.indexOf(p.stage) > 0) {
                   <button class="btn-ghost" style="font-size:12px; padding:6px 12px; color:#b45309; border-color:#b45309;" (click)="showRevertModal.set(true)">
                     <i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Revert stage
