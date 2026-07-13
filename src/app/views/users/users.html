@@ -1,0 +1,166 @@
+<!-- Filter + Invite -->
+<div class="card" style="padding:10px 16px; margin-bottom:14px;">
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Role</span>
+    @for (r of roles; track r) {
+      <button class="btn-ghost" style="font-size:12px; padding:5px 11px;"
+              [style.background]="roleFilter() === r ? 'var(--accent-soft)' : ''"
+              [style.color]="roleFilter() === r ? 'var(--accent)' : ''"
+              [style.border-color]="roleFilter() === r ? 'var(--accent)' : ''"
+              (click)="roleFilter.set(r)">
+        {{ r === 'all' ? 'All' : r }}
+      </button>
+    }
+    <button class="btn-primary" style="margin-left:auto; font-size:12px; padding:6px 14px;"
+            (click)="openInvite()">
+      <i class="ti ti-plus" style="margin-right:4px;"></i>Add User
+    </button>
+  </div>
+</div>
+
+<!-- Users table -->
+<div class="card flush">
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Access</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of filtered(); track u.id) {
+          <tr>
+            <td style="font-weight:700;">
+              {{ u.name }}
+              @if (isMe(u)) {
+                <span style="display:inline-flex; align-items:center; margin-left:6px; padding:2px 7px; border-radius:20px; background:var(--bg); border:1px solid var(--border); font-size:10px; font-weight:600; color:var(--text3);">you</span>
+              }
+            </td>
+            <td style="font-size:12px; color:var(--text2);">{{ u.email }}</td>
+            <td>
+              <span style="display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;"
+                    [style.background]="roleBg(u.role)"
+                    [style.color]="roleColor(u.role)">
+                {{ u.role }}
+              </span>
+            </td>
+            <td>
+              @if (u.isAdmin) {
+                <span class="badge badge-green" style="font-size:11px;">Admin</span>
+              } @else {
+                <span class="badge" style="font-size:11px; background:rgba(15,124,107,.08); color:var(--teal);">User</span>
+              }
+            </td>
+            <td style="text-align:right;">
+              <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                <button class="btn-ghost" style="font-size:12px; padding:4px 11px; display:inline-flex; align-items:center; gap:5px;"
+                        (click)="openReset(u)">
+                  <i class="ti ti-key"></i> Reset
+                </button>
+                @if (!isMe(u)) {
+                  <button style="width:30px; height:30px; border-radius:7px; border:1.5px solid rgba(239,68,68,.3); background:rgba(239,68,68,.05); color:#ef4444; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;"
+                          (click)="removeUser(u)">
+                    <i class="ti ti-trash" style="font-size:13px;"></i>
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ Invite / Add User modal ══════════════════════════ -->
+@if (showInvite()) {
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"
+       (click)="showInvite.set(false)">
+    <div style="background:#fff; border-radius:14px; padding:28px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,.15);"
+         (click)="$event.stopPropagation()">
+
+      <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Add user</div>
+      <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">Create a new account. The user can log in immediately with the password you set.</div>
+
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Full name</label>
+      <input class="form-input" type="text" placeholder="e.g. Jane Smith" style="margin-bottom:14px;"
+             [value]="inviteName()" (input)="inviteName.set($any($event.target).value)" />
+
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Email address</label>
+      <input class="form-input" type="email" placeholder="e.g. jane@council.gov.uk" style="margin-bottom:14px;"
+             [value]="inviteEmail()" (input)="inviteEmail.set($any($event.target).value)" />
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Role</label>
+          <select class="form-input" style="padding:8px 10px;"
+                  [value]="inviteRole()" (change)="inviteRole.set($any($event.target).value)">
+            @for (r of roleOptions; track r) {
+              <option [value]="r">{{ r }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Password</label>
+          <input class="form-input" type="text" placeholder="Set a password"
+                 [value]="invitePass()" (input)="invitePass.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-bottom:18px;">
+        <input type="checkbox" [checked]="inviteAdmin()" (change)="inviteAdmin.update(v => !v)" />
+        Grant admin access
+      </label>
+
+      @if (inviteError()) {
+        <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">
+          {{ inviteError() }}
+        </div>
+      }
+
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn-ghost" style="font-size:13px;" (click)="showInvite.set(false)">Cancel</button>
+        <button class="btn-primary" style="font-size:13px;" (click)="submitInvite()">
+          <i class="ti ti-user-plus" style="margin-right:5px;"></i>Create account
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ Reset password modal ═════════════════════════════ -->
+@if (showReset()) {
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"
+       (click)="showReset.set(false)">
+    <div style="background:#fff; border-radius:14px; padding:28px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.15);"
+         (click)="$event.stopPropagation()">
+
+      <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Reset password</div>
+      @if (resetTarget(); as t) {
+        <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">
+          Set a new password for <strong>{{ t.name }}</strong> ({{ t.email }}).
+        </div>
+        <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">New password</label>
+        <input class="form-input" type="text" placeholder="Enter new password" style="margin-bottom:6px;"
+               [value]="resetPass()" (input)="resetPass.set($any($event.target).value)" />
+      }
+
+      @if (resetError()) {
+        <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">
+          {{ resetError() }}
+        </div>
+      }
+
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:18px;">
+        <button class="btn-ghost" style="font-size:13px;" (click)="showReset.set(false)">Cancel</button>
+        <button class="btn-primary" style="font-size:13px;" (click)="submitReset()">
+          <i class="ti ti-key" style="margin-right:5px;"></i>Save password
+        </button>
+      </div>
+    </div>
+  </div>
+}

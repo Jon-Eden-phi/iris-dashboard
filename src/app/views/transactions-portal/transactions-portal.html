@@ -1,0 +1,1181 @@
+<div class="tx-layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────── -->
+  <aside class="tx-sidebar">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">T</div>
+      <div>
+        <div class="tx-logo-name">Transactions</div>
+      </div>
+    </div>
+
+    <div class="nav-section">Homes</div>
+    <a class="nav-item" [class.active]="view() === 'homes'" (click)="navTo('homes')">
+      <i class="ti ti-home-2"></i> Homes
+      <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ txProperties().length }}</span>
+    </a>
+    <a class="nav-item" [class.active]="view() === 'queries'" (click)="navTo('queries')">
+      <i class="ti ti-message-question"></i> My queries
+      @if (openQueryCount > 0) {
+        <span class="tx-nav-badge tx-nb-red" style="margin-left:auto;">{{ openQueryCount }}</span>
+      }
+    </a>
+    <a class="nav-item" [class.active]="view() === 'lost'" (click)="navTo('lost')">
+      <i class="ti ti-archive"></i> Aborted transactions
+    </a>
+
+    <div class="nav-section">Team</div>
+    <a class="nav-item" [class.active]="view() === 'surveys'" (click)="navTo('surveys')">
+      <i class="ti ti-clipboard-list"></i> Survey tracker
+    </a>
+    <a class="nav-item" [class.active]="view() === 'teamdash'" (click)="navTo('teamdash')">
+      <i class="ti ti-users"></i> Team dashboard
+    </a>
+    <a class="nav-item" [class.active]="view() === 'suppliers'" (click)="navTo('suppliers')">
+      <i class="ti ti-address-book"></i> Surveyor directory
+    </a>
+
+    @if (selectedProperty(); as p) {
+      <div class="nav-section">Working record</div>
+      <a class="nav-item" [class.active]="view() === 'record'" (click)="navTo('record')" style="font-size:12px;">
+        <i class="ti ti-file-text"></i>
+        <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">{{ p.address }}</span>
+        <span class="badge badge-orange" style="margin-left:4px; flex-shrink:0; font-size:9.5px;">{{ stageLabel(p.stage) }}</span>
+      </a>
+    }
+
+    <div style="flex:1"></div>
+    <div class="tx-sidebar-footer">
+      <div class="tx-avatar">{{ (auth.currentUser()?.name ?? 'U').substring(0,2).toUpperCase() }}</div>
+      <div style="min-width:0;">
+        <div class="tx-user-name">{{ auth.currentUser()?.name }}</div>
+        <div class="tx-user-role">Transactions</div>
+      </div>
+      <button class="tx-signout-btn" (click)="logout()" title="Sign out">
+        <i class="ti ti-logout"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ───────────────────────────────────────── -->
+  <main class="tx-main">
+
+    <!-- TOP BAR -->
+    <div class="tx-topbar">
+      @if (view() === 'homes')     { <span class="tx-topbar-title">Homes</span><span class="tx-topbar-sub">{{ filteredProperties().length }} of {{ txProperties().length }} in Transactions</span> }
+      @if (view() === 'queries')   { <span class="tx-topbar-title">My queries</span><span class="tx-topbar-sub">{{ openQueryCount }} open</span> }
+      @if (view() === 'lost')      { <span class="tx-topbar-title">Aborted transactions</span><span class="tx-topbar-sub">{{ lostTx().length }} aborted</span> }
+      @if (view() === 'surveys')   { <span class="tx-topbar-title">Survey tracker</span><span class="tx-topbar-sub">Technical surveys across all active transactions</span> }
+      @if (view() === 'teamdash')  { <span class="tx-topbar-title">Team dashboard</span><span class="tx-topbar-sub">Workload across the Transactions team</span> }
+      @if (view() === 'suppliers') { <span class="tx-topbar-title">Surveyor directory</span><span class="tx-topbar-sub">Approved surveying suppliers</span> }
+      @if (view() === 'record' && selectedProperty(); as p) { <span class="tx-topbar-title">{{ p.address }}</span><span class="tx-topbar-sub">{{ p.postcode }} · {{ stageLabel(p.stage) }}</span> }
+    </div>
+
+    <!-- CONTENT -->
+    <div class="tx-content">
+
+      <!-- ── VIEW: HOMES ────────────────────────────── -->
+      @if (view() === 'homes') {
+        <!-- Phase cards -->
+        <div class="phase-grid">
+          @for (ph of phases; track ph.id) {
+            <div class="phase-card" [class.active]="selectedPhase() === ph.id" (click)="selectedPhase.set(ph.id)">
+              <div class="phase-badge" [style.border-color]="ph.color" [style.color]="ph.color">
+                {{ ph.id === 'all' ? '∑' : ph.id.split(' ')[0][0] }}
+              </div>
+              <div>
+                <div class="phase-name">{{ ph.label }}</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:2px;">{{ phaseCount(ph.id) }} active properties</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Metric strip -->
+        <div class="metric-strip">
+          <div class="metric">
+            <div class="metric-l">Properties</div>
+            <div class="metric-v">{{ filteredProperties().length }}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-l">In MoS</div>
+            <div class="metric-v">{{ filteredProperties().filter(p => p.stage === 'MemorandumOfSale').length }}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-l">Conveyancing</div>
+            <div class="metric-v">{{ filteredProperties().filter(p => p.stage === 'Legals').length }}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-l">Surveys</div>
+            <div class="metric-v">{{ filteredProperties().filter(p => p.stage === 'Refurbishment').length }}</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tx-filter-bar">
+            <input class="form-input tx-input" placeholder="Search address or postcode…"
+                   [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)">
+            <select class="form-select tx-select" [value]="stageFilter()" (change)="stageFilter.set($any($event.target).value)">
+              <option value="all">All stages</option>
+              @for (s of txStages; track s) {
+                <option [value]="s">{{ stageLabel(s) }}</option>
+              }
+            </select>
+            <select class="form-select tx-select" [value]="sortOrder()" (change)="sortOrder.set($any($event.target).value)">
+              <option value="modified">Default order</option>
+              <option value="stage">Stage: MoS → Exchange</option>
+              <option value="stage-desc">Stage: Exchange → MoS</option>
+              <option value="address">Address A–Z</option>
+              <option value="price-high">Price: high–low</option>
+              <option value="price-low">Price: low–high</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-home-2"></i> Properties in Transactions</span>
+            <span class="badge badge-gray">{{ filteredProperties().length }} shown</span>
+          </div>
+          @if (filteredProperties().length === 0) {
+            <div class="tx-empty"><i class="ti ti-home-off"></i>No properties match these filters</div>
+          } @else {
+            <table>
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Beds</th>
+                  <th>Stage</th>
+                  <th>Purchase price</th>
+                  <th>Compl. statement</th>
+                  <th>Phase</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of filteredProperties(); track p.id) {
+                  <tr (click)="openRecord(p)">
+                    <td><span class="tx-prop-link">{{ p.address }}, {{ p.postcode }}</span></td>
+                    <td>{{ p.beds ?? '—' }} bed</td>
+                    <td>
+                      <span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span>
+                    </td>
+                    <td>
+                      @if (p.agreedPrice) {
+                        <span style="font-weight:700; font-size:12.5px;">£{{ p.agreedPrice.toLocaleString('en-GB') }}</span>
+                        @if (priceReduction(p); as reduction) {
+                          <span style="font-size:10px; color:#16a34a; margin-left:4px;">▼ £{{ reduction.toLocaleString('en-GB') }}</span>
+                        }
+                      } @else if (p.financial?.ap) {
+                        <span style="font-size:12px; color:var(--text3);">£{{ p.financial!.ap!.toLocaleString('en-GB') }}</span>
+                      } @else {
+                        <span style="color:var(--text3);">—</span>
+                      }
+                    </td>
+                    <td>
+                      @if (p.stage === 'Lettings') {
+                        @if (getTxData(p.id).checklist['compl_statement_appr']) {
+                          <span class="badge badge-green">Approved</span>
+                        } @else if (getTxData(p.id).checklist['compl_statement_recv']) {
+                          <span class="badge badge-amber">Received</span>
+                        } @else {
+                          <span class="badge badge-gray">Not sent</span>
+                        }
+                      } @else {
+                        <span style="color:var(--text3); font-size:11px;">—</span>
+                      }
+                    </td>
+                    <td style="font-size:12px; color:var(--text3);">{{ p.phase ?? '—' }}</td>
+                    <td><button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="openRecord(p); $event.stopPropagation()">View →</button></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- ── VIEW: QUERIES ──────────────────────────── -->
+      @if (view() === 'queries') {
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title" style="color:#dc2626;"><i class="ti ti-message-question"></i> Queries owed by you</span>
+            @if (queriesOwed.length > 0) {
+              <span class="badge" style="background:rgba(220,38,38,0.08); color:#dc2626;">{{ queriesOwed.length }} awaiting your response</span>
+            }
+          </div>
+          @if (queriesOwed.length === 0) {
+            <div class="tx-empty"><i class="ti ti-circle-check"></i>Nothing owed — all caught up</div>
+          }
+          @for (q of queriesOwed; track q.id) {
+            <div class="tx-query-item" [style.opacity]="q.status === 'Resolved' ? '0.65' : '1'">
+              <div class="tx-query-icon"
+                   [style.background]="q.status === 'Resolved' ? 'rgba(22,163,74,0.08)' : 'rgba(220,38,38,0.08)'"
+                   [style.color]="q.status === 'Resolved' ? '#16a34a' : '#dc2626'">
+                <i [class]="q.status === 'Resolved' ? 'ti ti-circle-check' : 'ti ti-message-question'"></i>
+              </div>
+              <div style="flex:1;">
+                <div class="tx-query-meta">
+                  <strong style="color:var(--text1);">{{ q.property }}</strong> · {{ q.doc }} · {{ q.date }}
+                  @if (q.status === 'Resolved') {
+                    <span class="badge badge-green" style="margin-left:6px;">Resolved {{ q.resolvedDate }}</span>
+                  }
+                </div>
+                <div class="tx-query-text">{{ q.text }}</div>
+                @if (q.response) {
+                  <div style="margin-top:8px; padding:8px 10px; background:rgba(22,163,74,0.06); border-left:3px solid #22c55e; border-radius:0 5px 5px 0; font-size:12px; color:var(--text2);">
+                    <span style="font-weight:600; color:#16a34a;">Your response:</span> {{ q.response }}
+                  </div>
+                }
+                <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                  <span style="font-size:11px; color:var(--text3);">Raised by {{ q.raisedBy }}</span>
+                  @if (q.status === 'Open') {
+                    <button class="btn-ghost" style="font-size:11px; padding:3px 10px; margin-left:auto;" (click)="openResponseModal(q.id)">
+                      <i class="ti ti-send" style="font-size:11px;"></i> Respond
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-message-question"></i> Queries raised by you</span>
+            <div style="display:flex; gap:8px; align-items:center;">
+              @if (queriesRaised.length > 0) {
+                <span class="badge badge-gray">{{ queriesRaised.length }} open</span>
+              }
+              <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="showQueryModal.set(true)"><i class="ti ti-plus" style="font-size:12px;"></i> Raise query</button>
+            </div>
+          </div>
+          @if (queriesRaised.length === 0) {
+            <div class="tx-empty"><i class="ti ti-circle-check"></i>No open queries raised</div>
+          }
+          @for (q of queriesRaised; track q.id) {
+            <div class="tx-query-item">
+              <div class="tx-query-icon" style="background:rgba(180,83,9,0.08); color:#b45309;"><i class="ti ti-message-question"></i></div>
+              <div style="flex:1;">
+                <div class="tx-query-meta"><strong style="color:var(--text1);">{{ q.property }}</strong> · {{ q.doc }} · {{ q.date }}</div>
+                <div class="tx-query-text">{{ q.text }}</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:4px;">Raised by {{ q.raisedBy }} · Assigned to {{ q.assignedTo }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── VIEW: LOST ─────────────────────────────── -->
+      @if (view() === 'lost') {
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-archive"></i> Aborted transactions</span>
+            <span class="badge badge-gray">{{ lostTx().length }}</span>
+          </div>
+          @if (lostTx().length === 0) {
+            <div class="tx-empty"><i class="ti ti-circle-check"></i>No aborted transactions</div>
+          } @else {
+            <table>
+              <thead><tr><th>Address</th><th>Stage when aborted</th><th>Reason</th><th>Detail</th><th>Date</th><th></th></tr></thead>
+              <tbody>
+                @for (p of lostTx(); track p.address; let i = $index) {
+                  <tr>
+                    <td>{{ p.address }}, {{ p.postcode }}</td>
+                    <td><span class="stage-chip stage-{{ p.stageWhenLost }}">{{ stageLabel(p.stageWhenLost) }}</span></td>
+                    <td><span class="badge" style="background:rgba(220,38,38,0.08); color:#dc2626;">{{ p.reason }}</span></td>
+                    <td style="font-size:12px; color:var(--text3); max-width:260px;">{{ p.detail }}</td>
+                    <td>{{ p.date }}</td>
+                    <td><button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="revertLost(i)"><i class="ti ti-arrow-back-up" style="font-size:12px;"></i> Revert</button></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- ── VIEW: SURVEY TRACKER ───────────────────── -->
+      @if (view() === 'surveys') {
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-label">Active surveys</div>
+            <div class="kpi-value">{{ surveys().length }}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Awaiting report</div>
+            <div class="kpi-value" style="color:#b45309;">{{ surveyAwaitingCount }}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Returned</div>
+            <div class="kpi-value" style="color:var(--teal);">{{ surveyReturnedCount }}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Total cost (active)</div>
+            <div class="kpi-value">£{{ surveyTotalCost.toLocaleString('en-GB') }}</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-clipboard-list"></i> All surveys</span>
+            <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="showSurveyModal.set(true)"><i class="ti ti-plus" style="font-size:12px;"></i> Instruct survey</button>
+          </div>
+          <table>
+            <thead><tr><th>Property</th><th>Report type</th><th>Provider</th><th>Instructed</th><th>Site visit</th><th>Returned</th><th>Status</th><th class="num-cell">Cost</th></tr></thead>
+            <tbody>
+              @for (s of surveys(); track s.property + s.type) {
+                <tr>
+                  <td>{{ s.property }}</td><td>{{ s.type }}</td><td>{{ s.provider }}</td>
+                  <td>{{ s.instructed }}</td><td>{{ s.siteVisit ?? '—' }}</td><td>{{ s.returned ?? '—' }}</td>
+                  <td><span class="badge badge-{{ surveyStatusColor(s.status) }}">{{ s.status }}</span></td>
+                  <td class="num-cell">£{{ s.cost }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- ── VIEW: TEAM DASHBOARD ───────────────────── -->
+      @if (view() === 'teamdash') {
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-users"></i> Transactions per team member</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+            @for (t of teamWorkload; track t.name) {
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:150px; font-size:13px; color:var(--text2);">{{ t.name }}</div>
+                <div style="flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden;">
+                  <div style="height:100%; background:var(--accent); border-radius:4px;" [style.width.%]="(t.count / 6) * 100"></div>
+                </div>
+                <div style="width:24px; text-align:right; font-size:13px; font-weight:700;">{{ t.count }}</div>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-table"></i> Breakdown</span>
+          </div>
+          <table>
+            <thead><tr><th>Team member</th><th class="num-cell">Assigned</th></tr></thead>
+            <tbody>
+              @for (t of teamWorkload; track t.name) {
+                <tr><td>{{ t.name }}</td><td class="num-cell">{{ t.count }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- ── VIEW: SURVEYOR DIRECTORY ───────────────── -->
+      @if (view() === 'suppliers') {
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-address-book"></i> Approved surveying suppliers</span>
+          </div>
+          <table>
+            <thead><tr><th>Provider</th><th>Specialism</th><th>Contact</th><th>Email</th><th>Phone</th><th class="num-cell">Active surveys</th></tr></thead>
+            <tbody>
+              @for (s of surveyorDirectory; track s.name) {
+                <tr>
+                  <td>{{ s.name }}</td><td>{{ s.specialism }}</td><td>{{ s.contact }}</td>
+                  <td style="color:var(--blue);">{{ s.email }}</td><td>{{ s.phone }}</td>
+                  <td class="num-cell"><span class="badge badge-gray">{{ s.active }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- ── VIEW: PROPERTY RECORD ──────────────────── -->
+      @if (view() === 'record') {
+        @if (selectedProperty(); as p) {
+
+          <!-- Record tabs -->
+          <div style="display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:16px;">
+            <button (click)="recordTab.set('overview')"
+              style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
+              [style.border-bottom-color]="recordTab() === 'overview' ? 'var(--accent)' : 'transparent'"
+              [style.color]="recordTab() === 'overview' ? 'var(--accent)' : 'var(--text3)'">
+              <i class="ti ti-home-2" style="font-size:13px; margin-right:5px;"></i>Overview
+            </button>
+            <button (click)="recordTab.set('dataroom')"
+              style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
+              [style.border-bottom-color]="recordTab() === 'dataroom' ? 'var(--accent)' : 'transparent'"
+              [style.color]="recordTab() === 'dataroom' ? 'var(--accent)' : 'var(--text3)'">
+              <i class="ti ti-folders" style="font-size:13px; margin-right:5px;"></i>Data Room
+              @if (filesForProperty(p.id).length > 0) {
+                <span class="badge badge-gray" style="margin-left:6px;">{{ filesForProperty(p.id).length }}</span>
+              }
+            </button>
+          </div>
+
+          @if (recordTab() === 'dataroom') {
+            <!-- Data Room view -->
+            <div class="card">
+              <div class="tx-section-header" style="margin-bottom:14px;">
+                <span class="tx-section-title"><i class="ti ti-folders"></i> Data Room — {{ p.address }}</span>
+                <button class="btn-primary" style="font-size:12px; padding:6px 14px;" (click)="showUploadModal.set(true)">
+                  <i class="ti ti-upload" style="font-size:12px;"></i> Upload files
+                </button>
+              </div>
+              <!-- Filters -->
+              <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+                <input class="form-input tx-input" style="flex:1; min-width:160px;" placeholder="Search files…"
+                       [value]="drSearch()" (input)="drSearch.set($any($event.target).value)">
+                <select class="form-select tx-select" [value]="drStageFilter()" (change)="drStageFilter.set($any($event.target).value)">
+                  <option value="all">All stages</option>
+                  @for (s of txStages; track s) { <option [value]="s">{{ stageLabel(s) }}</option> }
+                </select>
+              </div>
+
+              @if (filesByStage(p.id).length === 0) {
+                <div class="tx-empty"><i class="ti ti-folder-open"></i>No documents uploaded yet — click Upload files to add</div>
+              } @else {
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:40%;">Files</th>
+                      <th>Document type</th>
+                      <th>Uploaded</th>
+                      <th>Uploaded by</th>
+                      <th>Note</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (group of filesByStage(p.id); track group.stage) {
+                      <!-- Stage folder row -->
+                      <tr (click)="toggleDrStage(group.stage)" style="cursor:pointer; background:var(--surface2, var(--surface));">
+                        <td colspan="6" style="font-weight:700; font-size:12.5px; padding:10px 12px;">
+                          <i [class]="drExpandedStages().has(group.stage) ? 'ti ti-chevron-down' : 'ti ti-chevron-right'" style="font-size:12px; margin-right:6px; color:var(--text3);"></i>
+                          <i class="ti ti-folder-filled" style="font-size:14px; margin-right:6px; color:#f59e0b;"></i>
+                          {{ stageLabel(group.stage) }}
+                          <span class="badge badge-gray" style="margin-left:8px;">{{ group.files.length }}</span>
+                        </td>
+                      </tr>
+                      @if (drExpandedStages().has(group.stage)) {
+                        @for (file of group.files; track file.id) {
+                          <tr>
+                            <td style="padding-left:32px;">
+                              <i class="ti ti-file-description" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>
+                              <span style="font-size:13px;">{{ file.fileName }}</span>
+                            </td>
+                            <td><span class="badge badge-gray">{{ file.docType }}</span></td>
+                            <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
+                            <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
+                            <td style="font-size:12px; color:var(--text3); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
+                            <td>
+                              <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteFile(file.id)">
+                                <i class="ti ti-trash" style="font-size:12px;"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      }
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
+
+          @if (recordTab() === 'overview') {
+
+          <!-- Stage tracker -->
+          <div class="card">
+            <div class="tx-stage-tracker">
+              @for (s of txStages; track s; let i = $index; let first = $first) {
+                @if (!first) { <div class="tx-stage-connector" [class.done]="txStages.indexOf(p.stage) > i"></div> }
+                <div class="tx-stage-step"
+                     [class.done]="txStages.indexOf(p.stage) > i"
+                     [class.current]="p.stage === s"
+                     [class.todo]="txStages.indexOf(p.stage) < i">
+                  <div class="tx-stage-dot">
+                    @if (txStages.indexOf(p.stage) > i) { <i class="ti ti-check"></i> }
+                    @else { {{ i + 1 }} }
+                  </div>
+                  <div class="tx-stage-label">{{ stageLabel(s) }}</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Property header -->
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+              <div>
+                <div style="font-size:11px; font-weight:700; color:var(--teal); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">{{ p.id }}</div>
+                <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em; line-height:1.2;">{{ p.address }}, {{ p.postcode }}</div>
+                <div style="font-size:12.5px; color:var(--text3); margin-top:4px;">{{ p.beds ?? '—' }} bed · {{ p.phase ?? '—' }}</div>
+                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                  <span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span>
+                  @if (p.epcBefore?.r) { <span class="epc-pill badge-{{ p.epcBefore!.r }}">EPC {{ p.epcBefore!.r }}</span> }
+                  @if (p.financial?.ap) { <span class="badge badge-gray">£{{ p.financial!.ap!.toLocaleString('en-GB') }}</span> }
+                  @if (p.agreedPrice) { <span class="badge badge-green">Agreed £{{ p.agreedPrice.toLocaleString('en-GB') }}</span> }
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showQueryModal.set(true)">
+                  <i class="ti ti-message-question" style="font-size:13px;"></i> Raise query
+                </button>
+                <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showSurveyModal.set(true)">
+                  <i class="ti ti-clipboard-plus" style="font-size:13px;"></i> Instruct survey
+                </button>
+                <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showUploadModal.set(true)">
+                  <i class="ti ti-upload" style="font-size:13px;"></i> Upload document
+                </button>
+                @if (txStages.indexOf(p.stage) > 0) {
+                  <button class="btn-ghost" style="font-size:12px; padding:6px 12px; color:#b45309; border-color:#b45309;" (click)="showRevertModal.set(true)">
+                    <i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Revert stage
+                  </button>
+                }
+                @if (p.stage !== 'Lettings') {
+                  <button class="tx-btn-advance" (click)="advanceStage(p.id)">
+                    <i class="ti ti-arrow-right" style="font-size:13px;"></i> Next stage
+                  </button>
+                }
+                <button class="tx-btn-abort" (click)="showAbortModal.set(true)">
+                  <i class="ti ti-archive" style="font-size:13px;"></i> Abort
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial quick stats -->
+          @if (p.financial) {
+            <div class="tx-qs-grid">
+              @if (p.financial.ap) {
+                <div class="tx-qs-cell"><div class="tx-qs-label">Asking price</div><div class="tx-qs-value">£{{ p.financial.ap.toLocaleString('en-GB') }}</div></div>
+              }
+              @if (p.agreedPrice) {
+                <div class="tx-qs-cell"><div class="tx-qs-label">Agreed price</div><div class="tx-qs-value" style="color:var(--teal);">£{{ p.agreedPrice.toLocaleString('en-GB') }}</div></div>
+              }
+              @if (p.financial.capex) {
+                <div class="tx-qs-cell"><div class="tx-qs-label">Capex</div><div class="tx-qs-value">£{{ p.financial.capex.toLocaleString('en-GB') }}</div></div>
+              }
+              @if (p.financial.tc) {
+                <div class="tx-qs-cell"><div class="tx-qs-label">Transaction costs</div><div class="tx-qs-value">£{{ p.financial.tc.toLocaleString('en-GB') }}</div></div>
+              }
+              @if (p.beds) {
+                <div class="tx-qs-cell"><div class="tx-qs-label">Bedrooms</div><div class="tx-qs-value">{{ p.beds }}</div></div>
+              }
+            </div>
+          }
+
+          <!-- Key dates -->
+          <div class="card">
+            <div class="tx-section-header">
+              <span class="tx-section-title"><i class="ti ti-calendar-event"></i> Key dates</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px;">
+              <div>
+                <label class="form-label" style="font-size:11px;">Est. exchange date</label>
+                <input class="form-input" type="date"
+                       [value]="getTxData(p.id).exchangeDate"
+                       (change)="setTxData(p.id, {exchangeDate: $any($event.target).value})">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:11px;">Est. completion date</label>
+                <input class="form-input" type="date"
+                       [value]="getTxData(p.id).completionDate"
+                       (change)="setTxData(p.id, {completionDate: $any($event.target).value})">
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage checklist -->
+          @if (stageActions[p.stage]; as actions) {
+            <div class="card">
+              <div class="tx-section-header" style="margin-bottom:14px;">
+                <div>
+                  <span class="tx-section-title"><i class="ti ti-list-check"></i> Stage checklist — {{ stageLabel(p.stage) }}</span>
+                  @if (stageStatus(p.id, p.stage); as status) {
+                    <div style="margin-top:6px;">
+                      <span style="font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px;"
+                            [style.background]="status.done ? 'rgba(22,163,74,0.1)' : 'rgba(180,83,9,0.1)'"
+                            [style.color]="status.done ? '#16a34a' : '#b45309'">
+                        <i [class]="status.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:11px;"></i>
+                        {{ status.label }}
+                      </span>
+                    </div>
+                  }
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <span class="badge badge-gray">{{ checklistProgress(p.id, p.stage).done }} / {{ checklistProgress(p.id, p.stage).total }}</span>
+                </div>
+              </div>
+
+              <!-- Progress bar -->
+              <div style="height:5px; background:var(--border); border-radius:3px; margin-bottom:16px; overflow:hidden;">
+                <div style="height:100%; background:var(--teal); border-radius:3px; transition:width .3s;"
+                     [style.width.%]="checklistProgress(p.id, p.stage).total > 0 ? (checklistProgress(p.id, p.stage).done / checklistProgress(p.id, p.stage).total) * 100 : 0"></div>
+              </div>
+
+              <!-- Outstanding action banners -->
+              @if (!getTxData(p.id).checklist['fee_earner_added'] || !getTxData(p.id).checklist['contract_pack_received']) {
+                <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+                  @if (!getTxData(p.id).checklist['fee_earner_added']) {
+                    <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.2); border-radius:7px;">
+                      <i class="ti ti-user-exclamation" style="font-size:14px; color:#b45309; flex-shrink:0;"></i>
+                      <span style="font-size:12.5px; color:#92400e; font-weight:500;">Fee earner not yet assigned</span>
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showFeeEarnerModal.set(true)">
+                        <i class="ti ti-user-plus" style="font-size:11px;"></i> Add fee earner
+                      </button>
+                    </div>
+                  }
+                  @if (!getTxData(p.id).checklist['contract_pack_received']) {
+                    <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.2); border-radius:7px;">
+                      <i class="ti ti-file-alert" style="font-size:14px; color:#b45309; flex-shrink:0;"></i>
+                      <span style="font-size:12.5px; color:#92400e; font-weight:500;">Contract pack not yet received</span>
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true)">
+                        <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                @for (action of actions; track action.key) {
+                  <div
+                    (click)="toggleChecklist(p.id, action.key, action.label)"
+                    style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; border:1.5px solid; cursor:pointer; width:100%; transition:.12s; font-size:13px; font-weight:500;"
+                    [style.background]="getTxData(p.id).checklist[action.key] ? '#f0fdf4' : 'var(--surface)'"
+                    [style.border-color]="getTxData(p.id).checklist[action.key] ? '#22c55e' : 'var(--border)'"
+                    [style.color]="getTxData(p.id).checklist[action.key] ? '#15803d' : 'var(--text2)'">
+                    <span style="width:20px; height:20px; border-radius:50%; border:2px solid; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; transition:.12s;"
+                          [style.border-color]="getTxData(p.id).checklist[action.key] ? '#22c55e' : 'var(--border)'"
+                          [style.background]="getTxData(p.id).checklist[action.key] ? '#22c55e' : 'transparent'"
+                          [style.color]="getTxData(p.id).checklist[action.key] ? '#fff' : 'transparent'">
+                      <i class="ti ti-check"></i>
+                    </span>
+                    <span [style.text-decoration]="getTxData(p.id).checklist[action.key] ? 'line-through' : 'none'"
+                          [style.opacity]="getTxData(p.id).checklist[action.key] ? '0.6' : '1'">
+                      {{ action.label }}
+                    </span>
+                    @if (getTxData(p.id).checklist[action.key]) {
+                      <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">Done</span>
+                    } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_received') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showUploadModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload MoS
+                      </button>
+                    } @else if (action.key === 'fee_earner_added') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showFeeEarnerModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-user-plus" style="font-size:11px;"></i> Add fee earner
+                      </button>
+                    } @else if (p.stage === 'Legals' && action.key === 'contract_pack_received') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
+                      </button>
+                    } @else if (p.stage === 'Legals' && action.key === 'searches_ordered') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showSearchesModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-search" style="font-size:11px;"></i> Order searches
+                      </button>
+                    } @else if (p.stage === 'Legals' && action.key === 'draft_rot_received') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showDraftRotModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload draft RoT
+                      </button>
+                    } @else if (p.stage === 'Refurbishment' && action.key === 'surveys_ordered') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order surveys
+                      </button>
+                    } @else if (p.stage === 'Legals' && action.key === 'final_rot_received') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Report on Title'); showUploadModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload final RoT
+                      </button>
+                    } @else if (p.stage === 'Refurbishment' && action.key === 'survey_reports_received') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); showUploadModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey reports
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_recv') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Completion Statement'); showUploadModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload completion statement
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'contract_pack') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
+                      </button>
+                    } @else {
+                      <span style="margin-left:auto; font-size:11px; color:var(--text3); font-weight:400;">Click to mark done</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- TX activity log (from checklist actions) -->
+            @if (getTxData(p.id).txLog.length > 0) {
+              <div class="card">
+                <div class="tx-section-header">
+                  <span class="tx-section-title"><i class="ti ti-history"></i> Recent actions</span>
+                </div>
+                @for (entry of getTxData(p.id).txLog; track entry.ts) {
+                  <div class="tx-note-item">
+                    <div class="tx-note-avatar" style="background:rgba(34,197,94,0.12); color:#15803d;"><i class="ti ti-check" style="font-size:13px;"></i></div>
+                    <div style="flex:1;">
+                      <div style="font-size:11px; color:var(--text3); margin-bottom:2px;">{{ entry.ts }} · {{ entry.author }}</div>
+                      <div style="font-size:13px; color:var(--text2);">{{ entry.text }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <!-- Surveys on this property -->
+          @if (surveys().filter(s => s.property === p!.address).length > 0) {
+            <div class="card">
+              <div class="tx-section-header">
+                <span class="tx-section-title"><i class="ti ti-clipboard-list"></i> Surveys for this property</span>
+                <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="showSurveyModal.set(true)"><i class="ti ti-plus" style="font-size:12px;"></i> Add</button>
+              </div>
+              <table>
+                <thead><tr><th>Type</th><th>Provider</th><th>Instructed</th><th>Site visit</th><th>Status</th><th class="num-cell">Cost</th></tr></thead>
+                <tbody>
+                  @for (s of surveys().filter(sv => sv.property === p!.address); track s.type) {
+                    <tr>
+                      <td>{{ s.type }}</td><td>{{ s.provider }}</td><td>{{ s.instructed }}</td>
+                      <td>{{ s.siteVisit ?? '—' }}</td>
+                      <td><span class="badge badge-{{ surveyStatusColor(s.status) }}">{{ s.status }}</span></td>
+                      <td class="num-cell">£{{ s.cost }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <!-- Activity log -->
+          @if ((p.activityLog ?? []).length > 0) {
+            <div class="card">
+              <div class="tx-section-header">
+                <span class="tx-section-title"><i class="ti ti-notes"></i> Activity log</span>
+              </div>
+              @for (n of (p.activityLog ?? []); track n.id) {
+                <div class="tx-note-item">
+                  <div class="tx-note-avatar">{{ n.author.substring(0,2).toUpperCase() }}</div>
+                  <div style="flex:1;">
+                    <div style="font-size:11px; color:var(--text3); margin-bottom:3px;">{{ n.author }} · {{ n.timestamp }}</div>
+                    <div style="font-size:13px; color:var(--text2); line-height:1.5;">{{ n.text }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          } <!-- end overview tab -->
+
+        }
+      }
+
+    </div>
+  </main>
+</div>
+
+<!-- ── MODALS ──────────────────────────────────────── -->
+
+@if (showQueryModal()) {
+  <div class="tx-modal-backdrop" (click)="showQueryModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title">Raise a query</span>
+      <button class="tx-modal-close" (click)="showQueryModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Related to</label>
+      <select class="form-select" style="margin-bottom:12px;" [value]="queryDoc()" (change)="queryDoc.set($any($event.target).value)">
+        <option>Report on Title — draft</option>
+        <option>EPC certificate</option>
+        <option>Searches — local authority</option>
+        <option>Title deeds</option>
+      </select>
+      <label class="form-label">Assign to</label>
+      <select class="form-select" style="margin-bottom:12px;" [value]="queryAssignee()" (change)="queryAssignee.set($any($event.target).value)">
+        <option>Hayley Briggs (Winkworth Sherwood)</option>
+        <option>{{ auth.currentUser()?.name }} (TX)</option>
+      </select>
+      <label class="form-label">Query</label>
+      <textarea class="form-input" style="min-height:70px; resize:vertical;" placeholder="Describe the query…"
+                [value]="queryText()" (input)="queryText.set($any($event.target).value)"></textarea>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showQueryModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="raiseQuery()">Raise query &amp; notify</button>
+    </div>
+  </div>
+}
+
+@if (showSurveyModal()) {
+  <div class="tx-modal-backdrop" (click)="showSurveyModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title">Instruct a survey</span>
+      <button class="tx-modal-close" (click)="showSurveyModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Survey / report type</label>
+      <select class="form-select" style="margin-bottom:12px;" [value]="surveyType()" (change)="surveyType.set($any($event.target).value)">
+        <option>Electrical (EICR)</option>
+        <option>Gas safety</option>
+        <option>Condition survey</option>
+        <option>Valuation</option>
+        <option>Fire risk assessment</option>
+        <option>Structural</option>
+        <option>Roof condition</option>
+        <option>Damp / EPC follow-up</option>
+        <option>Asbestos</option>
+      </select>
+      <label class="form-label">Provider</label>
+      <select class="form-select" style="margin-bottom:12px;" [value]="surveyProvider()" (change)="surveyProvider.set($any($event.target).value)">
+        <option>Aziza Surveys</option>
+        <option>BRE</option>
+        <option>Savills</option>
+        <option>RICS Chartered (independent)</option>
+      </select>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label class="form-label">Cost (£)</label>
+          <input class="form-input" type="number" placeholder="e.g. 180"
+                 [value]="surveyCost()" (input)="surveyCost.set($any($event.target).value)">
+        </div>
+        <div>
+          <label class="form-label">Site visit date <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+          <input class="form-input" type="date"
+                 [value]="surveySiteVisit()" (change)="surveySiteVisit.set($any($event.target).value)">
+        </div>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showSurveyModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="addSurvey()">Instruct survey</button>
+    </div>
+  </div>
+}
+
+@if (showAbortModal()) {
+  <div class="tx-modal-backdrop" (click)="showAbortModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title" style="color:#dc2626;"><i class="ti ti-alert-triangle" style="font-size:15px; vertical-align:-2px; margin-right:5px;"></i>Confirm: abort transaction?</span>
+      <button class="tx-modal-close" (click)="showAbortModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      @if (selectedProperty(); as p) {
+        <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">This will abort the transaction for <strong>{{ p.address }}</strong>. ACQ, the client, and solicitors will be notified.</p>
+      }
+      <label class="form-label">Reason</label>
+      <select class="form-select" [value]="abortReason()" (change)="abortReason.set($any($event.target).value)">
+        <option>Red flag — unresolvable issue</option>
+        <option>Survey — structural / environmental concern</option>
+        <option>Client withdrew</option>
+        <option>Funds not available</option>
+        <option>Vendor withdrew</option>
+      </select>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showAbortModal.set(false)">Cancel</button>
+      <button class="tx-btn-reject" (click)="abortTransaction()"><i class="ti ti-trash" style="font-size:13px;"></i> Yes, move to Lost</button>
+    </div>
+  </div>
+}
+
+@if (showSearchesModal()) {
+  <div class="tx-modal-backdrop" (click)="showSearchesModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-search" style="font-size:14px; margin-right:6px;"></i>Instruct searches</span>
+      <button class="tx-modal-close" (click)="showSearchesModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Assignee</label>
+      <select class="form-select" style="margin-bottom:14px;" [value]="searchAssignee()" (change)="searchAssignee.set($any($event.target).value)">
+        <option value="">Select assignee</option>
+        <option>Hayley Briggs (Winkworth Sherwood)</option>
+        <option>Zan Williams (Winkworth Sherwood)</option>
+        <option>Jiya Chowdhury</option>
+        <option>Tom Resnick</option>
+      </select>
+      <label class="form-label" style="margin-bottom:8px;">Available searches</label>
+      <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:14px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; background:var(--surface2, var(--surface));">
+          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; border-right:1px solid var(--border);">Available searches</div>
+          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:#16a34a; text-transform:uppercase; letter-spacing:.05em;">Selected searches</div>
+        </div>
+        @for (s of availableSearches; track s) {
+          <div style="display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--border);">
+            <div style="padding:9px 12px; font-size:13px; border-right:1px solid var(--border);">{{ s }}</div>
+            <div style="padding:9px 12px; display:flex; align-items:center;">
+              <button (click)="toggleSearch(s)"
+                style="width:20px; height:20px; border-radius:4px; border:2px solid; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.12s; flex-shrink:0;"
+                [style.border-color]="selectedSearches().has(s) ? '#22c55e' : 'var(--border)'"
+                [style.background]="selectedSearches().has(s) ? '#22c55e' : 'transparent'">
+                @if (selectedSearches().has(s)) { <i class="ti ti-check" style="font-size:11px; color:#fff;"></i> }
+              </button>
+              @if (selectedSearches().has(s)) {
+                <span style="font-size:12px; color:#16a34a; margin-left:8px;">{{ s }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <label class="form-label">Comments <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <textarea class="form-input" style="min-height:60px; resize:vertical;" placeholder="Any instructions for the solicitor…"
+                [value]="searchComments()" (input)="searchComments.set($any($event.target).value)"></textarea>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showSearchesModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="selectedSearches().size === 0" (click)="orderSearches()">
+        <i class="ti ti-send" style="font-size:13px;"></i> Create order
+      </button>
+    </div>
+  </div>
+}
+
+@if (showFeeEarnerModal()) {
+  <div class="tx-modal-backdrop" (click)="showFeeEarnerModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-user-plus" style="font-size:14px; margin-right:6px;"></i>Add fee earner</span>
+      <button class="tx-modal-close" (click)="showFeeEarnerModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Fee earner <span style="color:#dc2626;">*</span></label>
+      <select class="form-select" [value]="feeEarnerName()" (change)="feeEarnerName.set($any($event.target).value)">
+        <option value="">Select an option</option>
+        <option>Hayley Briggs — Solicitor Manager (Winkworth Sherwood)</option>
+        <option>Zan Williams — Solicitor (Winkworth Sherwood)</option>
+        <option>Marcus Cole — Solicitor (Winkworth Sherwood)</option>
+        <option>Jiya Chowdhury — TX Manager (SimplyPhi)</option>
+      </select>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showFeeEarnerModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="!feeEarnerName()" (click)="addFeeEarner()">Save</button>
+    </div>
+  </div>
+}
+
+@if (showUploadModal()) {
+  <div class="tx-modal-backdrop" (click)="showUploadModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-upload" style="font-size:14px; margin-right:6px;"></i>Upload document</span>
+      <button class="tx-modal-close" (click)="showUploadModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+        <div>
+          <label class="form-label">Document type</label>
+          <select class="form-select" [value]="uploadDocType()" (change)="uploadDocType.set($any($event.target).value)">
+            @for (dt of docTypesForStage(selectedProperty()?.stage ?? ''); track dt) {
+              <option>{{ dt }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="form-label">File name <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+          <input class="form-input" type="text" placeholder="e.g. MoS_15_Hallards.pdf"
+                 [value]="uploadFileName()" (input)="uploadFileName.set($any($event.target).value)">
+        </div>
+      </div>
+      <label class="form-label">Note <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <textarea class="form-input" style="min-height:70px; resize:vertical;" placeholder="Add a note about this document…"
+                [value]="uploadNote()" (input)="uploadNote.set($any($event.target).value)"></textarea>
+      <div style="margin-top:14px; padding:14px; border:2px dashed var(--border); border-radius:8px; text-align:center; color:var(--text3); font-size:13px;">
+        <i class="ti ti-cloud-upload" style="font-size:22px; display:block; margin-bottom:6px;"></i>
+        Drag and drop a file, or click <span style="color:var(--accent); font-weight:600;">browse</span> to select
+        <div style="font-size:11px; margin-top:4px;">PDF, Word, Excel supported — up to 15 MB</div>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showUploadModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="uploadDocument()"><i class="ti ti-upload" style="font-size:13px;"></i> Save</button>
+    </div>
+  </div>
+}
+
+@if (showRevertModal()) {
+  <div class="tx-modal-backdrop" (click)="showRevertModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title" style="color:#b45309;"><i class="ti ti-arrow-back-up" style="font-size:15px; vertical-align:-2px; margin-right:5px;"></i>Revert stage?</span>
+      <button class="tx-modal-close" (click)="showRevertModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      @if (selectedProperty(); as p) {
+        <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">
+          This will return <strong>{{ p.address }}</strong> to the previous stage. All parties will be notified.
+        </p>
+      }
+      <label class="form-label">Comments <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <textarea class="form-input" style="min-height:70px; resize:vertical;" placeholder="Reason for reverting…"
+                [value]="revertComment()" (input)="revertComment.set($any($event.target).value)"></textarea>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showRevertModal.set(false)">Cancel</button>
+      <button class="tx-btn-reject" (click)="revertStageAction()"><i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Yes, revert</button>
+    </div>
+  </div>
+}
+
+@if (showInstructSurveysModal()) {
+  <div class="tx-modal-backdrop" (click)="showInstructSurveysModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:600px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-clipboard-plus" style="font-size:14px; margin-right:6px;"></i>Instruct surveys</span>
+      <button class="tx-modal-close" (click)="showInstructSurveysModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Assignee</label>
+      <select class="form-select" style="margin-bottom:14px;" [value]="surveyOrderAssignee()" (change)="surveyOrderAssignee.set($any($event.target).value)">
+        <option value="">Select assignee</option>
+        <option>Aziza Surveys</option>
+        <option>BRE</option>
+        <option>Savills</option>
+        <option>RICS Chartered (independent)</option>
+      </select>
+      <label class="form-label" style="margin-bottom:8px;">Available surveys</label>
+      <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:14px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; background:var(--surface2, var(--surface));">
+          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; border-right:1px solid var(--border);">Available surveys</div>
+          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:#7c3aed; text-transform:uppercase; letter-spacing:.05em;">Selected surveys</div>
+        </div>
+        @for (s of availableSurveyTypes; track s) {
+          <div style="display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--border);">
+            <div style="padding:9px 12px; font-size:13px; border-right:1px solid var(--border);">{{ s }}</div>
+            <div style="padding:9px 12px; display:flex; align-items:center;">
+              <button (click)="toggleSurveyOrder(s)"
+                style="width:20px; height:20px; border-radius:4px; border:2px solid; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.12s; flex-shrink:0;"
+                [style.border-color]="selectedSurveyOrders().has(s) ? '#7c3aed' : 'var(--border)'"
+                [style.background]="selectedSurveyOrders().has(s) ? '#7c3aed' : 'transparent'">
+                @if (selectedSurveyOrders().has(s)) { <i class="ti ti-check" style="font-size:11px; color:#fff;"></i> }
+              </button>
+              @if (selectedSurveyOrders().has(s)) {
+                <span style="font-size:12px; color:#7c3aed; margin-left:8px;">{{ s }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <label class="form-label">Comments <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <textarea class="form-input" style="min-height:70px; resize:vertical;" placeholder="Any instructions for the surveyor…"
+                [value]="surveyOrderComments()" (input)="surveyOrderComments.set($any($event.target).value)"></textarea>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showInstructSurveysModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="selectedSurveyOrders().size === 0" (click)="instructSurveyOrder()">
+        <i class="ti ti-send" style="font-size:13px;"></i> Create order
+      </button>
+    </div>
+  </div>
+}
+
+@if (showDraftRotModal()) {
+  <div class="tx-modal-backdrop" (click)="showDraftRotModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-upload" style="font-size:14px; margin-right:6px;"></i>Upload Draft RoT</span>
+      <button class="tx-modal-close" (click)="showDraftRotModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div>
+          <label class="form-label">Document type</label>
+          <select class="form-select" disabled>
+            <option>Report on Title (Draft)</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">File name <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+          <input class="form-input" type="text" placeholder="e.g. Draft_RoT.pdf"
+                 [value]="uploadRotFileName()" (input)="uploadRotFileName.set($any($event.target).value)">
+        </div>
+      </div>
+      <label class="form-label">Note <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <textarea class="form-input" style="min-height:60px; resize:vertical;" placeholder="Add a note…"
+                [value]="uploadRotNote()" (input)="uploadRotNote.set($any($event.target).value)"></textarea>
+      <div style="margin-top:14px; padding:20px; border:2px dashed var(--border); border-radius:8px; text-align:center; color:var(--text3); font-size:13px;">
+        <i class="ti ti-cloud-upload" style="font-size:26px; display:block; margin-bottom:6px; color:var(--accent);"></i>
+        Drag and drop to upload Draft RoT<br>
+        <span style="color:var(--accent); font-weight:600; cursor:pointer;">or browse files</span>
+        <div style="font-size:11px; margin-top:6px;">PDF, Word, Excel supported · up to 15 MB</div>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showDraftRotModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="uploadDraftRot()"><i class="ti ti-upload" style="font-size:13px;"></i> Save</button>
+    </div>
+  </div>
+}
+
+@if (showContractPackModal()) {
+  <div class="tx-modal-backdrop" (click)="showContractPackModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-file-check" style="font-size:14px; margin-right:6px;"></i>Upload Contract Pack</span>
+      <button class="tx-modal-close" (click)="showContractPackModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div>
+          <label class="form-label">Document type</label>
+          <select class="form-select" disabled>
+            <option>Contract Pack</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Contract received on</label>
+          <input class="form-input" type="date"
+                 [value]="contractReceivedDate()" (change)="contractReceivedDate.set($any($event.target).value)">
+        </div>
+      </div>
+      <label class="form-label" style="margin-bottom:8px;">File name <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <input class="form-input" type="text" placeholder="e.g. Contract_Pack.pdf" style="margin-bottom:12px;"
+             [value]="contractPackFileName()" (input)="contractPackFileName.set($any($event.target).value)">
+      <label class="form-label">Note <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <textarea class="form-input" style="min-height:60px; resize:vertical;" placeholder="Add a note…"
+                [value]="contractPackNote()" (input)="contractPackNote.set($any($event.target).value)"></textarea>
+      <div style="margin-top:14px; padding:20px; border:2px dashed var(--border); border-radius:8px; text-align:center; color:var(--text3); font-size:13px;">
+        <i class="ti ti-cloud-upload" style="font-size:26px; display:block; margin-bottom:6px; color:var(--teal);"></i>
+        Drag and drop to upload Contract Pack<br>
+        <span style="color:var(--teal); font-weight:600; cursor:pointer;">or browse files</span>
+        <div style="font-size:11px; margin-top:6px;">PDF, Word, Excel supported · up to 15 MB</div>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showContractPackModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="contractPackReceived()"><i class="ti ti-file-check" style="font-size:13px;"></i> Save</button>
+    </div>
+  </div>
+}
+
+@if (showResponseModal()) {
+  <div class="tx-modal-backdrop" (click)="showResponseModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title">Respond to query</span>
+      <button class="tx-modal-close" (click)="showResponseModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <p style="font-size:12px; color:var(--text3); margin-bottom:12px;">Your response will be sent to the solicitor and the query will be marked resolved.</p>
+      <label class="form-label">Your response</label>
+      <textarea class="form-input" style="min-height:90px; resize:vertical;" placeholder="Type your response…"
+                [value]="responseText()" (input)="responseText.set($any($event.target).value)"></textarea>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showResponseModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="submitResponse()"><i class="ti ti-send" style="font-size:13px;"></i> Send response</button>
+    </div>
+  </div>
+}
+
+<!-- TOAST -->
+<div class="tx-toast" [class.show]="toastVisible()">
+  <i class="ti ti-check" style="font-size:15px; color:var(--accent);"></i>
+  {{ toast() }}
+</div>

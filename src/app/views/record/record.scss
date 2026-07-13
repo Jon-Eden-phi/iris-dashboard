@@ -1,0 +1,73 @@
+/* ── AIC metric cell ─────────────────────────────── */
+.aic-cell {
+  position: relative;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  border-radius: 7px 0 0 7px;
+  transition: background .15s;
+  user-select: none;
+}
+.aic-cell:hover,
+.aic-cell-open {
+  background: rgba(232, 96, 28, .07);
+}
+.aic-cell-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text3);
+}
+.aic-cell-value {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ── AIC breakdown popover ───────────────────────── */
+.aic-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 300;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.14);
+  min-width: 260px;
+  padding: 14px 16px;
+  cursor: default;
+}
+.aic-pop-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.aic-pop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  span:last-child { font-weight: 600; color: var(--text1); }
+}
+.aic-pop-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 0 4px;
+  background: var(--accent);
+  color: #fff;
+  margin: 8px -16px -14px;
+  padding: 10px 16px;
+  border-radius: 0 0 10px 10px;
+}

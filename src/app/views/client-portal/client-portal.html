@@ -1,0 +1,613 @@
+<!-- ── Top nav ──────────────────────────────────────────── -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">
+      <div class="logo-mark">SP</div>
+      <div>
+        <span class="brand-name">SimplyPhi</span>
+        <span class="brand-sep">/</span>
+        <span class="brand-sub">Client Portal · Iris 2.0</span>
+      </div>
+    </div>
+
+    <div class="nav-pills">
+      <button class="nav-pill" [class.active]="view() === 'dashboard'" (click)="view.set('dashboard')">
+        <i class="ti ti-layout-dashboard"></i> Dashboard
+        @if (actionRequired().length > 0) {
+          <span class="pill-badge">{{ actionRequired().length }}</span>
+        }
+      </button>
+      <button class="nav-pill" [class.active]="view() === 'properties' || view() === 'detail'" (click)="view.set('properties')">
+        <i class="ti ti-building"></i> Properties
+        <span class="pill-badge pill-badge-neutral">{{ activeProperties().length }}</span>
+      </button>
+    </div>
+
+    <div class="nav-right">
+      <div class="council-chip">
+        <i class="ti ti-building-bank"></i>
+        <span>Bristol City Council</span>
+      </div>
+      <div class="user-avatar">JS</div>
+      <button class="sign-out-btn">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ─────────────────────────────────────────────── -->
+<main class="portal-main">
+
+  <!-- ════════ DASHBOARD ════════ -->
+  @if (view() === 'dashboard') {
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Active properties</div>
+        <div class="stat-val">{{ activeProperties().length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Awaiting your decision</div>
+        <div class="stat-val" [class.amber]="actionRequired().length > 0" [class.green]="actionRequired().length === 0">
+          {{ actionRequired().length }}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">At Memorandum of Sale</div>
+        <div class="stat-val">{{ atMoS() }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total pipeline value</div>
+        <div class="stat-val" style="font-size:22px;">{{ fmt(totalValue()) }}</div>
+      </div>
+    </div>
+
+    <!-- Action required -->
+    @if (actionRequired().length > 0) {
+      <div class="section-head">
+        <i class="ti ti-alert-circle"></i>
+        Action required ({{ actionRequired().length }})
+      </div>
+      @for (p of actionRequired(); track p.id) {
+        <div class="action-card" (click)="openDetail(p)">
+          <i class="ti ti-home-2" style="font-size:22px; color:#E8601C; flex-shrink:0;"></i>
+          <div class="action-card-info">
+            <div class="action-card-address">{{ p.address }}</div>
+            <div class="action-card-meta">
+              <span>{{ p.phase }}</span>
+              @if (p.beds) { <span>{{ p.beds }} bed</span> }
+              @if (p.type) { <span>{{ p.type }}</span> }
+              @if (p.financial?.ap) { <span>{{ fmtFull(p.financial!.ap) }}</span> }
+            </div>
+          </div>
+          @if (actionType(p) === 'viewing-review') {
+            <span class="action-badge" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">
+              <i class="ti ti-eye"></i> Viewing decision needed
+            </span>
+          } @else {
+            <span class="action-badge">
+              <i class="ti ti-clock"></i> Awaiting approval
+            </span>
+          }
+          <i class="ti ti-chevron-right" style="color:#d1d5db;"></i>
+        </div>
+      }
+    } @else {
+      <div class="no-action-box">
+        <i class="ti ti-circle-check" style="font-size:20px;"></i>
+        No actions required — all properties are progressing smoothly.
+      </div>
+    }
+
+    <!-- All properties -->
+    <div class="section-head" style="margin-top:28px;">
+      <i class="ti ti-building"></i>
+      Your properties ({{ activeProperties().length }})
+    </div>
+    <div class="prop-table">
+      <div class="prop-table-header">
+        <span>Address</span>
+        <span>Phase</span>
+        <span>Bedrooms</span>
+        <span>Value</span>
+        <span>Status</span>
+      </div>
+      @for (p of activeProperties(); track p.id) {
+        <div class="prop-row" (click)="openDetail(p)">
+          <div>
+            <div class="prop-address">{{ p.address }}</div>
+            <div class="prop-sub">{{ p.type }}</div>
+          </div>
+          <div style="font-size:12px; color:#6b7280;">{{ p.phase }}</div>
+          <div style="font-size:13px; font-weight:600;">{{ p.beds ?? '—' }}</div>
+          <div style="font-size:13px; font-weight:600;">{{ fmtFull(p.financial?.ap) }}</div>
+          <div>
+            @if (p.stage === 'ClientApproval') {
+              <span class="stage-chip chip-action">
+                <i class="ti ti-clock" style="font-size:10px;"></i> Awaiting approval
+              </span>
+            } @else if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') {
+              <span class="stage-chip chip-action" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">
+                <i class="ti ti-eye" style="font-size:10px;"></i> Viewing decision
+              </span>
+            } @else if (p.stage === 'MemorandumOfSale') {
+              <span class="stage-chip chip-green">MoS</span>
+            } @else if (p.stage === 'Legals' || p.stage === 'Refurbishment') {
+              <span class="stage-chip chip-blue">{{ stageLabel(p.stage) }}</span>
+            } @else {
+              <span class="stage-chip chip-neutral">{{ stageLabel(p.stage) }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ════════ PROPERTIES LIST ════════ -->
+  @if (view() === 'properties') {
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <h2 style="font-size:18px; font-weight:800; margin:0;">Your properties</h2>
+      <span style="font-size:13px; color:#9ca3af;">{{ filteredProperties().length }} of {{ activeProperties().length }} active</span>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div style="position:relative; flex:1; min-width:180px;">
+        <i class="ti ti-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9ca3af; font-size:14px; pointer-events:none;"></i>
+        <input class="filter-input filter-search" type="text" placeholder="Search address or postcode..."
+               [value]="filterSearch()" (input)="filterSearch.set($any($event.target).value)" />
+      </div>
+      <select class="filter-select" [value]="filterBeds()" (change)="filterBeds.set($any($event.target).value)">
+        <option value="all">All beds</option>
+        <option value="1">1 bed</option>
+        <option value="2">2 beds</option>
+        <option value="3">3 beds</option>
+        <option value="4">4 beds</option>
+        <option value="5+">5+ beds</option>
+      </select>
+      <select class="filter-select" [value]="filterEpc()" (change)="filterEpc.set($any($event.target).value)">
+        <option value="all">All EPC</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="G">G</option>
+      </select>
+      <select class="filter-select" [value]="filterStage()" (change)="filterStage.set($any($event.target).value)">
+        <option value="all">All stages</option>
+        <option value="Draft">Draft</option>
+        <option value="ClientApproval">Client Approval</option>
+        <option value="Viewing">Viewing</option>
+        <option value="Negotiations">Negotiations</option>
+        <option value="MemorandumOfSale">Memorandum of Sale</option>
+        <option value="Legals">Legals</option>
+        <option value="Refurbishment">Refurbishment</option>
+        <option value="Lettings">Lettings</option>
+      </select>
+      <select class="filter-select" [value]="filterSort()" (change)="filterSort.set($any($event.target).value)">
+        <option value="newest">Newest added</option>
+        <option value="oldest">Oldest added</option>
+        <option value="price-high">Price: high–low</option>
+        <option value="price-low">Price: low–high</option>
+      </select>
+      @if (hasFilters()) {
+        <button class="filter-reset" (click)="resetFilters()">
+          <i class="ti ti-refresh"></i> Reset
+        </button>
+      }
+    </div>
+
+    <div class="prop-table">
+      <div class="prop-table-header">
+        <span>Address</span>
+        <span>Phase</span>
+        <span>Bedrooms</span>
+        <span>Value</span>
+        <span>Status</span>
+      </div>
+      @for (p of filteredProperties(); track p.id) {
+        <div class="prop-row" (click)="openDetail(p)">
+          <div>
+            <div class="prop-address">{{ p.address }}</div>
+            <div class="prop-sub">{{ p.type }} · {{ p.postcode }}</div>
+          </div>
+          <div style="font-size:12px; color:#6b7280;">{{ p.phase }}</div>
+          <div style="font-size:13px; font-weight:600;">{{ p.beds ?? '—' }}</div>
+          <div style="font-size:13px; font-weight:600;">{{ fmtFull(p.financial?.ap) }}</div>
+          <div>
+            @if (p.stage === 'ClientApproval') {
+              <span class="stage-chip chip-action">
+                <i class="ti ti-clock" style="font-size:10px;"></i> Awaiting approval
+              </span>
+            } @else if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') {
+              <span class="stage-chip chip-action" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">
+                <i class="ti ti-eye" style="font-size:10px;"></i> Viewing decision
+              </span>
+            } @else if (p.stage === 'MemorandumOfSale') {
+              <span class="stage-chip chip-green">MoS</span>
+            } @else {
+              <span class="stage-chip chip-neutral">{{ stageLabel(p.stage) }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ════════ PROPERTY DETAIL ════════ -->
+  @if (view() === 'detail') {
+    @if (activeProperty(); as p) {
+
+      <!-- Back button -->
+      <button class="detail-back" (click)="view.set('properties')">
+        <i class="ti ti-arrow-left"></i> Back to properties
+      </button>
+
+      <!-- Header -->
+      <div class="detail-header">
+        <div class="detail-address">{{ p.address }}</div>
+        <div class="detail-chips">
+          <span class="detail-chip chip-phase"><i class="ti ti-map-pin" style="font-size:10px;"></i> {{ p.phase }}</span>
+          @if (p.type) { <span class="detail-chip chip-type">{{ p.type }}</span> }
+          @if (p.beds) { <span class="detail-chip chip-type">{{ p.beds }} bedrooms</span> }
+          @if (p.postcode) { <span class="detail-chip chip-type" style="font-family:monospace; font-size:11px;">{{ p.postcode }}</span> }
+        </div>
+        <div class="progress-label">
+          <span>{{ stageLabel(p.stage) }}</span>
+          <span>{{ stagePct(p.stage) }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width]="stagePct(p.stage) + '%'"></div>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="prop-layout">
+
+        <!-- Left column -->
+        <div>
+          <!-- Financial summary -->
+          @if (p.financial; as f) {
+            <div class="detail-section">
+              <div class="detail-section-title"><i class="ti ti-coin"></i> Financial summary</div>
+              <div class="fin-row"><span>Asking price</span><span>{{ fmtFull(f.ap) }}</span></div>
+              @if (p.clientMaxPrice) {
+                <div class="fin-row" style="color:#16a34a;">
+                  <span>Your max authorised price</span>
+                  <span style="color:#16a34a;">{{ fmtFull(p.clientMaxPrice) }}</span>
+                </div>
+              }
+              <div class="fin-row"><span>Capex estimate</span><span>{{ fmtFull(f.capex) }}</span></div>
+              <div class="fin-row"><span>Transaction costs</span><span>{{ fmtFull(f.tc) }}</span></div>
+              <div class="fin-row" style="font-weight:700; border-top:2px solid #f3f4f6; padding-top:10px;">
+                <span>Total estimated cost</span>
+                <span>{{ fmtFull((f.ap ?? 0) + (f.capex ?? 0) + (f.tc ?? 0)) }}</span>
+              </div>
+              <div class="fin-row"><span>Social rent (pw)</span><span>{{ fmtFull(f.sp) }}</span></div>
+              <div class="fin-row"><span>Gross yield</span><span style="color:#16a34a; font-weight:700;">{{ f.yield?.toFixed(1) }}%</span></div>
+            </div>
+          }
+
+          <!-- Property details -->
+          <div class="detail-section">
+            <div class="detail-section-title"><i class="ti ti-home-2"></i> Property details</div>
+            <div class="prop-detail-grid">
+              @if (p.type)     { <div class="prop-detail-item"><div class="prop-detail-label">Type</div><div class="prop-detail-value">{{ p.type }}</div></div> }
+              @if (p.beds)     { <div class="prop-detail-item"><div class="prop-detail-label">Bedrooms</div><div class="prop-detail-value">{{ p.beds }}</div></div> }
+              @if (p.postcode) { <div class="prop-detail-item"><div class="prop-detail-label">Postcode</div><div class="prop-detail-value" style="font-family:monospace;">{{ p.postcode }}</div></div> }
+              <div class="prop-detail-item"><div class="prop-detail-label">Stage</div><div class="prop-detail-value">{{ stageLabel(p.stage) }}</div></div>
+            </div>
+          </div>
+
+          <!-- EPC -->
+          @if (p.epcBefore && p.epcAfter) {
+            <div class="detail-section">
+              <div class="detail-section-title"><i class="ti ti-bolt"></i> EPC Ratings</div>
+              <div style="display:flex; gap:16px; align-items:center;">
+                <div class="epc-strip">
+                  <div class="epc-badge" [style.background]="epcColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
+                  <div class="epc-info">
+                    <strong>{{ p.epcBefore.s }} SAP</strong>
+                    Before
+                  </div>
+                </div>
+                <i class="ti ti-arrow-right" style="color:#d1d5db; font-size:18px;"></i>
+                <div class="epc-strip">
+                  <div class="epc-badge" [style.background]="epcColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
+                  <div class="epc-info">
+                    <strong>{{ p.epcAfter.s }} SAP</strong>
+                    After refurb
+                  </div>
+                </div>
+                <div style="margin-left:auto; text-align:right;">
+                  <div style="font-size:22px; font-weight:800; color:#16a34a;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
+                  <div style="font-size:11px; color:#9ca3af;">SAP uplift</div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Viewing report — visible whenever viewing data exists -->
+          @if (p.stage === 'Viewing' || p.viewing?.reportNotes || p.viewing?.reportCondition) {
+            <div class="detail-section" style="border-color:rgba(232,96,28,.2);">
+              <div class="detail-section-title" style="color:#E8601C;">
+                <i class="ti ti-report" style="color:#E8601C;"></i> Viewing Report
+              </div>
+
+              @if (p.viewing?.date) {
+                <div style="display:flex; gap:16px; font-size:13px; color:#374151; margin-bottom:14px; flex-wrap:wrap;">
+                  <div>
+                    <span style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; display:block; margin-bottom:2px;">Date</span>
+                    <strong>{{ p.viewing!.date }}@if (p.viewing?.time) {&nbsp;· {{ p.viewing!.time }}}</strong>
+                  </div>
+                  @if (p.viewing?.agentName) {
+                    <div>
+                      <span style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; display:block; margin-bottom:2px;">Estate Agent</span>
+                      <strong>{{ p.viewing!.agentName }}</strong>@if (p.viewing?.agentCompany) {&nbsp;· {{ p.viewing!.agentCompany }}}
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (p.viewing?.reportCondition) {
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; margin-bottom:6px;">Property condition</div>
+                  <span style="font-size:13px; font-weight:700; padding:5px 16px; border-radius:20px; color:#fff;"
+                        [style.background]="p.viewing!.reportCondition === 'excellent' ? '#16a34a' : p.viewing!.reportCondition === 'good' ? '#2472a8' : p.viewing!.reportCondition === 'fair' ? '#f59e0b' : '#ef4444'">
+                    {{ p.viewing!.reportCondition | titlecase }}
+                  </span>
+                </div>
+              }
+
+              <!-- Photos placeholder -->
+              <div style="margin-bottom:14px;">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; margin-bottom:8px;">Photos</div>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                  @for (slot of [1,2,3,4]; track slot) {
+                    <div style="aspect-ratio:4/3; border-radius:7px; border:1.5px dashed #e2e8f0; background:#f8fafc; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:10px; color:#9ca3af;">
+                      <i class="ti ti-photo" style="font-size:18px;"></i>
+                      No photo
+                    </div>
+                  }
+                </div>
+                <div style="font-size:11px; color:#9ca3af; margin-top:6px;">
+                  <i class="ti ti-info-circle" style="margin-right:3px;"></i>Photo upload will be available in a future update.
+                </div>
+              </div>
+
+              @if (p.viewing?.reportNotes) {
+                <div>
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; margin-bottom:6px;">Observations & notes</div>
+                  <div style="font-size:13px; color:#374151; line-height:1.7; background:#f8fafc; border-radius:8px; padding:12px 14px; border:1px solid #e2e8f0; white-space:pre-wrap;">{{ p.viewing!.reportNotes }}</div>
+                </div>
+              } @else {
+                <div style="font-size:13px; color:#9ca3af; font-style:italic;">No written observations submitted yet.</div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Right column: action panel -->
+        <div>
+          @if (p.stage === 'ClientApproval') {
+            <div class="action-panel">
+              <div class="action-panel-title">Your approval is needed</div>
+              <p class="action-panel-desc">Review the property details. Approve to allow SimplyPhi to proceed to a formal viewing, or reject if this property is not suitable.</p>
+              <button class="btn-approve" (click)="showApproveModal.set(true)">
+                <i class="ti ti-circle-check"></i>
+                Approve — proceed to viewing
+              </button>
+              <button class="btn-reject" (click)="showRejectModal.set(true)">
+                <i class="ti ti-circle-x"></i>
+                Reject property
+              </button>
+            </div>
+
+            <!-- Activity log if available -->
+            @if ((p.activityLog?.length ?? 0) > 0) {
+              <div class="detail-section" style="margin-top:14px;">
+                <div class="detail-section-title"><i class="ti ti-notes"></i> Activity log</div>
+                @for (note of (p.activityLog ?? []).slice().reverse(); track note.id) {
+                  <div style="padding:9px 0; border-bottom:1px solid #f3f4f6; font-size:12px; color:#6b7280; line-height:1.5;">
+                    <div style="color:#111; font-weight:600; margin-bottom:2px;">{{ note.text }}</div>
+                    <div>{{ note.author }} · {{ note.timestamp | date:'d MMM y, HH:mm' }}</div>
+                  </div>
+                }
+              </div>
+            }
+
+          } @else if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') {
+            <div class="action-panel">
+              <div class="action-panel-title">Viewing review needed</div>
+              <p class="action-panel-desc">SimplyPhi have completed a viewing of this property and sent you the report. Please review the details below and let us know if you'd like to proceed to offer negotiations.</p>
+
+              <!-- Viewing details -->
+              @if (p.viewing?.date) {
+                <div style="background:#f8fafc; border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:13px; color:#374151; border:1px solid #e2e8f0;">
+                  <div style="font-weight:700; margin-bottom:6px; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af;">Viewing details</div>
+                  <div style="margin-bottom:3px;">Date: <strong>{{ p.viewing!.date }}</strong>@if (p.viewing?.time) {&nbsp;at <strong>{{ p.viewing!.time }}</strong>}</div>
+                  @if (p.viewing?.agentName) {
+                    <div>Agent: <strong>{{ p.viewing!.agentName }}</strong>@if (p.viewing?.agentCompany) {&nbsp;· {{ p.viewing!.agentCompany }}}</div>
+                  }
+                </div>
+              }
+
+              <!-- Condition rating -->
+              @if (p.viewing?.reportCondition) {
+                <div style="background:#f8fafc; border-radius:8px; padding:10px 12px; margin-bottom:12px; border:1px solid #e2e8f0;">
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; margin-bottom:6px;">Property condition</div>
+                  <span style="font-size:13px; font-weight:700; padding:4px 14px; border-radius:20px; color:#fff;"
+                        [style.background]="p.viewing!.reportCondition === 'excellent' ? '#16a34a' : p.viewing!.reportCondition === 'good' ? '#2472a8' : p.viewing!.reportCondition === 'fair' ? '#f59e0b' : '#ef4444'">
+                    {{ p.viewing!.reportCondition | titlecase }}
+                  </span>
+                </div>
+              }
+
+              <!-- Report notes -->
+              @if (p.viewing?.reportNotes) {
+                <div style="background:#f8fafc; border-radius:8px; padding:10px 12px; margin-bottom:12px; border:1px solid #e2e8f0;">
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:700; margin-bottom:6px;">Observations & notes</div>
+                  <div style="font-size:13px; color:#374151; line-height:1.6; white-space:pre-wrap;">{{ p.viewing!.reportNotes }}</div>
+                </div>
+              } @else {
+                <div style="background:#fffbeb; border-radius:8px; padding:10px 12px; margin-bottom:12px; border:1px solid #fde68a; font-size:12px; color:#92400e;">
+                  <i class="ti ti-alert-triangle" style="margin-right:5px;"></i>No written observations added yet.
+                </div>
+              }
+
+              <button class="btn-approve" (click)="showViewingApproveModal.set(true)">
+                <i class="ti ti-circle-check"></i>
+                Approve — proceed to offer
+              </button>
+              <button class="btn-reject" (click)="showViewingRejectModal.set(true)">
+                <i class="ti ti-circle-x"></i>
+                Reject at viewing
+              </button>
+            </div>
+
+          } @else {
+            <div class="status-card">
+              <i class="ti ti-circle-check status-icon"></i>
+              <div class="status-msg">No action needed</div>
+              <div class="status-sub">{{ statusMsg(p) }}</div>
+            </div>
+
+            @if (p.clientApprovedBy) {
+              <div class="detail-section" style="margin-top:14px; background:rgba(22,163,74,.04); border-color:rgba(22,163,74,.18);">
+                <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-circle-check" style="color:#16a34a;"></i> Your approval on record</div>
+                <div style="font-size:13px; color:#374151;">
+                  <div style="margin-bottom:6px;"><strong>Approved by:</strong> {{ p.clientApprovedBy }}</div>
+                  @if (p.clientMaxPrice) {
+                    <div><strong>Max authorised price:</strong> {{ fmtFull(p.clientMaxPrice) }}</div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+    } @else {
+      <div style="text-align:center; padding:60px; color:#9ca3af;">
+        <i class="ti ti-file-x" style="font-size:40px; display:block; margin-bottom:12px;"></i>
+        Property not found
+      </div>
+    }
+  }
+
+</main>
+
+<!-- ══ Approve modal ══════════════════════════════════════ -->
+@if (showApproveModal()) {
+  <div class="modal-overlay" (click)="showApproveModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-title">Approve property</div>
+      <p class="modal-subtitle">You're approving this property for a formal viewing. Please enter your name and the maximum purchase price you authorise SimplyPhi to offer.</p>
+
+      <label class="modal-label">Approver name</label>
+      <input class="modal-input" type="text" placeholder="Your full name"
+             [value]="approverName()"
+             (input)="approverName.set($any($event.target).value)" />
+
+      <label class="modal-label">Maximum authorised price (£)</label>
+      <input class="modal-input" type="number" placeholder="e.g. 320000"
+             [value]="maxPrice()"
+             (input)="maxPrice.set($any($event.target).value)" />
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="showApproveModal.set(false)">Cancel</button>
+        <button class="btn-confirm-approve" (click)="approve()">
+          <i class="ti ti-circle-check"></i> Confirm approval
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ Reject modal ═══════════════════════════════════════ -->
+@if (showRejectModal()) {
+  <div class="modal-overlay" (click)="showRejectModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-title">Reject property</div>
+      <p class="modal-subtitle">Please select the reason(s) for rejection. This will be recorded on the property file.</p>
+
+      <div class="reason-list">
+        @for (r of rejectOptions; track r) {
+          <label class="reason-label">
+            <input type="checkbox"
+                   [checked]="rejectReasons().includes(r)"
+                   (change)="toggleReason(r)" />
+            {{ r }}
+          </label>
+        }
+      </div>
+
+      <label class="modal-label">Additional notes (optional)</label>
+      <textarea class="modal-input" rows="3" placeholder="Any additional detail…"
+                style="resize:vertical;"
+                [value]="rejectNotes()"
+                (input)="rejectNotes.set($any($event.target).value)"></textarea>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="showRejectModal.set(false)">Cancel</button>
+        <button class="btn-confirm-reject" (click)="reject()">
+          <i class="ti ti-circle-x"></i> Confirm rejection
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ Viewing approve modal ══════════════════════════════ -->
+@if (showViewingApproveModal()) {
+  <div class="modal-overlay" (click)="showViewingApproveModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-title">Approve viewing</div>
+      <p class="modal-subtitle">You're confirming that the viewing was satisfactory and authorising SimplyPhi to proceed to offer negotiations.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="showViewingApproveModal.set(false)">Cancel</button>
+        <button class="btn-confirm-approve" (click)="approveViewing()">
+          <i class="ti ti-circle-check"></i> Confirm — proceed to offer
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ Viewing reject modal ═══════════════════════════════ -->
+@if (showViewingRejectModal()) {
+  <div class="modal-overlay" (click)="showViewingRejectModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-title">Reject at viewing</div>
+      <p class="modal-subtitle">Please select the reason(s) for rejecting this property after viewing. This will be recorded on the property file.</p>
+
+      <div class="reason-list">
+        @for (r of viewingRejectOptions; track r) {
+          <label class="reason-label">
+            <input type="checkbox"
+                   [checked]="viewingRejectReasons().includes(r)"
+                   (change)="toggleViewingReason(r)" />
+            {{ r }}
+          </label>
+        }
+      </div>
+
+      <label class="modal-label">Additional notes (optional)</label>
+      <textarea class="modal-input" rows="3" placeholder="Any additional detail…"
+                style="resize:vertical;"
+                [value]="viewingRejectNotes()"
+                (input)="viewingRejectNotes.set($any($event.target).value)"></textarea>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="showViewingRejectModal.set(false)">Cancel</button>
+        <button class="btn-confirm-reject" (click)="rejectAtViewing()">
+          <i class="ti ti-circle-x"></i> Confirm rejection
+        </button>
+      </div>
+    </div>
+  </div>
+}

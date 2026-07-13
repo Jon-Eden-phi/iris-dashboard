@@ -1,0 +1,83 @@
+<!-- KPI Grid -->
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-label"><i class="ti ti-pig-money"></i> Total off asking</div>
+    <div class="kpi-value" style="color:var(--teal);">{{ fmt(totalOff) }}</div>
+    <div class="kpi-sub">Across all projects</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><i class="ti ti-percentage"></i> Avg % off asking</div>
+    <div class="kpi-value" style="color:var(--teal);">{{ avgPct.toFixed(1) }}%</div>
+    <div class="kpi-sub">Weighted across projects</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><i class="ti ti-building-estate"></i> Properties negotiated</div>
+    <div class="kpi-value">{{ totalProps }}</div>
+    <div class="kpi-sub">Completed acquisitions</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><i class="ti ti-trophy"></i> Top project saving</div>
+    <div class="kpi-value">{{ fmt(rowOff(topProject)) }}</div>
+    <div class="kpi-sub">{{ topProject.label }}</div>
+  </div>
+</div>
+
+<!-- Cumulative savings line chart -->
+<div class="card">
+  <div class="section-header">
+    <div class="section-title">
+      <i class="ti ti-chart-line" style="color:var(--teal);"></i>
+      Cumulative amount negotiated off asking — by project
+    </div>
+  </div>
+  <div style="height:240px; position:relative;">
+    <canvas #insightsChart></canvas>
+  </div>
+</div>
+
+<!-- By project breakdown table -->
+<div class="card flush">
+  <div style="padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;">
+    <i class="ti ti-table" style="color:var(--accent);"></i> By project breakdown
+  </div>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th class="num-cell">Properties</th>
+          <th class="num-cell">Total asking</th>
+          <th class="num-cell">Total agreed</th>
+          <th class="num-cell">Off asking</th>
+          <th class="num-cell">% off</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of negotiationRows(); track r.id) {
+          <tr>
+            <td>
+              <span style="display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px; vertical-align:middle;"
+                    [style.background]="r.color"></span>
+              {{ r.label }}
+            </td>
+            <td class="num-cell">{{ r.properties }}</td>
+            <td class="num-cell">{{ fmt(r.asking) }}</td>
+            <td class="num-cell">{{ fmt(r.agreed) }}</td>
+            <td class="num-cell" style="color:var(--teal); font-weight:600;">{{ fmt(rowOff(r)) }}</td>
+            <td class="num-cell">{{ rowPct(r).toFixed(1) }}%</td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid var(--border);">
+          <td style="font-weight:700; color:var(--text1);">All projects</td>
+          <td class="num-cell" style="font-weight:700; color:var(--text1);">{{ totalProps }}</td>
+          <td class="num-cell" style="font-weight:700; color:var(--text1);">{{ fmt(totalAsking) }}</td>
+          <td class="num-cell" style="font-weight:700; color:var(--text1);">{{ fmt(totalAgreed) }}</td>
+          <td class="num-cell" style="font-weight:700; color:var(--teal);">{{ fmt(totalOff) }}</td>
+          <td class="num-cell" style="font-weight:700;">{{ avgPct.toFixed(1) }}%</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

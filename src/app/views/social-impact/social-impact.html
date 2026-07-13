@@ -1,0 +1,530 @@
+<!-- ── 1. Header card + project selector ──────────────────────────── -->
+<div class="card" style="padding:14px 16px;">
+  <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+    <div style="width:42px; height:42px; border-radius:10px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <i class="ti ti-building-community" style="font-size:20px; color:var(--accent);"></i>
+    </div>
+    <div style="flex:1; min-width:0;">
+      <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Project / council</div>
+      <div style="font-weight:800; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ headerTitle() }}</div>
+      <div style="font-size:11.5px; color:var(--text3); margin-top:1px;">{{ headerSubtitle() }}</div>
+    </div>
+    <div>
+      <select class="form-input" style="font-size:13px; padding:7px 10px; min-width:220px;"
+              (change)="socialProject.set($any($event.target).value)">
+        <option value="all" [selected]="socialProject() === 'all'">All projects (portfolio)</option>
+        <optgroup label="── Individual projects ──">
+          @for (p of data.socialProjects; track p.id) {
+            <option [value]="p.id" [selected]="socialProject() === p.id">{{ p.label }}</option>
+          }
+        </optgroup>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. Date filter bar ─────────────────────────────────────────── -->
+<div class="card" style="padding:10px 16px;">
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Period</span>
+    @for (p of datePresets; track p.label) {
+      <button class="btn-ghost" style="font-size:12px; padding:5px 11px;"
+              [style.background]="activePreset() === p.label ? 'var(--accent-soft)' : ''"
+              [style.color]="activePreset() === p.label ? 'var(--accent)' : ''"
+              [style.border-color]="activePreset() === p.label ? 'var(--accent)' : ''"
+              (click)="setPreset(p)">{{ p.label }}</button>
+    }
+    <div style="display:flex; align-items:center; gap:6px; margin-left:auto;">
+      <input type="date" class="form-input" style="width:140px; font-size:12px; padding:5px 8px;"
+             [value]="dateFrom()" (change)="dateFrom.set($any($event.target).value); activePreset.set('Custom')" />
+      <span style="color:var(--text3); font-size:12px;">to</span>
+      <input type="date" class="form-input" style="width:140px; font-size:12px; padding:5px 8px;"
+             [value]="dateTo()" (change)="dateTo.set($any($event.target).value); activePreset.set('Custom')" />
+      @if (dateFrom() || dateTo()) {
+        <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="clearDates()">
+          <i class="ti ti-x"></i>
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. Contract info card (conditional) ───────────────────────── -->
+@if (activeProject(); as proj) {
+  @if (proj.contract; as c) {
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+        <i class="ti ti-file-certificate" style="color:var(--accent);"></i> Contract Information
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
+        <div>
+          <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px;">Reference</div>
+          <div style="font-weight:700; font-size:13px;">{{ c.reference }}</div>
+        </div>
+        <div>
+          <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px;">Contract Value</div>
+          <div style="font-weight:700; font-size:13px;">{{ c.value | money }}</div>
+        </div>
+        <div>
+          <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px;">Provider</div>
+          <div style="font-weight:700; font-size:13px;">{{ c.provider }}</div>
+        </div>
+        <div>
+          <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px;">Period</div>
+          <div style="font-weight:700; font-size:13px;">{{ c.period }}</div>
+        </div>
+      </div>
+      <div style="margin-top:8px; font-size:11.5px; color:var(--text3);">{{ c.name }}</div>
+    </div>
+  }
+}
+
+<!-- ── 4. KPI grid ────────────────────────────────────────────────── -->
+<div class="kpi-grid">
+  <div class="kpi">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <div style="width:32px; height:32px; border-radius:8px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center;">
+        <i class="ti ti-door" style="color:var(--accent); font-size:17px;"></i>
+      </div>
+      <div class="kpi-label" style="margin:0;">Homes Delivered</div>
+    </div>
+    <div class="kpi-value">{{ statHomes() }}</div>
+    <div class="kpi-sub">front doors · {{ periodLabel() }}</div>
+  </div>
+
+  <div class="kpi" style="border-left-color:var(--teal);">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <div style="width:32px; height:32px; border-radius:8px; background:#e8f5f2; display:flex; align-items:center; justify-content:center;">
+        <i class="ti ti-bed" style="color:var(--teal); font-size:17px;"></i>
+      </div>
+      <div class="kpi-label" style="margin:0;">Bedrooms Created</div>
+    </div>
+    <div class="kpi-value">{{ statBeds() }}</div>
+    <div class="kpi-sub">bedroom capacity</div>
+  </div>
+
+  <div class="kpi" style="border-left-color:#7c3aed;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <div style="width:32px; height:32px; border-radius:8px; background:#f3f0ff; display:flex; align-items:center; justify-content:center;">
+        <i class="ti ti-home-bolt" style="color:#7c3aed; font-size:17px;"></i>
+      </div>
+      <div class="kpi-label" style="margin:0;">EPC C+ on Completion</div>
+    </div>
+    <div class="kpi-value">{{ statCPlusPct() }}%</div>
+    <div class="kpi-sub">of homes at EPC C or better</div>
+  </div>
+
+  <div class="kpi" style="border-left-color:var(--teal);">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <div style="width:32px; height:32px; border-radius:8px; background:#e8f5f2; display:flex; align-items:center; justify-content:center;">
+        <i class="ti ti-trending-up" style="color:var(--teal); font-size:17px;"></i>
+      </div>
+      <div class="kpi-label" style="margin:0;">EPC Point Uplift</div>
+    </div>
+    <div class="kpi-value">+{{ statUplift() }}</div>
+    <div class="kpi-sub">total SAP points across all homes</div>
+  </div>
+</div>
+
+<!-- ── 5. EPC uplift section ─────────────────────────────────────── -->
+<div class="card">
+  <div style="display:flex; align-items:center; gap:6px; margin-bottom:14px;">
+    <i class="ti ti-bolt" style="color:var(--accent);"></i>
+    <span style="font-weight:700; font-size:13px;">EPC Point Uplift</span>
+    <span style="font-size:11px; font-weight:400; color:var(--text3); margin-left:4px;">
+      {{ socialProject() === 'all' ? 'by project' : 'per home' }} · {{ periodLabel() }}
+    </span>
+  </div>
+
+  <!-- Sub-KPI row — matches Flask order -->
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;">
+    <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--teal);">
+      <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:4px;">
+        <i class="ti ti-plus" style="font-size:10px;"></i> Total Points Gained
+      </div>
+      <div style="font-size:22px; font-weight:800; margin-top:4px; color:var(--teal);">+{{ totalUpliftPts() }}</div>
+      <div style="font-size:11px; color:var(--text3); margin-top:2px;">Across all filtered homes</div>
+    </div>
+    <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--teal);">
+      <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:4px;">
+        <i class="ti ti-home" style="font-size:10px;"></i> Avg Uplift / Home
+      </div>
+      <div style="font-size:22px; font-weight:800; margin-top:4px; color:var(--teal);">+{{ avgEpcUplift() }}</div>
+      <div style="font-size:11px; color:var(--text3); margin-top:2px;">EPC points per acquisition</div>
+    </div>
+    <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--teal);">
+      <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:4px;">
+        <i class="ti ti-circle-check" style="font-size:10px;"></i> Reached EPC C+
+      </div>
+      <div style="font-size:22px; font-weight:800; margin-top:4px;">{{ epcCPlusPct() }}%</div>
+      <div style="font-size:11px; color:var(--text3); margin-top:2px;">{{ epcCPlusCount() }} of {{ displayedHomes().length }} homes</div>
+    </div>
+    <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--accent);">
+      <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:4px;">
+        <i class="ti ti-door" style="font-size:10px;"></i> Front Doors
+      </div>
+      <div style="font-size:22px; font-weight:800; margin-top:4px;">{{ totalDoors() }}</div>
+      <div style="font-size:11px; color:var(--text3); margin-top:2px;">Affordable homes delivered</div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div style="position:relative; height:200px;">
+    <canvas #epcChartCanvas></canvas>
+  </div>
+  <div style="font-size:10.5px; color:var(--text3); margin-top:8px; display:flex; align-items:center; gap:12px;">
+    <span style="display:flex; align-items:center; gap:4px;">
+      <span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:#0f7c6b;"></span>
+      EPC C+ or better (A/B/C)
+    </span>
+    <span style="display:flex; align-items:center; gap:4px;">
+      <span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:#E8601C;"></span>
+      Below EPC C
+    </span>
+  </div>
+</div>
+
+<!-- ── 6. TA Cost Avoided Calculator ─────────────────────────────── -->
+<div class="card">
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+    <i class="ti ti-calculator" style="color:var(--accent);"></i>
+    <span style="font-weight:700; font-size:13px;">TA Cost Avoided Calculator</span>
+    <span style="font-size:11px; color:var(--text3); margin-left:4px;">
+      Based on England FOI average weekly TA costs · {{ totalBedHomes() }} homes
+    </span>
+  </div>
+
+  <div style="overflow-x:auto; margin-bottom:16px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Bedroom size</th>
+          <th class="num-cell">Homes</th>
+          <th style="min-width:160px;">Annual rate / home</th>
+          <th class="num-cell">Annual saving</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (k of ['1','2','3','4']; track k) {
+          @if (bedBreakdown()[k] > 0) {
+            <tr>
+              <td>{{ k }}-bed</td>
+              <td class="num-cell">{{ bedBreakdown()[k] }}</td>
+              <td>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:var(--text3);">£</span>
+                  <input type="number" class="form-input" style="width:100px; font-size:12px; padding:4px 8px;"
+                         [value]="avoidedRates()[k]"
+                         (change)="updateRate(k, $any($event.target).value)" />
+                  <span style="font-size:11px; color:var(--text3);">/ yr</span>
+                </div>
+              </td>
+              <td class="num-cell" style="font-weight:700; color:var(--teal);">
+                {{ bedBreakdown()[k] * avoidedRates()[k] | money }}
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--bg);">
+          <td colspan="3" style="font-weight:700;">Total Annual Saving</td>
+          <td class="num-cell" style="font-weight:800; color:var(--teal); font-size:15px;">{{ annualAvoided() | money }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi" style="border-left-color:var(--teal);">
+      <div class="kpi-label">Annual saving</div>
+      <div class="kpi-value" style="font-size:20px;">{{ annualAvoided() | money }}</div>
+    </div>
+    <div class="kpi" style="border-left-color:var(--teal);">
+      <div class="kpi-label">5-year saving</div>
+      <div class="kpi-value" style="font-size:20px;">{{ annualAvoided() * 5 | money }}</div>
+    </div>
+    <div class="kpi" style="border-left-color:var(--teal);">
+      <div class="kpi-label">25-year saving</div>
+      <div class="kpi-value" style="font-size:20px;">{{ annualAvoided() * 25 | money }}</div>
+    </div>
+  </div>
+  <div style="font-size:10.5px; color:var(--text3); margin-top:10px;">
+    Sources: MHCLG quarterly TA statistics · Shelter England analysis · LGA FOI requests. Rates are England averages; adjust to reflect local authority costs.
+  </div>
+</div>
+
+<!-- ── 7. Grant funding (conditional) ────────────────────────────── -->
+@if (activeProject(); as proj) {
+  @if (proj.grantFunding?.length) {
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+        <i class="ti ti-building-bank" style="color:var(--accent);"></i> Grant Funding
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+        @for (g of proj.grantFunding!; track g.code) {
+          <div style="background:var(--bg); border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:12px; min-width:180px;">
+            <div style="width:40px; height:40px; border-radius:10px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="ti ti-building-bank" style="color:var(--accent); font-size:18px;"></i>
+            </div>
+            <div>
+              <div style="font-weight:800; font-size:20px;">{{ g.homes }}</div>
+              <div style="font-size:11px; color:var(--text3);">households · <strong>{{ g.code }}</strong></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── 8. Sub-programmes (conditional) ───────────────────────── -->
+  @if (proj.programmes?.length) {
+    <div class="card flush">
+      <div style="padding:12px 16px; border-bottom:1px solid var(--border); font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; display:flex; align-items:center; gap:6px;">
+        <i class="ti ti-list-check" style="color:var(--accent);"></i> Sub-programmes
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Programme</th><th class="num-cell">Homes</th></tr></thead>
+          <tbody>
+            @for (pg of proj.programmes!; track pg.name) {
+              <tr>
+                <td style="font-weight:600; font-size:13px;">{{ pg.name }}</td>
+                <td class="num-cell" style="font-weight:700;">{{ pg.homes }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<!-- ── 9. Delivered homes table ───────────────────────────────────── -->
+<div class="card flush">
+  <div style="padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+    <i class="ti ti-home-check" style="color:var(--accent);"></i>
+    <span style="font-weight:700; font-size:13px;">Delivered Homes</span>
+    <span style="font-size:11px; font-weight:400; color:var(--text3); margin-left:4px;">{{ displayedHomes().length }} acquisitions · {{ periodLabel() }}</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Acquisition</th>
+          <th>Type</th>
+          <th class="num-cell">Front Doors</th>
+          <th>EPC Before</th>
+          <th>EPC After</th>
+          <th class="num-cell">Uplift</th>
+          <th class="num-cell">Capex Invested</th>
+          <th>Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (h of displayedHomes(); track h.acq) {
+          <tr>
+            <td style="font-weight:600; font-size:12px;">{{ h.acq }}</td>
+            <td style="font-size:12px; color:var(--text2);">{{ h.type }}</td>
+            <td class="num-cell">{{ h.frontDoors }}</td>
+            <td>
+              <span class="epc-pill" [style.background]="epcColor(h.epcBefore.r)" [style.color]="epcTextColor(h.epcBefore.r)">
+                {{ h.epcBefore.r }} ({{ h.epcBefore.s }})
+              </span>
+            </td>
+            <td>
+              <span class="epc-pill" [style.background]="epcColor(h.epcAfter.r)" [style.color]="epcTextColor(h.epcAfter.r)">
+                {{ h.epcAfter.r }} ({{ h.epcAfter.s }})
+              </span>
+            </td>
+            <td class="num-cell">
+              <span style="color:var(--teal); font-weight:700;">+{{ (h.epcAfter.s - h.epcBefore.s) * h.frontDoors }}</span>
+            </td>
+            <td class="num-cell" style="font-size:12px;">{{ h.capex | money }}</td>
+            <td style="font-size:12px; color:var(--text3);">{{ h.completed }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text3);">No homes for the selected project / period.</td></tr>
+        }
+      </tbody>
+      @if (displayedHomes().length > 0) {
+        <tfoot>
+          <tr style="background:var(--bg);">
+            <td colspan="2" style="font-weight:700;">Totals</td>
+            <td class="num-cell" style="font-weight:700;">{{ totalDoors() }}</td>
+            <td colspan="2"></td>
+            <td class="num-cell" style="font-weight:700; color:var(--teal);">+{{ statUplift() }}</td>
+            <td class="num-cell" style="font-weight:700;">{{ totalCapex() | money }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      }
+    </table>
+  </div>
+</div>
+
+<!-- ── 10. Contract spend by region ──────────────────────────────── -->
+<div class="card">
+  <div style="display:flex; align-items:center; gap:6px; margin-bottom:14px;">
+    <i class="ti ti-map-pin" style="color:var(--accent);"></i>
+    <span style="font-weight:700; font-size:13px;">Contract Spend by Region</span>
+  </div>
+  <div style="position:relative; height:160px;">
+    <canvas #regionChartCanvas></canvas>
+  </div>
+</div>
+
+<!-- ── 11. Supplier stats KPIs ────────────────────────────────────── -->
+<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+  <div class="kpi">
+    <div class="kpi-label">Suppliers Logged</div>
+    <div class="kpi-value">{{ filteredSuppliers().length }}</div>
+    <div class="kpi-sub">{{ localCount() }} local · {{ nonLocalCount() }} remote</div>
+  </div>
+  <div class="kpi" style="border-left-color:var(--teal);">
+    <div class="kpi-label">Total Fees Paid</div>
+    <div class="kpi-value">{{ totalFees() | money }}</div>
+    <div class="kpi-sub">{{ localFees() | money }} local</div>
+  </div>
+  <div class="kpi" [style.border-left-color]="localSpendPct() >= 50 ? 'var(--teal)' : 'var(--accent)'">
+    <div class="kpi-label">Local Spend %</div>
+    <div class="kpi-value" [style.color]="localSpendPct() >= 50 ? 'var(--teal)' : 'var(--accent)'">
+      {{ localSpendPct() }}%
+    </div>
+    <div style="margin-top:6px; height:5px; border-radius:3px; background:var(--border); overflow:hidden;">
+      <div style="height:100%; border-radius:3px; transition:width .4s;"
+           [style.width]="localSpendPct() + '%'"
+           [style.background]="localSpendPct() >= 50 ? 'var(--teal)' : 'var(--accent)'"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 12. Supplier locations map (single project only) ──────────── -->
+@if (projectCentre(); as centre) {
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px;">
+        <i class="ti ti-map-pin" style="color:var(--accent);"></i> Supplier locations
+      </div>
+      <span style="font-size:12px; color:var(--text3);">
+        @if (hoveredPin()) { {{ hoveredPin() }} } @else { Hover a pin for details }
+      </span>
+    </div>
+
+    <div style="background:#eef1f5; border-radius:8px; overflow:hidden; position:relative;">
+      <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"
+           style="display:block; width:100%; max-height:380px;">
+
+        <!-- Background -->
+        <rect width="500" height="500" fill="#eef1f5"/>
+
+        <!-- 50 mi ring -->
+        <circle cx="250" cy="250" r="192"
+                fill="rgba(232,96,28,0.06)" stroke="#E8601C" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <!-- 25 mi ring -->
+        <circle cx="250" cy="250" r="96"
+                fill="rgba(232,96,28,0.09)" stroke="#E8601C" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+        <!-- Ring labels -->
+        <text x="348" y="247" fill="#E8601C" font-size="10" font-family="sans-serif" font-weight="600">25 mi</text>
+        <text x="444" y="247" fill="#E8601C" font-size="10" font-family="sans-serif" font-weight="600">50 mi</text>
+
+        <!-- Supplier dots -->
+        @for (pin of supplierPins(); track pin.name) {
+          <circle [attr.cx]="pin.x" [attr.cy]="pin.y" r="7"
+                  [attr.fill]="pin.isLocal ? '#0f7c6b' : '#E8601C'"
+                  stroke="white" stroke-width="1.5"
+                  style="cursor:pointer; transition:r .1s;"
+                  (mouseenter)="hoveredPin.set(pin.name + ' · ' + pin.distance + ' mi · ' + pin.category)"
+                  (mouseleave)="hoveredPin.set(null)">
+          </circle>
+        }
+
+        <!-- Project centre dot -->
+        <circle cx="250" cy="250" r="9" fill="#E8601C" stroke="white" stroke-width="2"/>
+        <circle cx="250" cy="250" r="4" fill="white"/>
+        <text x="263" y="254" fill="#E8601C" font-size="11" font-family="sans-serif" font-weight="700">{{ centre.label }}</text>
+      </svg>
+
+      <!-- Legend -->
+      <div style="position:absolute; bottom:10px; left:12px; display:flex; gap:14px; font-size:11px; background:rgba(255,255,255,0.88); padding:5px 10px; border-radius:6px;">
+        <span style="display:flex; align-items:center; gap:5px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:#0f7c6b; display:inline-block;"></span>
+          Local (≤50 mi)
+        </span>
+        <span style="display:flex; align-items:center; gap:5px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:#E8601C; display:inline-block;"></span>
+          Non-local
+        </span>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── 13. Supplier register table ───────────────────────────────── -->
+<div class="card flush">
+  <div style="padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <i class="ti ti-briefcase" style="color:var(--accent);"></i>
+    <span style="font-weight:700; font-size:13px;">Supplier Register</span>
+    <span style="font-size:11px; color:var(--text3); margin-left:4px;">{{ filteredSuppliers().length }} entries</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Business</th>
+          <th>Category</th>
+          @if (socialProject() === 'all') { <th>Project</th> }
+          <th>Postcode</th>
+          <th class="num-cell">Distance</th>
+          <th>Local?</th>
+          <th class="num-cell">Fee</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of filteredSuppliers(); track s.id) {
+          <tr>
+            <td style="font-weight:600; font-size:12px;">{{ s.name }}</td>
+            <td style="font-size:12px; color:var(--text2);">{{ s.category }}</td>
+            @if (socialProject() === 'all') {
+              <td style="font-size:11px; color:var(--text3);">{{ getProjectLabel(s.projectId) }}</td>
+            }
+            <td style="font-size:12px; font-family:monospace; color:var(--text3);">{{ s.postcode }}</td>
+            <td class="num-cell" style="font-size:12px; color:var(--text3);">{{ s.distanceMiles }} mi</td>
+            <td>
+              <span class="badge" [class.badge-green]="s.isLocal" [class.badge-gray]="!s.isLocal">
+                {{ s.isLocal ? 'Local' : 'Remote' }}
+              </span>
+            </td>
+            <td class="num-cell" style="font-weight:600;">{{ s.fee | money }}</td>
+            <td style="font-size:11px; color:var(--text3);">{{ fmtDate(s.date) }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text3);">No suppliers for the selected project / period.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 13. B Corp / local definition note ────────────────────────── -->
+<div style="font-size:11px; color:var(--text3); padding:4px 2px; display:flex; align-items:flex-start; gap:6px;">
+  <i class="ti ti-info-circle" style="flex-shrink:0; margin-top:1px;"></i>
+  <span>
+    <strong>Local supplier definition:</strong> A supplier is classified as local if their registered office is within 25 miles of the project site.
+    Distance calculated from project postcode centroid. Non-UK-registered businesses are classified as non-local regardless of proximity.
+  </span>
+</div>
+
+<!-- ── 14. Narrative (conditional) ───────────────────────────────── -->
+@if (activeProject(); as proj) {
+  @if (proj.narrative) {
+    <div class="card">
+      <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+        <i class="ti ti-quote" style="color:var(--accent);"></i> Social Value Summary
+      </div>
+      <p style="font-size:13.5px; line-height:1.65; color:var(--text1); margin:0;">{{ proj.narrative }}</p>
+    </div>
+  }
+}

@@ -1,0 +1,194 @@
+<!-- Phase selector cards + Create Draft -->
+<div style="display:flex; align-items:center; gap:12px;">
+  <div class="phase-grid" style="flex:1; grid-template-columns:repeat(5,1fr);">
+    @for (ph of phases; track ph.id) {
+      <div class="phase-card" [class.active]="selectedPhase() === ph.id"
+           (click)="selectedPhase.set(ph.id)">
+        <div class="phase-badge" [style.border-color]="ph.color" [style.color]="ph.color">
+          {{ ph.id === 'all' ? '∑' : ph.id.split(' ')[0][0] }}
+        </div>
+        <div>
+          <div class="phase-name">{{ ph.label }}</div>
+          <div style="font-size:11px; color:var(--text3); margin-top:2px;">
+            {{ phaseCount(ph.id) }} active properties
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <button class="btn-primary" style="display:flex; align-items:center; gap:6px; flex-shrink:0;" (click)="showCreateModal.set(true)">
+    <i class="ti ti-plus" style="font-size:15px;"></i> Create Draft
+  </button>
+</div>
+
+<!-- Metric strip -->
+<div class="metric-strip">
+  <div class="metric">
+    <div class="metric-l">Properties</div>
+    <div class="metric-v">{{ filteredProperties().length }}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-l">Budget Deployed</div>
+    <div class="metric-v">{{ totalBudget() | money }}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-l">Avg Yield</div>
+    <div class="metric-v">{{ avgYield().toFixed(1) }}%</div>
+  </div>
+  <div class="metric">
+    <div class="metric-l">EPC C+ on Completion</div>
+    <div class="metric-v">{{ epcCPlus() }}<span style="font-size:13px; font-weight:500; color:var(--text3);"> / {{ filteredProperties().length }}</span></div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="padding:10px 16px;">
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <div style="position:relative; flex:1; min-width:180px;">
+      <i class="ti ti-search" style="position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px;"></i>
+      <input class="form-input" style="padding-left:30px;" type="text" placeholder="Search address or postcode…"
+             [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <select class="form-select" style="width:auto;" [value]="bedsFilter()" (change)="bedsFilter.set($any($event.target).value)">
+      <option value="all">All beds</option>
+      <option value="1">1 bed</option>
+      <option value="2">2 beds</option>
+      <option value="3">3 beds</option>
+      <option value="4">4 beds</option>
+      <option value="5+">5+ beds</option>
+    </select>
+    <select class="form-select" style="width:auto;" [value]="epcFilter()" (change)="epcFilter.set($any($event.target).value)">
+      <option value="all">All EPC</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="G">G</option>
+    </select>
+    <select class="form-select" style="width:auto;" [value]="stageFilter()" (change)="stageFilter.set($any($event.target).value)">
+      <option value="all">All stages</option>
+      @for (s of stages.slice(1); track s) {
+        <option [value]="s">{{ stageLabel(s) }}</option>
+      }
+    </select>
+    <select class="form-select" style="width:auto;" [value]="sortOrder()" (change)="sortOrder.set($any($event.target).value)">
+      <option value="newest">Newest added</option>
+      <option value="oldest">Oldest added</option>
+      <option value="price-high">Price: high–low</option>
+      <option value="price-low">Price: low–high</option>
+    </select>
+    @if (hasFilters()) {
+      <button class="btn-ghost" style="font-size:12px;" (click)="resetFilters()">
+        <i class="ti ti-refresh" style="margin-right:3px;"></i>Reset
+      </button>
+    }
+  </div>
+</div>
+
+<!-- Property table -->
+<div class="card flush">
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Address</th>
+          <th>Phase</th>
+          <th>Stage</th>
+          <th>Beds</th>
+          <th>EPC Before</th>
+          <th>EPC After</th>
+          <th class="num-cell">Asking Price</th>
+          <th class="num-cell">Yield</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of filteredProperties(); track p.id) {
+          <tr (click)="navigate(p)" style="cursor:pointer;">
+            <td>
+              <div style="font-weight:600;">{{ p.address }}</div>
+              @if (p.postcode) {
+                <div style="font-size:11px; color:var(--text3);">{{ p.postcode }}</div>
+              }
+            </td>
+            <td><span class="badge badge-blue">{{ p.phase }}</span></td>
+            <td><span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span></td>
+            <td>{{ p.beds ?? '—' }}</td>
+            <td>
+              @if (p.epcBefore) {
+                <span class="epc-pill badge-{{ p.epcBefore.r }}">{{ p.epcBefore.r }} ({{ p.epcBefore.s }})</span>
+              }
+            </td>
+            <td>
+              @if (p.epcAfter) {
+                <span class="epc-pill badge-{{ p.epcAfter.r }}">{{ p.epcAfter.r }} ({{ p.epcAfter.s }})</span>
+              }
+            </td>
+            <td class="num-cell">{{ p.financial?.ap | money }}</td>
+            <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="8" style="text-align:center; padding:32px; color:var(--text3);">No properties match the current filters.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Create Draft Modal -->
+@if (showCreateModal()) {
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:900;" (click)="showCreateModal.set(false)"></div>
+  <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:901; background:var(--surface); border-radius:var(--radius); width:100%; max-width:460px; box-shadow:0 16px 48px rgba(0,0,0,0.18); border:1px solid var(--border); overflow:hidden;" (click)="$event.stopPropagation()">
+    <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+      <span style="font-size:14px; font-weight:700;">Create Draft property</span>
+      <button class="btn-ghost" style="padding:4px 8px; font-size:13px;" (click)="showCreateModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:18px 20px; display:flex; flex-direction:column; gap:12px;">
+      <div>
+        <label class="form-label" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); display:block; margin-bottom:5px;">Address *</label>
+        <input class="form-input" placeholder="e.g. 14 Granby Hill, Bristol" [value]="draftAddress()" (input)="draftAddress.set($any($event.target).value)">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label class="form-label" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); display:block; margin-bottom:5px;">Postcode</label>
+          <input class="form-input" placeholder="e.g. BS8 4LS" [value]="draftPostcode()" (input)="draftPostcode.set($any($event.target).value)">
+        </div>
+        <div>
+          <label class="form-label" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); display:block; margin-bottom:5px;">Phase</label>
+          <select class="form-select" [value]="draftPhase()" (change)="draftPhase.set($any($event.target).value)">
+            <option value="Bristol P3">Bristol — Phase 3</option>
+            <option value="Merton LAHF">Merton LAHF</option>
+            <option value="Leeds P1">Leeds — Phase 1</option>
+            <option value="Hastings ESPH">Hastings ESPH</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+        <div>
+          <label class="form-label" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); display:block; margin-bottom:5px;">Beds</label>
+          <select class="form-select" [value]="draftBeds()" (change)="draftBeds.set($any($event.target).value)">
+            <option value="">—</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); display:block; margin-bottom:5px;">Type</label>
+          <input class="form-input" placeholder="e.g. Flat" [value]="draftType()" (input)="draftType.set($any($event.target).value)">
+        </div>
+        <div>
+          <label class="form-label" style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); display:block; margin-bottom:5px;">Asking price</label>
+          <input class="form-input" placeholder="e.g. 280000" [value]="draftPrice()" (input)="draftPrice.set($any($event.target).value)">
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn-ghost" (click)="showCreateModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="createDraft()"><i class="ti ti-plus" style="font-size:13px; margin-right:4px;"></i>Create Draft</button>
+    </div>
+  </div>
+}

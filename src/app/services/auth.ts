@@ -1,0 +1,55 @@
+import { Injectable, signal } from '@angular/core';
+
+export type UserRole = 'Internal' | 'Legal Provider' | 'Client' | 'Transactions';
+
+export interface IrisUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  isAdmin: boolean;
+  password: string;
+}
+
+const INITIAL_USERS: IrisUser[] = [
+  { id: 'u1',  email: 'aryan@simplyphi.co.uk',     name: 'Aryan',         role: 'Internal',       isAdmin: true,  password: 'simplyphi24' },
+  { id: 'u2',  email: 'athesan@simplyphi.co.uk',   name: 'Athesan Guna',  role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
+  { id: 'u3',  email: 'carol@simplyphi.co.uk',     name: 'Carol Quinton', role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
+  { id: 'u4',  email: 'demo@simplyphi.co.uk',      name: 'Demo User',     role: 'Internal',       isAdmin: false, password: 'demo1234'    },
+  { id: 'u5',  email: 'hayley@winksherwood.co.uk', name: 'Hayley Briggs', role: 'Legal Provider', isAdmin: false, password: 'legal24'     },
+  { id: 'u6',  email: 'holly@simplyphi.co.uk',     name: 'Holly Clarke',  role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
+  { id: 'u7',  email: 'priya@simplyphi.co.uk',     name: 'Priya Shah',    role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
+  { id: 'u8',  email: 's.jones@bristol.gov.uk',    name: 'Sarah Jones',   role: 'Client',         isAdmin: false, password: 'bristol24'   },
+  { id: 'u9',  email: 'sukritibisht4@gmail.com',   name: 'Sukriti Bisht', role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
+  { id: 'u10', email: 'jiya@simplyphi.co.uk',      name: 'Jiya Chowdhury', role: 'Transactions',   isAdmin: false, password: 'tx24'        },
+  { id: 'u11', email: 'marcus@simplyphi.co.uk',    name: 'Marcus Webb',    role: 'Transactions',   isAdmin: false, password: 'tx24'        },
+];
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private _users = signal<IrisUser[]>(INITIAL_USERS);
+  currentUser = signal<IrisUser | null>(null);
+
+  get allUsers(): IrisUser[] { return this._users(); }
+
+  login(email: string, password: string): boolean {
+    const user = this._users().find(u => u.email === email.toLowerCase() && u.password === password);
+    if (user) { this.currentUser.set(user); return true; }
+    return false;
+  }
+
+  addUser(user: IrisUser): void {
+    this._users.update(list => [...list, user]);
+  }
+
+  updateUser(id: string, changes: Partial<IrisUser>): void {
+    this._users.update(list => list.map(u => u.id === id ? { ...u, ...changes } : u));
+  }
+
+  removeUser(id: string): void {
+    this._users.update(list => list.filter(u => u.id !== id));
+  }
+
+  isLoggedIn(): boolean { return this.currentUser() !== null; }
+  logout(): void { this.currentUser.set(null); }
+}

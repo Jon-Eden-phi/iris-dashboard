@@ -1,0 +1,369 @@
+import { Injectable, signal } from '@angular/core';
+import { ActivityNote, NoteLabel, Offer, Property, Stage, Viewing } from '../models/property.model';
+import { SocialProject, Supplier } from '../models/social.model';
+import { Agent } from '../models/agent.model';
+
+@Injectable({ providedIn: 'root' })
+export class MockDataService {
+
+  private readonly STORAGE_KEY = 'iris-props-v4';
+
+  private _props = signal<Property[]>([
+    // ── ACQ pipeline (mock) ──────────────────────────────────────────────────
+    { id: 'm001', address: '14 Granby Hill',          postcode: 'BS8 4LS',  phase: 'Bristol P3',    stage: 'Draft',          beds: 3, type: 'End-terrace',    epcBefore: { r: 'E', s: 44 }, financial: { ap: 310000 },                    status: 'active' },
+    { id: 'm002', address: '7 Stapleton Road',        postcode: 'BS5 0QN',  phase: 'Bristol P3',    stage: 'ClientApproval', beds: 2, type: 'Flat',           epcBefore: { r: 'F', s: 33 }, financial: { ap: 185000 },                    status: 'active' },
+    { id: 'm003', address: '22 Whitehouse Street',    postcode: 'BS3 4HA',  phase: 'Bristol P3',    stage: 'Negotiations',   beds: 4, type: 'Semi-detached',  epcBefore: { r: 'D', s: 56 }, financial: { ap: 420000 },                    status: 'active' },
+    { id: 'm004', address: '45 High Street, Merton',  postcode: 'SW19 1DE', phase: 'Merton LAHF',   stage: 'Viewing',        beds: 2, type: 'Flat',           epcBefore: { r: 'E', s: 43 }, financial: { ap: 340000 },                    status: 'active' },
+    { id: 'm005', address: '12 Morden Road',          postcode: 'CR4 4DG',  phase: 'Merton LAHF',   stage: 'Negotiations',   beds: 3, type: 'End-terrace',    epcBefore: { r: 'D', s: 55 }, financial: { ap: 385000 },                    status: 'active' },
+
+    // ── MemorandumOfSale (real) ──────────────────────────────────────────────
+    { id: 'p001', address: '15 Hallards Close',       postcode: 'BS11 0JP', phase: 'Bristol P3',    stage: 'MemorandumOfSale', beds: 3, type: 'End-Terrace',   epcBefore: { r: 'E', s: 41 }, financial: { ap: 285000, capex: 38000, tc: 5200, yield: 5.4 }, agreedPrice: 280000, status: 'active' },
+    { id: 'p002', address: 'GFF 22 Rock Lane',        postcode: 'TN35 4JN', phase: 'Hastings ESPH', stage: 'MemorandumOfSale', beds: 2, type: 'Ground Flat',   epcBefore: { r: 'D', s: 60 }, financial: { ap: 170000, capex: 65000, tc: 12680, yield: 3.62 },                    status: 'active' },
+    { id: 'p003', address: '32 Orchard Avenue',       postcode: 'BS13 0FH', phase: 'Bristol P3',    stage: 'MemorandumOfSale', beds: 2, type: 'End-Terrace',   epcBefore: { r: 'B', s: 85 }, financial: { ap: 300000, capex: 28000, tc: 4800, yield: 5.1 }, agreedPrice: 297500, status: 'active' },
+
+    // ── Legals (real) ────────────────────────────────────────────────────────
+    { id: 'p004', address: '94 Middleton Road',       postcode: 'SM4 6RR',  phase: 'Merton LAHF',   stage: 'Legals',           beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 64 }, financial: { ap: 475000, capex: 11000, tc: 5865, yield: 3.75 }, agreedPrice: 461500, status: 'active' },
+    { id: 'p005', address: '120 Rye Road',            postcode: 'TN35 5DB', phase: 'Hastings ESPH', stage: 'Legals',           beds: 2, type: 'Flat',          epcBefore: { r: 'D', s: 67 }, financial: { ap: 210000, capex: 42000, tc: 13080, yield: 6.37 }, agreedPrice: 185000, status: 'active' },
+
+    // ── Refurbishment (real) ─────────────────────────────────────────────────
+    { id: 'p006', address: '74 Avenue Road',          postcode: 'SW16 4HL', phase: 'Merton LAHF',   stage: 'Refurbishment',    beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 57 }, financial: { ap: 475000, capex: 11000, tc: 5865, yield: 3.65 },                    status: 'active' },
+    { id: 'p007', address: '148 Malvern Way',         postcode: 'TN34 3QG', phase: 'Hastings ESPH', stage: 'Refurbishment',    beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 65 }, financial: { ap: 225000, capex: 72000, tc: 12874, yield: 5.2 }, agreedPrice: 210000, status: 'active' },
+    { id: 'p008', address: '26 Dunster Road',         postcode: 'BS4 1BU',  phase: 'Bristol P3',    stage: 'Refurbishment',    beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 70 }, financial: { ap: 290000, capex: 32000, tc: 5200, yield: 5.0 }, agreedPrice: 270000, status: 'active' },
+
+    // ── Lettings / Exchange & Completion (real) ──────────────────────────────
+    { id: 'p009', address: '26 Norton Farm Road',     postcode: 'BS10 7ER', phase: 'Bristol P3',    stage: 'Lettings',         beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 75 }, financial: { ap: 335000, capex: 18000, tc: 4800, yield: 5.8 }, agreedPrice: 330000, status: 'active' },
+    { id: 'p010', address: '44 Brendon Rise',         postcode: 'TN34 3QD', phase: 'Hastings ESPH', stage: 'Lettings',         beds: 3, type: 'House',         epcBefore: { r: 'F', s: 36 }, financial: { ap: 150000, capex: 48000, tc: 12584, yield: 4.8 }, agreedPrice: 150000, status: 'active' },
+  ]);
+  get properties(): Property[] { return this._props(); }
+
+  constructor() {
+    // Load persisted state if available; otherwise seed demo data for first run
+    const saved = this._loadFromStorage();
+    if (saved) {
+      this._props.set(saved);
+    } else {
+      this._seedDemoData();
+    }
+
+    // Sync across browser tabs — when one tab mutates, all others update instantly
+    window.addEventListener('storage', e => {
+      if (e.key === this.STORAGE_KEY && e.newValue) {
+        try { this._props.set(JSON.parse(e.newValue)); } catch { /* ignore parse errors */ }
+      }
+    });
+  }
+
+  private _loadFromStorage(): Property[] | null {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Property[]) : null;
+    } catch { return null; }
+  }
+
+  private _saveToStorage(): void {
+    try { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this._props())); } catch { /* ignore */ }
+  }
+
+  private _seedDemoData(): void {
+    this._mutate('m002', p => ({ ...p,
+      viewing: {
+        agentName: 'Edward Carr', agentCompany: 'Knight Frank · Clifton',
+        agentEmail: 'edward.carr@knightfrank.com', agentPhone: '0117 317 1990',
+        date: '2026-07-14', time: '10:30', attendee: 'Megan Doyle',
+      },
+    }));
+    this._mutate('m004', p => ({ ...p,
+      viewing: {
+        agentName: 'James Parker', agentCompany: 'Savills · Wimbledon',
+        agentEmail: 'j.parker@savills.com', agentPhone: '020 8947 1200',
+        date: '2026-07-15', time: '14:00', attendee: 'Ryan Okonkwo',
+      },
+    }));
+    this._mutate('m003', p => ({ ...p,
+      offers: [
+        { id: 'o003a', amount: 405000, status: 'rejected', date: '2026-06-10T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor felt too low' },
+        { id: 'o003b', amount: 415000, status: 'pending',  date: '2026-06-18T14:30:00Z', submittedBy: 'Aryan' },
+      ],
+      activityLog: [
+        { id: 'n003a', text: 'Second offer submitted at £415,000. Vendor considering.', author: 'Aryan', timestamp: '2026-06-18T14:35:00Z', label: 'action' as NoteLabel },
+      ],
+    }));
+    this._mutate('m005', p => ({ ...p,
+      offers: [
+        { id: 'o005a', amount: 375000, status: 'countered', date: '2026-06-20T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor countered at £385k' },
+        { id: 'o005b', amount: 385000, status: 'pending',   date: '2026-06-25T15:00:00Z', submittedBy: 'Aryan' },
+      ],
+      activityLog: [
+        { id: 'n005a', text: 'Initial offer of £375k countered. Vendor firm at £385k.', author: 'Aryan', timestamp: '2026-06-20T10:05:00Z', label: 'warning' as NoteLabel },
+        { id: 'n005b', text: 'Counter-offer of £385k submitted. Awaiting response.',    author: 'Aryan', timestamp: '2026-06-25T15:10:00Z', label: 'action'  as NoteLabel },
+      ],
+    }));
+    this._mutate('p001', p => ({ ...p,
+      activityLog: [
+        { id: 'np001a', text: 'Offer of £280k accepted. MoS issued by vendor solicitor.', author: 'Aryan', timestamp: '2026-05-14T11:00:00Z', label: 'success' as NoteLabel },
+        { id: 'np001b', text: 'MoS signed and returned. Conveyancer instructed.',         author: 'Aryan', timestamp: '2026-05-20T09:30:00Z', label: 'action'  as NoteLabel },
+      ],
+    }));
+    this._mutate('p004', p => ({ ...p,
+      activityLog: [
+        { id: 'np004a', text: 'Searches ordered. ETA 10 working days.',                  author: 'Jiya Chowdhury', timestamp: '2026-06-01T09:00:00Z', label: 'action' as NoteLabel },
+        { id: 'np004b', text: 'Searches received. Draft RoT sent to fee earner.',        author: 'Jiya Chowdhury', timestamp: '2026-06-18T14:00:00Z', label: 'info'   as NoteLabel },
+      ],
+    }));
+    this._mutate('p009', p => ({ ...p,
+      activityLog: [
+        { id: 'np009a', text: 'Contracts exchanged. Completion set for 25 July 2026.',   author: 'Jiya Chowdhury', timestamp: '2026-07-01T10:00:00Z', label: 'success' as NoteLabel },
+      ],
+    }));
+  }
+
+  private _mutate(id: string, fn: (p: Property) => Property): void {
+    this._props.update(list => list.map(p => p.id === id ? fn(p) : p));
+    this._saveToStorage();
+  }
+
+  readonly lostProperties: Property[] = [
+    { id: 'l001', address: '6 Park Street, Bristol BS1', phase: 'Bristol P3', stage: 'Draft', beds: 2, status: 'lost', lostReason: 'Vendor withdrew', lostDate: '2025-03-12' },
+    { id: 'l002', address: '19 Tooting High St, London SW17', phase: 'Merton LAHF', stage: 'Negotiations', beds: 3, status: 'lost', lostReason: 'Outbid', lostDate: '2025-04-05' },
+    { id: 'l003', address: '44 Chapeltown Road, Leeds LS7', phase: 'Leeds P1', stage: 'Viewing', beds: 2, status: 'lost', lostReason: 'Failed survey', lostDate: '2025-02-20' },
+    { id: 'l004', address: '11 Harold Road, Hastings TN35', phase: 'Hastings ESPH', stage: 'Legals', beds: 4, status: 'lost', lostReason: 'Legal issues', lostDate: '2025-05-01' },
+  ];
+
+  readonly socialProjects: SocialProject[] = [
+    {
+      id: 'bristol-p3', label: 'Bristol — Phase 3', council: 'Bristol City Council', area: 'Bristol & surrounding BS postcodes',
+      totalSupplierSpend: 178000,
+      stats: { homes: 18, bedrooms: 41, epcCPlusPct: 100, epcPointUplift: 130 },
+      spendByRegion: [{ region: 'South West', pct: 86 }, { region: 'Greater London', pct: 9 }, { region: 'Other', pct: 5 }],
+      grantFunding: [{ code: 'SAHP', homes: 12 }, { code: 'LAHF', homes: 6 }],
+      bedsBreakdown: { '1': 0, '2': 14, '3': 3, '4': 1 },
+      homes: [
+        { acq: 'Granby House, BS5', type: 'Block of flats', frontDoors: 6, bedSize: 2, epcBefore: { r: 'E', s: 42 }, epcAfter: { r: 'C', s: 71 }, capex: 142000, completed: '11/2024' },
+        { acq: 'Stapleton Court, BS5', type: 'Block of flats', frontDoors: 8, bedSize: 2, epcBefore: { r: 'E', s: 39 }, epcAfter: { r: 'C', s: 73 }, capex: 196000, completed: '09/2024' },
+        { acq: '3 Brunswick Square, BS2', type: 'Maisonette', frontDoors: 2, bedSize: 3, epcBefore: { r: 'E', s: 48 }, epcAfter: { r: 'B', s: 81 }, capex: 41000, completed: '05/2025' },
+        { acq: '41 Filwood Road, BS16', type: 'End-terrace house', frontDoors: 1, bedSize: 3, epcBefore: { r: 'D', s: 57 }, epcAfter: { r: 'C', s: 75 }, capex: 33000, completed: '03/2025' },
+        { acq: '6 Greenway Park, BS9', type: 'Semi-detached house', frontDoors: 1, bedSize: 4, epcBefore: { r: 'D', s: 60 }, epcAfter: { r: 'C', s: 76 }, capex: 29500, completed: '04/2025' },
+      ],
+      localSpend: [
+        { business: 'Avon Trades Ltd', category: 'Trades & contractors', town: 'Bristol BS3', amount: 64200, jobs: 14 },
+        { business: 'Severnside Builders Merchants', category: 'Materials & merchants', town: 'Bristol BS2', amount: 41800, jobs: 27 },
+        { business: 'Bristol Bright Cleaning Co.', category: 'Cleaning', town: 'Bristol BS5', amount: 18400, jobs: 32 },
+      ],
+    },
+    {
+      id: 'merton', label: 'Merton LAHF 2 & 3', council: 'London Borough of Merton', area: 'Mitcham & South London',
+      totalSupplierSpend: 174000,
+      stats: { homes: 13, bedrooms: 30, epcCPlusPct: 100, epcPointUplift: 106 },
+      spendByRegion: [{ region: 'Greater London', pct: 82 }, { region: 'South East', pct: 13 }, { region: 'Other', pct: 5 }],
+      grantFunding: [{ code: 'LSAHP', homes: 9 }, { code: 'LAHF', homes: 4 }],
+      bedsBreakdown: { '1': 0, '2': 9, '3': 4, '4': 0 },
+      homes: [
+        { acq: 'Pollards Hill Court, CR4', type: 'Block of flats', frontDoors: 9, bedSize: 2, epcBefore: { r: 'E', s: 40 }, epcAfter: { r: 'C', s: 72 }, capex: 214000, completed: '08/2024' },
+        { acq: '55 Chestnut Grove, CR4', type: 'Mid-terrace house', frontDoors: 1, bedSize: 3, epcBefore: { r: 'D', s: 55 }, epcAfter: { r: 'B', s: 82 }, capex: 38000, completed: '02/2025' },
+        { acq: '9 St Olaves Walk, SW16', type: 'Maisonette', frontDoors: 2, bedSize: 3, epcBefore: { r: 'E', s: 46 }, epcAfter: { r: 'C', s: 74 }, capex: 44000, completed: '06/2025' },
+        { acq: '13 Acacia Road, CR4', type: 'End-terrace house', frontDoors: 1, bedSize: 3, epcBefore: { r: 'D', s: 58 }, epcAfter: { r: 'C', s: 77 }, capex: 31000, completed: '03/2025' },
+      ],
+      localSpend: [
+        { business: 'South London Build & Maintain', category: 'Trades & contractors', town: 'Croydon CR0', amount: 71800, jobs: 16 },
+        { business: 'Colliers Wood Merchants', category: 'Materials & merchants', town: 'Colliers Wood SW19', amount: 39600, jobs: 28 },
+      ],
+    },
+    {
+      id: 'leeds-p1', label: 'Leeds — Phase 1', council: 'Leeds City Council', area: 'Leeds & LS postcodes',
+      totalSupplierSpend: 101000,
+      stats: { homes: 9, bedrooms: 21, epcCPlusPct: 89, epcPointUplift: 73 },
+      spendByRegion: [{ region: 'Yorkshire & Humber', pct: 90 }, { region: 'Other', pct: 10 }],
+      grantFunding: [{ code: 'SAHP', homes: 6 }, { code: 'LAHF', homes: 3 }],
+      bedsBreakdown: { '1': 0, '2': 6, '3': 3, '4': 0 },
+      homes: [
+        { acq: 'Burley Lodge, LS6', type: 'Block of flats', frontDoors: 5, bedSize: 2, epcBefore: { r: 'F', s: 32 }, epcAfter: { r: 'C', s: 70 }, capex: 124000, completed: '10/2024' },
+        { acq: 'Roundhay Mews, LS8', type: 'Converted terrace', frontDoors: 3, bedSize: 3, epcBefore: { r: 'E', s: 44 }, epcAfter: { r: 'C', s: 72 }, capex: 88000, completed: '12/2024' },
+        { acq: '88 Roundhay Road, LS8', type: 'Mid-terrace house', frontDoors: 1, bedSize: 2, epcBefore: { r: 'D', s: 59 }, epcAfter: { r: 'D', s: 66 }, capex: 27000, completed: '01/2025' },
+      ],
+      localSpend: [
+        { business: 'Aire Valley Contractors', category: 'Trades & contractors', town: 'Leeds LS6', amount: 38500, jobs: 8 },
+        { business: 'Headingley Timber & Tools', category: 'Materials & merchants', town: 'Leeds LS6', amount: 22400, jobs: 31 },
+      ],
+    },
+    {
+      id: 'hastings-esph', label: 'Hastings — ESPH', council: 'Hastings Borough Council', area: 'East Sussex, Kent & Greater London',
+      totalSupplierSpend: 420000,
+      stats: { homes: 42, bedrooms: 107, epcCPlusPct: 100, epcPointUplift: 252 },
+      spendByRegion: [{ region: 'Greater London', pct: 49 }, { region: 'East Sussex', pct: 40 }, { region: 'Kent', pct: 10 }, { region: 'Other', pct: 1 }],
+      grantFunding: [{ code: 'SAHP', homes: 23 }, { code: 'LAHF', homes: 19 }],
+      bedsBreakdown: { '1': 6, '2': 14, '3': 15, '4': 7 },
+      contract: { name: 'Consultancy Contract for Property Acquisition and Refurbishment Services', reference: 'ESPH', value: 36240000, provider: 'Phi Property Acquisitions Ltd', period: '1 Apr 2025 – 31 May 2026' },
+      narrative: 'The Hastings housing programme transformed government funding into 42 high-quality, energy-efficient affordable homes through acquisition, refurbishment and conversion of existing properties.',
+      programmes: [{ name: 'SHAP', homes: 12 }, { name: 'LAHF R3', homes: 10 }, { name: 'LAHF R4', homes: 9 }, { name: 'Levelling Up', homes: 6 }, { name: 'Affordable Housing', homes: 5 }],
+      homes: [
+        { acq: 'The Hideaway (Flats 1–8), St Leonards', type: 'Block of flats', frontDoors: 8, bedSize: 2, epcBefore: { r: 'E', s: 43 }, epcAfter: { r: 'C', s: 72 }, capex: 240000, completed: '05/2025' },
+        { acq: '8 Cherry Tree Close', type: 'End-terrace house', frontDoors: 1, bedSize: 3, epcBefore: { r: 'E', s: 45 }, epcAfter: { r: 'C', s: 74 }, capex: 52000, completed: '04/2025' },
+        { acq: '2 Norfolk Drive', type: 'Mid-terrace house', frontDoors: 1, bedSize: 3, epcBefore: { r: 'D', s: 58 }, epcAfter: { r: 'C', s: 76 }, capex: 30000, completed: '03/2025' },
+        { acq: '12 Bandhills Close', type: 'Semi-detached house', frontDoors: 1, bedSize: 3, epcBefore: { r: 'D', s: 55 }, epcAfter: { r: 'B', s: 81 }, capex: 38000, completed: '02/2025' },
+      ],
+      localSpend: [
+        { business: 'Sussex Refurb Co.', category: 'Trades & contractors', town: 'Hastings TN34', amount: 210000, jobs: 24 },
+        { business: 'Coastal Builders Merchants', category: 'Materials & merchants', town: 'St Leonards TN38', amount: 96000, jobs: 40 },
+      ],
+    },
+  ];
+
+  readonly suppliers: Supplier[] = [
+    // Bristol — Phase 3 (12)
+    { id:  1, projectId: 'bristol-p3',    name: 'Avon Property Law LLP',          category: 'Solicitor',                 postcode: 'BS1 4AQ',  fee:   8500, isLocal: true,  distanceMiles:   1.2, date: '2024-06-10', lat: 51.454, lng: -2.596 },
+    { id:  2, projectId: 'bristol-p3',    name: 'Bristol Survey Group',           category: 'Surveyor',                  postcode: 'BS7 8AR',  fee:   3200, isLocal: true,  distanceMiles:   2.1, date: '2024-07-02', lat: 51.479, lng: -2.570 },
+    { id:  3, projectId: 'bristol-p3',    name: 'Severnside Electrical Ltd',      category: 'Electrician',               postcode: 'BS3 1AD',  fee:  14200, isLocal: true,  distanceMiles:   1.5, date: '2024-08-14', lat: 51.443, lng: -2.601 },
+    { id:  4, projectId: 'bristol-p3',    name: 'Avon Trades Ltd',                category: 'Builder / Main Contractor', postcode: 'BS5 6HR',  fee:  64200, isLocal: true,  distanceMiles:   2.3, date: '2024-09-01', lat: 51.459, lng: -2.558 },
+    { id:  5, projectId: 'bristol-p3',    name: 'Clevedon Plumbing & Heating',    category: 'Plumber',                   postcode: 'BS21 6AB', fee:   9800, isLocal: true,  distanceMiles:  13.4, date: '2024-09-20', lat: 51.441, lng: -2.855 },
+    { id:  6, projectId: 'bristol-p3',    name: 'Aztec Fire & Safety',            category: 'Fire Risk Assessor',        postcode: 'BS32 4AQ', fee:   1800, isLocal: true,  distanceMiles:   5.5, date: '2024-10-05', lat: 51.530, lng: -2.545 },
+    { id:  7, projectId: 'bristol-p3',    name: 'Aziza Surveys',                  category: 'EPC Assessor',              postcode: 'BS7 0BJ',  fee:   2400, isLocal: true,  distanceMiles:   2.1, date: '2025-01-18', lat: 51.479, lng: -2.565 },
+    { id:  8, projectId: 'bristol-p3',    name: 'Cotswold Roofing Co.',           category: 'Roofer',                    postcode: 'GL54 1AB', fee:  11600, isLocal: true,  distanceMiles:  42.1, date: '2025-02-11', lat: 51.883, lng: -1.775 },
+    { id:  9, projectId: 'bristol-p3',    name: 'Greenleaf Grounds',              category: 'Landscaper / Gardener',     postcode: 'BS16 1AB', fee:   4200, isLocal: true,  distanceMiles:   4.9, date: '2025-03-22', lat: 51.483, lng: -2.504 },
+    { id: 10, projectId: 'bristol-p3',    name: 'Bristol Bright Cleaning Co.',    category: 'Cleaner',                   postcode: 'BS5 0BJ',  fee:   6800, isLocal: true,  distanceMiles:   2.5, date: '2025-04-08', lat: 51.459, lng: -2.553 },
+    { id: 11, projectId: 'bristol-p3',    name: 'Midland Damp Specialists',       category: 'Damp Specialist',           postcode: 'B1 1BB',   fee:   3600, isLocal: false, distanceMiles:  81.2, date: '2025-05-14', lat: 52.481, lng: -1.900 },
+    { id: 12, projectId: 'bristol-p3',    name: 'National Structural Engineers',  category: 'Structural Engineer',       postcode: 'EC2A 1AB', fee:   5200, isLocal: false, distanceMiles: 118.4, date: '2025-06-30', lat: 51.522, lng: -0.085 },
+    // Merton LAHF (11)
+    { id: 13, projectId: 'merton',        name: 'Wimbledon Law Practice',         category: 'Solicitor',                 postcode: 'SW19 1QS', fee:   9200, isLocal: true,  distanceMiles:   1.4, date: '2024-05-08', lat: 51.421, lng: -0.204 },
+    { id: 14, projectId: 'merton',        name: 'Wandle Surveying',               category: 'Surveyor',                  postcode: 'SW19 2AA', fee:   2800, isLocal: true,  distanceMiles:   1.8, date: '2024-06-15', lat: 51.419, lng: -0.191 },
+    { id: 15, projectId: 'merton',        name: 'South London Build & Maintain',  category: 'Builder / Main Contractor', postcode: 'CR0 1AA',  fee:  71800, isLocal: true,  distanceMiles:   8.1, date: '2024-07-22', lat: 51.375, lng: -0.098 },
+    { id: 16, projectId: 'merton',        name: 'Clapham Electrics',              category: 'Electrician',               postcode: 'SW4 7DH',  fee:  11400, isLocal: true,  distanceMiles:   6.9, date: '2024-08-10', lat: 51.461, lng: -0.134 },
+    { id: 17, projectId: 'merton',        name: 'Kingston Plumbing Services',     category: 'Plumber',                   postcode: 'KT1 1AA',  fee:   7600, isLocal: true,  distanceMiles:   7.8, date: '2024-10-03', lat: 51.412, lng: -0.307 },
+    { id: 18, projectId: 'merton',        name: 'Surrey Fire Risk Solutions',     category: 'Fire Risk Assessor',        postcode: 'GU1 1AA',  fee:   1600, isLocal: true,  distanceMiles:  22.3, date: '2024-11-19', lat: 51.236, lng: -0.570 },
+    { id: 19, projectId: 'merton',        name: 'Mitcham Sparkle Cleaning',       category: 'Cleaner',                   postcode: 'CR4 1AA',  fee:   5200, isLocal: true,  distanceMiles:   4.3, date: '2025-01-07', lat: 51.399, lng: -0.163 },
+    { id: 20, projectId: 'merton',        name: 'Pollards Hill Landscapes',       category: 'Landscaper / Gardener',     postcode: 'CR4 2AB',  fee:   3800, isLocal: true,  distanceMiles:   6.2, date: '2025-02-28', lat: 51.389, lng: -0.140 },
+    { id: 21, projectId: 'merton',        name: 'SE Roofing Specialists',         category: 'Roofer',                    postcode: 'SE15 4AA', fee:   9400, isLocal: true,  distanceMiles:  12.1, date: '2025-04-14', lat: 51.470, lng: -0.067 },
+    { id: 22, projectId: 'merton',        name: 'Redhill Damp & Timber',          category: 'Damp Specialist',           postcode: 'RH1 1AA',  fee:   4100, isLocal: true,  distanceMiles:  18.5, date: '2025-05-30', lat: 51.237, lng: -0.168 },
+    { id: 23, projectId: 'merton',        name: 'Northern EPC Assessors',         category: 'EPC Assessor',              postcode: 'M1 1AA',   fee:   1800, isLocal: false, distanceMiles: 163.2, date: '2025-06-12', lat: 53.480, lng: -2.243 },
+    // Leeds — Phase 1 (10)
+    { id: 24, projectId: 'leeds-p1',      name: 'Aire Valley Solicitors',         category: 'Solicitor',                 postcode: 'LS1 4HH',  fee:   7800, isLocal: true,  distanceMiles:   0.5, date: '2024-08-05', lat: 53.797, lng: -1.547 },
+    { id: 25, projectId: 'leeds-p1',      name: 'Pennine Survey Partners',        category: 'Surveyor',                  postcode: 'LS1 2AA',  fee:   2600, isLocal: true,  distanceMiles:   0.3, date: '2024-09-12', lat: 53.799, lng: -1.549 },
+    { id: 26, projectId: 'leeds-p1',      name: 'Aire Valley Contractors',        category: 'Builder / Main Contractor', postcode: 'LS6 2AA',  fee:  38500, isLocal: true,  distanceMiles:   1.8, date: '2024-10-18', lat: 53.822, lng: -1.573 },
+    { id: 27, projectId: 'leeds-p1',      name: 'Bradford Electrical Services',   category: 'Electrician',               postcode: 'BD1 1AA',  fee:  12800, isLocal: true,  distanceMiles:   9.8, date: '2024-11-24', lat: 53.796, lng: -1.758 },
+    { id: 28, projectId: 'leeds-p1',      name: 'Harrogate Plumbing & Gas',       category: 'Plumber',                   postcode: 'HG1 1AA',  fee:   8400, isLocal: true,  distanceMiles:  13.2, date: '2025-01-09', lat: 53.992, lng: -1.538 },
+    { id: 29, projectId: 'leeds-p1',      name: 'Yorkshire Fire Safety',          category: 'Fire Risk Assessor',        postcode: 'LS8 1AA',  fee:   1400, isLocal: true,  distanceMiles:   2.3, date: '2025-02-17', lat: 53.816, lng: -1.511 },
+    { id: 30, projectId: 'leeds-p1',      name: 'Headingley Timber & Tools',      category: 'Roofer',                    postcode: 'LS6 1AA',  fee:  16200, isLocal: true,  distanceMiles:   2.1, date: '2025-03-05', lat: 53.822, lng: -1.573 },
+    { id: 31, projectId: 'leeds-p1',      name: 'Leeds Spotless Ltd',             category: 'Cleaner',                   postcode: 'LS8 2AB',  fee:   4200, isLocal: true,  distanceMiles:   2.1, date: '2025-04-22', lat: 53.816, lng: -1.509 },
+    { id: 32, projectId: 'leeds-p1',      name: 'Yorkshire Green Spaces',         category: 'Landscaper / Gardener',     postcode: 'LS8 3AA',  fee:   3600, isLocal: true,  distanceMiles:   2.1, date: '2025-05-08', lat: 53.816, lng: -1.509 },
+    { id: 33, projectId: 'leeds-p1',      name: 'London Damp Specialists Ltd',    category: 'Damp Specialist',           postcode: 'E1 6AA',   fee:   3800, isLocal: false, distanceMiles: 190.8, date: '2025-06-01', lat: 51.515, lng: -0.060 },
+    // Hastings — ESPH (12)
+    { id: 34, projectId: 'hastings-esph', name: 'Hastings Law Group',             category: 'Solicitor',                 postcode: 'TN34 1HH', fee:  12400, isLocal: true,  distanceMiles:   0.4, date: '2025-04-02', lat: 50.854, lng:  0.573 },
+    { id: 35, projectId: 'hastings-esph', name: 'Wealden Survey Partners',        category: 'Surveyor',                  postcode: 'BN21 1AA', fee:   4200, isLocal: true,  distanceMiles:  16.8, date: '2025-04-15', lat: 50.768, lng:  0.284 },
+    { id: 36, projectId: 'hastings-esph', name: 'Sussex Refurb Co.',              category: 'Builder / Main Contractor', postcode: 'TN34 2AA', fee: 210000, isLocal: true,  distanceMiles:   0.6, date: '2025-05-01', lat: 50.854, lng:  0.565 },
+    { id: 37, projectId: 'hastings-esph', name: 'Coastal Electrical Services',    category: 'Electrician',               postcode: 'TN38 0AA', fee:  22800, isLocal: true,  distanceMiles:   1.8, date: '2025-05-14', lat: 50.849, lng:  0.546 },
+    { id: 38, projectId: 'hastings-esph', name: 'St Leonards Plumbing',           category: 'Plumber',                   postcode: 'TN38 1AA', fee:  14600, isLocal: true,  distanceMiles:   1.8, date: '2025-06-03', lat: 50.849, lng:  0.546 },
+    { id: 39, projectId: 'hastings-esph', name: 'East Sussex Fire Risk',          category: 'Fire Risk Assessor',        postcode: 'TN1 1AA',  fee:   2200, isLocal: true,  distanceMiles:  22.1, date: '2025-06-20', lat: 51.133, lng:  0.264 },
+    { id: 40, projectId: 'hastings-esph', name: 'Rother Roofing Ltd',             category: 'Roofer',                    postcode: 'TN39 3AA', fee:  31400, isLocal: true,  distanceMiles:   6.4, date: '2025-07-08', lat: 50.843, lng:  0.474 },
+    { id: 41, projectId: 'hastings-esph', name: '1066 Cleaning Services',         category: 'Cleaner',                   postcode: 'TN34 3AA', fee:   9800, isLocal: true,  distanceMiles:   0.2, date: '2025-08-11', lat: 50.854, lng:  0.573 },
+    { id: 42, projectId: 'hastings-esph', name: 'Rother Grounds & Gardens',       category: 'Landscaper / Gardener',     postcode: 'TN39 1AA', fee:   8200, isLocal: true,  distanceMiles:   6.1, date: '2025-09-25', lat: 50.843, lng:  0.474 },
+    { id: 43, projectId: 'hastings-esph', name: 'Brighton EPC Solutions',         category: 'EPC Assessor',              postcode: 'BN1 1AA',  fee:   2800, isLocal: true,  distanceMiles:  43.2, date: '2025-10-14', lat: 50.829, lng: -0.137 },
+    { id: 44, projectId: 'hastings-esph', name: 'London Structural Engineers',    category: 'Structural Engineer',       postcode: 'SE1 1AA',  fee:   8600, isLocal: false, distanceMiles:  68.4, date: '2025-11-03', lat: 51.503, lng: -0.088 },
+    { id: 45, projectId: 'hastings-esph', name: 'City Damp Specialists',          category: 'Damp Specialist',           postcode: 'EC1A 1BB', fee:   4800, isLocal: false, distanceMiles:  69.1, date: '2025-12-01', lat: 51.522, lng: -0.102 },
+  ];
+
+  readonly agents: Agent[] = [
+    { id: 'a1', name: 'Sarah Mitchell', role: 'Senior Agent', email: 'sarah@winkworth.co.uk', phone: '0117 946 6500', company: 'Winkworth Bristol', region: 'Bristol', properties: 3 },
+    { id: 'a2', name: 'James Patel', role: 'Sales Director', email: 'james@jll.com', phone: '0208 493 3700', company: 'JLL Merton', region: 'Merton', properties: 2 },
+    { id: 'a3', name: 'Anjali Sood', role: 'Agent', email: 'anjali.sood@jll.com', phone: '0113 261 6400', company: 'JLL Leeds', region: 'Leeds', properties: 2 },
+    { id: 'a4', name: 'Tom Hendricks', role: 'Regional Director', email: 'tom@savills.com', phone: '01424 839280', company: 'Savills Hastings', region: 'Hastings', properties: 4 },
+  ];
+
+  advanceStage(id: string): void {
+    const stages: Stage[] = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
+    this._mutate(id, p => {
+      const idx = stages.indexOf(p.stage as Stage);
+      return idx >= 0 && idx < stages.length - 1 ? { ...p, stage: stages[idx + 1] } : p;
+    });
+  }
+
+  revertStage(id: string, comment: string, author: string): void {
+    const stages: Stage[] = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
+    this._mutate(id, p => {
+      const idx = stages.indexOf(p.stage as Stage);
+      if (idx <= 0) return p;
+      const prevStage = stages[idx - 1];
+      const logEntry: ActivityNote = {
+        id: 'revert_' + Date.now(),
+        text: comment ? `Stage reverted to ${prevStage}. Comment: ${comment}` : `Stage reverted to ${prevStage}.`,
+        author,
+        timestamp: new Date().toISOString(),
+        label: 'warning',
+      };
+      return { ...p, stage: prevStage, activityLog: [...(p.activityLog ?? []), logEntry] };
+    });
+  }
+
+  addActivity(id: string, note: ActivityNote): void {
+    this._mutate(id, p => ({ ...p, activityLog: [...(p.activityLog ?? []), note] }));
+  }
+
+  addOffer(id: string, offer: Offer): void {
+    this._mutate(id, p => ({ ...p, offers: [...(p.offers ?? []), offer] }));
+  }
+
+  updateOffer(propertyId: string, offerId: string, status: Offer['status']): void {
+    this._mutate(propertyId, p => {
+      const updatedOffers = (p.offers ?? []).map(o => o.id === offerId ? { ...o, status } : o);
+      const acceptedOffer = status === 'accepted' ? updatedOffers.find(o => o.id === offerId) : null;
+      return {
+        ...p,
+        offers: updatedOffers,
+        ...(acceptedOffer ? { agreedPrice: acceptedOffer.amount } : {}),
+      };
+    });
+  }
+
+  approveClient(id: string, approvedBy: string, maxPrice: number): void {
+    this._mutate(id, p => ({
+      ...p,
+      stage: 'Viewing' as Stage,
+      clientApprovedBy: approvedBy,
+      clientMaxPrice: maxPrice,
+      activityLog: [
+        ...(p.activityLog ?? []),
+        {
+          id: crypto.randomUUID(),
+          text: `Approved by ${approvedBy}. Max authorised price: £${maxPrice.toLocaleString('en-GB')}.`,
+          author: approvedBy,
+          timestamp: new Date().toISOString(),
+          label: 'success' as NoteLabel,
+        },
+      ],
+    }));
+  }
+
+  updateViewing(id: string, changes: Partial<Viewing>): void {
+    this._mutate(id, p => ({ ...p, viewing: { ...(p.viewing ?? {}), ...changes } }));
+  }
+
+  submitViewingForReview(id: string): void {
+    this.updateViewing(id, { clientReview: 'pending' });
+  }
+
+  approveViewing(id: string): void {
+    const stages: Stage[] = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
+    this._mutate(id, p => {
+      const idx = stages.indexOf(p.stage as Stage);
+      const newStage = (idx >= 0 && idx < stages.length - 1 ? stages[idx + 1] : p.stage) as Stage;
+      return { ...p, stage: newStage, viewing: { ...(p.viewing ?? {}), clientReview: 'approved' as const } };
+    });
+  }
+
+  markLost(id: string, reason: string): void {
+    this._mutate(id, p => ({
+      ...p,
+      status: 'lost' as const,
+      lostReason: reason,
+      lostDate: new Date().toISOString().split('T')[0],
+    }));
+  }
+
+  addProperty(p: Omit<Property, 'id' | 'stage' | 'status'>): void {
+    const id = 'p' + Date.now();
+    this._props.update(list => [...list, { ...p, id, stage: 'Draft', status: 'active' }]);
+    this._saveToStorage();
+  }
+
+  getProperty(id: string): Property | undefined {
+    return [...this.properties, ...this.lostProperties].find(p => p.id === id);
+  }
+}

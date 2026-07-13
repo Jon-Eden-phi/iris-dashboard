@@ -1,0 +1,764 @@
+@if (property(); as p) {
+
+  <!-- Back -->
+  <div style="margin-bottom:4px;">
+    <a routerLink="/pipeline" style="display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text3); text-decoration:none;">
+      <i class="ti ti-arrow-left"></i> Pipeline
+    </a>
+  </div>
+
+  <!-- Header card -->
+  <div class="card" [style.border-left]="'4px solid ' + phaseColor(p.phase)">
+    <div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px;">{{ p.address }}</div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px;">
+          <span class="badge badge-blue">{{ p.phase }}</span>
+          @if (p.postcode) { <span style="font-size:12px; color:var(--text3); font-family:monospace;">{{ p.postcode }}</span> }
+          @if (p.type)     { <span style="font-size:12px; color:var(--text2);">{{ p.type }}</span> }
+          @if (p.beds)     { <span style="font-size:12px; color:var(--text2);">{{ p.beds }} bed</span> }
+        </div>
+      </div>
+      <div>
+        @if (p.status === 'lost') {
+          <span class="badge badge-orange" style="font-size:12px; padding:5px 10px;">
+            <i class="ti ti-file-x" style="margin-right:4px;"></i>Lost — {{ p.lostReason }}
+          </span>
+        } @else {
+          <span class="stage-chip stage-{{ p.stage }}" style="font-size:12px; padding:5px 12px;">
+            {{ stageLabels[p.stage] ?? p.stage }}
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stage timeline with groups ─────────────────────────────── -->
+  @if (p.status === 'active') {
+    <div class="card" style="padding:16px 20px;">
+
+      <div style="display:flex; align-items:flex-start; gap:0; overflow-x:auto; padding-bottom:4px;">
+        @for (group of stageGroups; track group.label; let gLast = $last) {
+
+          <!-- Group block -->
+          <div style="flex-shrink:0;">
+            <!-- Coloured label line -->
+            <div style="display:flex; align-items:center; gap:0; margin-bottom:10px;">
+              <div style="height:3px; border-radius:2px; flex:1;" [style.background]="group.color"></div>
+              <span style="font-size:10px; font-weight:700; padding:0 8px; white-space:nowrap;" [style.color]="group.color">{{ group.label }}</span>
+              <div style="height:3px; border-radius:2px; flex:1;" [style.background]="group.color"></div>
+            </div>
+
+            <!-- Stages row -->
+            <div style="display:flex; align-items:flex-start;">
+              @for (s of group.stages; track s; let sLast = $last) {
+                <div style="display:flex; align-items:center; flex-shrink:0;">
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                    <!-- Circle -->
+                    <div style="width:30px; height:30px; border-radius:50%; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; transition:.2s;"
+                         [style.background]="stageIndex(p.stage) > stageIndex(s) ? group.color : stageIndex(p.stage) === stageIndex(s) ? group.color : 'transparent'"
+                         [style.border-color]="stageIndex(p.stage) >= stageIndex(s) ? group.color : 'var(--border)'"
+                         [style.color]="stageIndex(p.stage) >= stageIndex(s) ? '#fff' : 'var(--text3)'">
+                      @if (stageIndex(p.stage) > stageIndex(s)) {
+                        <i class="ti ti-check" style="font-size:12px;"></i>
+                      } @else {
+                        {{ stageIndex(s) + 1 }}
+                      }
+                    </div>
+                    <!-- Label -->
+                    <div style="font-size:10px; white-space:nowrap; font-weight:600;"
+                         [style.color]="stageIndex(p.stage) === stageIndex(s) ? group.color : stageIndex(p.stage) > stageIndex(s) ? group.color : 'var(--text3)'">
+                      {{ stageLabels[s] ?? s }}
+                    </div>
+                  </div>
+                  <!-- Connector within group -->
+                  @if (!sLast) {
+                    <div style="width:28px; height:2px; margin-bottom:20px; flex-shrink:0;"
+                         [style.background]="stageIndex(p.stage) > stageIndex(s) ? group.color : 'var(--border)'"></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Connector between groups -->
+          @if (!gLast) {
+            <div style="width:24px; height:2px; margin-top:13px; flex-shrink:0; background:var(--border);"></div>
+          }
+        }
+      </div>
+
+      <!-- Advance button (hidden on stages that have their own dedicated cards) -->
+      @if (canAdvance() && p.stage !== 'Draft' && p.stage !== 'ClientApproval' && p.stage !== 'Viewing' && p.stage !== 'Negotiations') {
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+          <span style="font-size:12px; color:var(--text3);">Ready to advance?</span>
+          <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; padding:8px 18px; font-size:13px;"
+                  (click)="advance()">
+            <i class="ti ti-arrow-right"></i> {{ nextStageLabel() }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Client Approval stage card ───────────────────────────────── -->
+  @if (p.stage === 'ClientApproval') {
+    <div class="card">
+      <!-- Banner -->
+      <div style="background:var(--accent-soft); border:1px solid rgba(232,96,28,0.25); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+        <i class="ti ti-clock" style="color:var(--accent); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+        <span><strong>Awaiting {{ councilName() }} approval.</strong> This property has been sent to the client for review. Only the client can approve or reject it — acquisitions cannot advance this stage.</span>
+      </div>
+
+      <!-- Status boxes -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+        <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Sent to client</div>
+          <div style="font-size:14px; font-weight:700; color:var(--text2);">{{ councilName() }}</div>
+        </div>
+        <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Decision</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; flex-shrink:0;"></span>
+            <span style="font-size:14px; font-weight:700; color:var(--accent);">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lock notice -->
+      <div style="background:var(--bg); border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text3); line-height:1.6;">
+        <i class="ti ti-lock" style="flex-shrink:0; margin-top:1px; color:var(--text3);"></i>
+        <span>This stage is <strong>client-controlled</strong>. When the client approves, the property will automatically move to <strong>Viewing</strong>. If they reject it, the property will be marked as <strong>Lost</strong>. No action is available to acquisitions at this stage.</span>
+      </div>
+    </div>
+  }
+
+  <!-- ── Draft stage card ───────────────────────────────────────── -->
+  @if (p.stage === 'Draft') {
+    <div class="card">
+      <!-- Info banner -->
+      <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.18); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+        <i class="ti ti-info-circle" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+        <span>This property is in <strong>Draft</strong>. Complete the listing details, confirm pre-offer capex, and mark the draft complete to send it for client approval.</span>
+      </div>
+
+      <!-- Form grid -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <!-- Left -->
+        <div>
+          <div style="font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px;">Vacant / Chain-free / Probate</div>
+          <div style="display:flex; gap:18px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+              <input type="checkbox" [checked]="draftVacant()" (change)="draftVacant.update(v => !v)" />
+              Vacant possession
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+              <input type="checkbox" [checked]="draftChainFree()" (change)="draftChainFree.update(v => !v)" />
+              Chain-free
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+              <input type="checkbox" [checked]="draftProbate()" (change)="draftProbate.update(v => !v)" />
+              Probate
+            </label>
+          </div>
+          <div style="margin-top:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Pre-offer capex estimate</label>
+            <input type="text" class="form-input" [value]="draftCapex()" (input)="draftCapex.set($any($event.target).value)" />
+          </div>
+        </div>
+        <!-- Right -->
+        <div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Agent contact (branch-level)</label>
+            <input type="text" class="form-input" placeholder="e.g. Mark Ellison — Hardwick & Pace" [value]="draftAgent()" (input)="draftAgent.set($any($event.target).value)" />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Listing link</label>
+            <input type="text" class="form-input" placeholder="e.g. rightmove.co.uk/properties/…" [value]="draftLink()" (input)="draftLink.set($any($event.target).value)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Draft action buttons -->
+      <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+        <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #ef4444; background:transparent; color:#ef4444; font-size:12px; font-weight:600; cursor:pointer;">
+          <i class="ti ti-x"></i> Reject property
+        </button>
+        <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; font-size:13px;" (click)="advance()">
+          <i class="ti ti-arrow-right"></i> Mark draft complete → send for client approval
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Viewing stage card ────────────────────────────────────────── -->
+  @if (p.stage === 'Viewing') {
+    <div class="card">
+
+      <!-- Confirmation banner -->
+      @if (p.viewing?.date) {
+        <div style="background:rgba(36,114,168,.07); border:1px solid rgba(36,114,168,.2); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+          <i class="ti ti-calendar-check" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+          <span>Viewing confirmed for <strong>{{ formatViewingDate(p.viewing?.date) }}, {{ p.viewing?.time }}</strong>
+            @if (p.viewing?.agentName) { with <strong>{{ p.viewing!.agentName }}</strong> ({{ p.viewing!.agentCompany }}). }
+            @if (p.viewing?.attendee) { <strong>{{ p.viewing!.attendee }}</strong> attending from Operations. }
+          </span>
+        </div>
+      }
+
+      <!-- Agent + Attendee row -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+
+        <!-- Estate agent -->
+        <div style="background:var(--bg); border-radius:10px; padding:16px;">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Estate Agent — Meeting on site</div>
+          <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:12px;">
+            <div style="width:38px; height:38px; border-radius:50%; background:var(--accent-soft); border:1px solid rgba(232,96,28,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="ti ti-user" style="color:var(--accent); font-size:16px;"></i>
+            </div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">{{ p.viewing?.agentName ?? 'Not assigned' }}</div>
+              <div style="font-size:12px; color:var(--text3);">{{ p.viewing?.agentCompany }}</div>
+            </div>
+          </div>
+          @if (p.viewing?.agentEmail) {
+            <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--blue); margin-bottom:6px;">
+              <i class="ti ti-mail" style="flex-shrink:0;"></i>
+              <span>{{ p.viewing!.agentEmail }}</span>
+            </div>
+          }
+          @if (p.viewing?.agentPhone) {
+            <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text2); margin-bottom:12px;">
+              <i class="ti ti-phone" style="flex-shrink:0;"></i>
+              <span>{{ p.viewing!.agentPhone }}</span>
+            </div>
+          }
+          <div style="display:flex; gap:7px;">
+            <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;">
+              <i class="ti ti-mail"></i> Email agent
+            </button>
+            <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;">
+              <i class="ti ti-phone"></i> Call
+            </button>
+          </div>
+        </div>
+
+        <!-- Viewing attendee -->
+        <div style="background:var(--bg); border-radius:10px; padding:16px;">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Viewing Attendee — Operations or Viewber</div>
+          @if (p.viewing?.attendee) {
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+              <div style="width:38px; height:38px; border-radius:50%; background:rgba(15,124,107,.12); color:var(--teal); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0;">
+                {{ attendeeInitials(p.viewing!.attendee) }}
+              </div>
+              <div style="flex:1;">
+                <div style="font-weight:700; font-size:14px;">{{ p.viewing!.attendee }}</div>
+                <div style="font-size:12px; color:var(--text3);">Operations coordinator</div>
+              </div>
+              <span class="badge badge-green" style="font-size:10px; white-space:nowrap;">SimplyPhi · Operations</span>
+            </div>
+          }
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Who is attending?</label>
+          <select class="form-input" style="padding:8px 10px; border-color:rgba(232,96,28,.3);"
+                  [value]="p.viewing?.attendee ?? ''"
+                  (change)="setViewingAttendee($any($event.target).value)">
+            @for (group of viewingAttendeeGroups; track group.label) {
+              <optgroup [label]="group.label">
+                @for (opt of group.options; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </optgroup>
+            }
+          </select>
+          <div style="display:flex; align-items:flex-start; gap:5px; font-size:11px; color:var(--text3); margin-top:8px; line-height:1.5;">
+            <i class="ti ti-info-circle" style="flex-shrink:0; margin-top:1px;"></i>
+            Acquisitions don't attend — viewings are covered by Operations or an external Viewber agent.
+          </div>
+        </div>
+      </div>
+
+      <!-- Date / time -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Viewing date</label>
+          <input type="date" class="form-input" style="border-color:rgba(232,96,28,.3);"
+                 [value]="p.viewing?.date ?? ''"
+                 (change)="setViewingDate($any($event.target).value)" />
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Viewing time</label>
+          <input type="time" class="form-input" style="border-color:rgba(232,96,28,.3);"
+                 [value]="p.viewing?.time ?? ''"
+                 (change)="setViewingTime($any($event.target).value)" />
+        </div>
+      </div>
+
+      <!-- Pre-offer capex -->
+      <div style="margin-bottom:18px;">
+        <div style="font-size:13px; font-weight:600; color:var(--text2); margin-bottom:4px;">Pre-offer capex review</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:20px; font-weight:800;">{{ p.financial?.capex | money }}</span>
+          <span style="font-size:12px; color:var(--text3);">Confirm or revise after viewing</span>
+        </div>
+      </div>
+
+      <!-- Viewing report -->
+      <div style="border:1.5px solid rgba(232,96,28,.25); border-radius:10px; padding:16px; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <i class="ti ti-report" style="color:var(--accent); font-size:16px;"></i>
+          <span style="font-size:13px; font-weight:700; color:var(--text1);">Viewing Report</span>
+          @if (p.viewing?.reportNotes || p.viewing?.reportCondition) {
+            <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(15,124,107,.1); color:var(--teal); margin-left:auto;">Saved</span>
+          }
+        </div>
+
+        <!-- Condition rating -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Property condition</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            @for (cond of [
+              { val: 'excellent', label: 'Excellent', color: '#16a34a' },
+              { val: 'good',      label: 'Good',      color: '#2472a8' },
+              { val: 'fair',      label: 'Fair',       color: '#f59e0b' },
+              { val: 'poor',      label: 'Poor',       color: '#ef4444' }
+            ]; track cond.val) {
+              <button (click)="setViewingCondition(cond.val)"
+                      [disabled]="p.viewing?.clientReview === 'pending'"
+                      style="padding:6px 16px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid; transition:.15s;"
+                      [style.background]="p.viewing?.reportCondition === cond.val ? cond.color : 'transparent'"
+                      [style.color]="p.viewing?.reportCondition === cond.val ? '#fff' : cond.color"
+                      [style.border-color]="cond.color">
+                {{ cond.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Photos placeholder -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Photos</label>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+            @for (slot of [1,2,3,4,5,6,7,8]; track slot) {
+              <div style="aspect-ratio:4/3; border-radius:7px; border:1.5px dashed var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer; background:var(--bg); font-size:10px; color:var(--text3);"
+                   [style.opacity]="p.viewing?.clientReview === 'pending' ? '0.5' : '1'">
+                <i class="ti ti-camera" style="font-size:18px;"></i>
+                Add photo
+              </div>
+            }
+          </div>
+          <div style="font-size:11px; color:var(--text3); margin-top:6px;">
+            <i class="ti ti-info-circle" style="margin-right:3px;"></i>Photo upload coming soon — attach viewing photos before sending to client.
+          </div>
+        </div>
+
+        <!-- Report notes -->
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Observations & notes</label>
+          <textarea class="form-input"
+                    rows="4"
+                    placeholder="Describe the property condition, any issues observed, access notes, or anything the client should know before approving to offer…"
+                    style="resize:vertical; border-color:rgba(232,96,28,.3);"
+                    [disabled]="p.viewing?.clientReview === 'pending'"
+                    [value]="p.viewing?.reportNotes ?? ''"
+                    (input)="setViewingReportNotes($any($event.target).value)"></textarea>
+        </div>
+      </div>
+
+      <!-- Action area: locked if sent for review, otherwise show submit button -->
+      @if (p.viewing?.clientReview === 'pending') {
+        <div style="background:var(--accent-soft); border:1px solid rgba(232,96,28,.25); border-radius:8px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+          <i class="ti ti-clock" style="color:var(--accent); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+          <span><strong>Viewing report sent to {{ councilName() }}.</strong> Awaiting their decision. The client will approve or reject via their portal.</span>
+        </div>
+        <div style="background:var(--bg); border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text3); line-height:1.6;">
+          <i class="ti ti-lock" style="flex-shrink:0; margin-top:1px;"></i>
+          <span>This stage is <strong>client-controlled</strong>. When the client approves, the property will automatically move to <strong>Negotiations</strong>. If they reject, it will be marked as <strong>Lost</strong>.</span>
+        </div>
+      } @else {
+        <div style="display:flex; justify-content:flex-end; align-items:center; padding-top:14px; border-top:1px solid var(--border);">
+          <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; font-size:13px;"
+                  (click)="submitViewingForReview()">
+            <i class="ti ti-send"></i> Send viewing report to client for review
+          </button>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ── Negotiations / Offer Tracker ────────────────────────────── -->
+  @if (p.status === 'active' && (p.stage === 'Negotiations' || p.stage === 'MemorandumOfSale' || p.stage === 'Legals' || p.stage === 'Refurbishment' || p.stage === 'Lettings')) {
+    <div class="card">
+
+      <!-- Banner -->
+      @if (currentOffer(); as co) {
+        <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.2); border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:13px;">
+          <i class="ti ti-currency-pound" style="color:var(--blue); font-size:16px; flex-shrink:0;"></i>
+          <span><strong>Offer in progress.</strong> {{ (p.offers ?? []).length }} offer{{ (p.offers ?? []).length !== 1 ? 's' : '' }} submitted. Current offer: <strong>{{ co.amount | money }}</strong></span>
+        </div>
+      }
+
+      <!-- Current offer vs asking price vs client max price boxes -->
+      @if (p.stage === 'Negotiations') {
+        <div style="display:grid; grid-template-columns:1fr 1fr{{ p.clientMaxPrice ? ' 1fr' : '' }}; gap:10px; margin-bottom:16px;">
+          <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+            <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:6px;">Current Offer</div>
+            @if (currentOffer(); as co) {
+              <div style="font-size:22px; font-weight:800; color:var(--accent);">{{ co.amount | money }}</div>
+            } @else {
+              <div style="font-size:14px; color:var(--text3);">No offer yet</div>
+            }
+          </div>
+          <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+            <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:6px;">Asking Price</div>
+            <div style="font-size:22px; font-weight:800;">{{ p.financial?.ap | money }}</div>
+          </div>
+          @if (p.clientMaxPrice) {
+            <div style="background:rgba(15,124,107,.07); border:1px solid rgba(15,124,107,.2); border-radius:8px; padding:14px 16px;">
+              <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--teal); margin-bottom:6px;">Client Max Price</div>
+              <div style="font-size:22px; font-weight:800; color:var(--teal);">{{ p.clientMaxPrice | money }}</div>
+              <div style="font-size:10px; color:var(--teal); margin-top:4px; opacity:.7;">Authorised by {{ p.clientApprovedBy }}</div>
+            </div>
+          }
+        </div>
+
+        <!-- Action buttons — always visible; reject/accept operate on latest pending offer -->
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
+          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #ef4444; background:transparent; font-size:12px; font-weight:600; cursor:pointer; transition:.15s;"
+                  [style.color]="currentOffer()?.status === 'pending' ? '#ef4444' : 'var(--text3)'"
+                  [style.border-color]="currentOffer()?.status === 'pending' ? '#ef4444' : 'var(--border)'"
+                  [disabled]="currentOffer()?.status !== 'pending'"
+                  (click)="resolveOffer(currentOffer()!.id, 'rejected')">
+            <i class="ti ti-x"></i> Offer rejected — withdraw
+          </button>
+          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid var(--border); background:transparent; color:var(--text2); font-size:12px; font-weight:600; cursor:pointer;"
+                  (click)="showOfferForm.update(v => !v)">
+            <i class="ti ti-trending-up"></i> Submit offer
+          </button>
+          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:7px; border:none; font-size:12px; font-weight:700; cursor:pointer; transition:.15s;"
+                  [style.background]="currentOffer()?.status === 'pending' ? 'var(--accent)' : 'var(--border)'"
+                  [style.color]="currentOffer()?.status === 'pending' ? '#fff' : 'var(--text3)'"
+                  [disabled]="currentOffer()?.status !== 'pending'"
+                  (click)="resolveOffer(currentOffer()!.id, 'accepted')">
+            <i class="ti ti-file-description"></i> Offer accepted → MoS
+          </button>
+          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #E8601C; background:transparent; color:#E8601C; font-size:12px; font-weight:600; cursor:pointer; transition:.15s;"
+                  (click)="generateOfferLetter()">
+            <i class="ti ti-file-text"></i> Generate Offer Letter
+          </button>
+        </div>
+      }
+
+      <!-- Submit offer inline form -->
+      @if (showOfferForm()) {
+        <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:16px; border:1px dashed var(--border);">
+          <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">Log New Offer</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Amount (£)</label>
+              <input type="number" placeholder="e.g. 310000" class="form-input"
+                     [value]="offerAmount() ?? ''"
+                     (input)="offerAmount.set(+$any($event.target).value || null)" />
+            </div>
+            <div>
+              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Submitted by</label>
+              <input type="text" class="form-input"
+                     [value]="offerBy()"
+                     (input)="offerBy.set($any($event.target).value)" />
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Notes / conditions (optional)</label>
+            <input type="text" placeholder='e.g. "Subject to satisfactory survey"' class="form-input"
+                   [value]="offerNotes()"
+                   (input)="offerNotes.set($any($event.target).value)" />
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn-ghost" style="font-size:12px;" (click)="showOfferForm.set(false)">Cancel</button>
+            <button class="btn-primary" style="font-size:12px;" (click)="submitOffer()">Submit Offer</button>
+          </div>
+        </div>
+      }
+
+      <!-- Offer history -->
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">
+        Offer History ({{ (p.offers ?? []).length }})
+      </div>
+
+      @if ((p.offers?.length ?? 0) > 0) {
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          @for (offer of (p.offers ?? []).slice().reverse(); track offer.id; let offerFirst = $first) {
+            <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:var(--bg);">
+              <div style="width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0;"
+                   [style.background]="offerStatusColor(offer.status)"></div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span style="font-size:16px; font-weight:800;">{{ offer.amount | money }}</span>
+                  @if (pctVsAsking(offer.amount)) {
+                    <span style="font-size:12px; color:var(--text3);">({{ pctVsAsking(offer.amount) }})</span>
+                  }
+                  <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; color:#fff;"
+                        [style.background]="offerStatusColor(offer.status)">
+                    {{ offer.status | titlecase }}
+                  </span>
+                  @if (offerFirst) {
+                    <span style="font-size:11px; font-weight:700; color:var(--accent);">Latest</span>
+                  }
+                </div>
+                <div style="font-size:11px; color:var(--text3); margin-top:3px;">
+                  {{ fmtTimestamp(offer.date) }} · {{ offer.submittedBy }}
+                </div>
+                @if (offer.notes) {
+                  <div style="font-size:12px; color:var(--text2); margin-top:5px; font-style:italic;">
+                    "{{ offer.notes }}"
+                  </div>
+                }
+              </div>
+              @if (offer.status === 'pending' && p.stage === 'Negotiations') {
+                <div style="display:flex; gap:5px; flex-shrink:0;">
+                  <button style="padding:4px 9px; border-radius:5px; background:#0f7c6b; color:#fff; border:none; font-size:11px; font-weight:600; cursor:pointer;"
+                          (click)="resolveOffer(offer.id, 'accepted')">Accept</button>
+                  <button style="padding:4px 9px; border-radius:5px; background:#ef4444; color:#fff; border:none; font-size:11px; font-weight:600; cursor:pointer;"
+                          (click)="resolveOffer(offer.id, 'rejected')">Reject</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div style="text-align:center; padding:18px; color:var(--text3); font-size:13px;">
+          <i class="ti ti-receipt-off" style="display:block; font-size:22px; margin-bottom:5px;"></i>
+          No offers logged yet
+        </div>
+      }
+    </div>
+  }
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start;">
+
+    <!-- EPC -->
+    <div class="card">
+      <div class="section-header"><div class="section-title"><i class="ti ti-bolt" style="color:var(--accent);"></i> EPC Ratings</div></div>
+      <div style="display:flex; gap:12px; align-items:stretch;">
+        @if (p.epcBefore) {
+          <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcBefore.r) + '22'">
+            <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Before</div>
+            <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
+                 [style.background]="epcColor(p.epcBefore.r)" [style.color]="epcTextColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
+            <div style="font-size:20px; font-weight:800;">{{ p.epcBefore.s }}</div>
+            <div style="font-size:11px; color:var(--text3);">SAP score</div>
+          </div>
+        }
+        @if (p.epcAfter) {
+          <div style="display:flex; align-items:center; color:var(--teal); font-size:18px;"><i class="ti ti-arrow-right"></i></div>
+          <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcAfter.r) + '22'">
+            <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">After</div>
+            <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
+                 [style.background]="epcColor(p.epcAfter.r)" [style.color]="epcTextColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
+            <div style="font-size:20px; font-weight:800;">{{ p.epcAfter.s }}</div>
+            <div style="font-size:11px; color:var(--text3);">SAP score</div>
+          </div>
+        }
+        @if (p.epcBefore && p.epcAfter) {
+          <div style="flex:1; border-radius:8px; padding:16px; text-align:center; background:rgba(15,124,107,0.08);">
+            <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Uplift</div>
+            <div style="font-size:32px; font-weight:800; color:var(--teal); line-height:1; margin-top:8px;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
+            <div style="font-size:11px; color:var(--text3); margin-top:4px;">SAP points</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Financials -->
+    @if (p.financial; as f) {
+      <div class="card" (click)="showAicPopover.set(false)">
+        <div class="section-header"><div class="section-title"><i class="ti ti-coin" style="color:var(--accent);"></i> Financials</div></div>
+
+        <!-- AIC / AGREED / CAPEX strip -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid var(--border); border-radius:8px; overflow:visible; margin-bottom:16px;">
+
+          <!-- AIC cell — clickable, shows breakdown popover -->
+          <div class="aic-cell" [class.aic-cell-open]="showAicPopover()"
+               (click)="showAicPopover.update(v => !v); $event.stopPropagation()">
+            <div class="aic-cell-label">AIC</div>
+            <div class="aic-cell-value" style="color:var(--accent);">{{ totalCost() | money }}</div>
+            <i class="ti ti-chevron-down" style="font-size:10px; color:var(--text3); margin-top:2px;"></i>
+
+            <!-- Popover -->
+            @if (showAicPopover()) {
+              <div class="aic-popover" (click)="$event.stopPropagation()">
+                <div class="aic-pop-title">AIC Breakdown</div>
+                <div class="aic-pop-row"><span>Asking Price</span><span>{{ f.ap | money }}</span></div>
+                <div class="aic-pop-row"><span>Stamp Duty</span><span>—</span></div>
+                <div class="aic-pop-row"><span>Capex</span><span>{{ f.capex | money }}</span></div>
+                <div class="aic-pop-row"><span>Transaction Costs</span><span>{{ f.tc | money }}</span></div>
+                <div class="aic-pop-row"><span>Service Charge</span><span>{{ f.sc ? (f.sc | money) : '—' }}</span></div>
+                <div class="aic-pop-total"><span>AIC</span><span>{{ totalCost() | money }}</span></div>
+              </div>
+            }
+          </div>
+
+          <!-- Agreed -->
+          <div style="padding:10px 12px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+            <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Agreed</div>
+            <div style="font-size:14px; font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</div>
+          </div>
+
+          <!-- Capex -->
+          <div style="padding:10px 12px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+            <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Capex</div>
+            <div style="font-size:14px; font-weight:700;">{{ f.capex | money }}</div>
+          </div>
+        </div>
+
+        <!-- Detail rows -->
+        <div style="display:flex; flex-direction:column; gap:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-size:13px; color:var(--text2);">Asking Price</span>
+            <span style="font-weight:700;">{{ f.ap | money }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-size:13px; color:var(--text2);">Capex (Refurb)</span>
+            <span style="font-weight:700;">{{ f.capex | money }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-size:13px; color:var(--text2);">Transaction Costs</span>
+            <span style="font-weight:700;">{{ f.tc | money }}</span>
+          </div>
+          @if (f.sc) {
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+              <span style="font-size:13px; color:var(--text2);">Service Charge</span>
+              <span style="font-weight:700;">{{ f.sc | money }}</span>
+            </div>
+          }
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-size:13px; color:var(--text2);">Social Rent (pw)</span>
+            <span style="font-weight:700;">{{ f.sp | money }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0;">
+            <span style="font-size:13px; color:var(--text2);">Gross Yield</span>
+            <span style="font-weight:800; font-size:16px; color:var(--teal);">{{ f.yield?.toFixed(1) }}%</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- MoS details -->
+  @if (p.stage === 'MemorandumOfSale' || p.stage === 'Legals') {
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title"><i class="ti ti-file-description" style="color:var(--accent);"></i> Memorandum of Sale</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px;">
+        <div><span style="color:var(--text3);">Agreed Price:</span> <strong>{{ (p.agreedPrice ?? p.financial?.ap) | money }}</strong></div>
+        <div><span style="color:var(--text3);">Vendor's Solicitor:</span> <strong>TBC</strong></div>
+        <div><span style="color:var(--text3);">MoS Date:</span> <strong>Pending</strong></div>
+        <div><span style="color:var(--text3);">Exchange Target:</span> <strong>4–6 weeks</strong></div>
+      </div>
+    </div>
+  }
+
+  <!-- Refurb schedule -->
+  @if (p.stage === 'Refurbishment') {
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title"><i class="ti ti-tools" style="color:var(--accent);"></i> Refurbishment Schedule</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        @for (item of [
+          { task: 'New boiler & heating system', status: 'complete',    pct: 100 },
+          { task: 'Loft insulation',             status: 'complete',    pct: 100 },
+          { task: 'Kitchen refurbishment',       status: 'in-progress', pct: 60  },
+          { task: 'Bathroom refurbishment',      status: 'in-progress', pct: 40  },
+          { task: 'Decorating & finishing',      status: 'pending',     pct: 0   },
+        ]; track item.task) {
+          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
+            <div style="flex:1;">{{ item.task }}</div>
+            <div style="width:120px; background:var(--border); border-radius:3px; height:6px; overflow:hidden;">
+              <div [style.width]="item.pct + '%'"
+                   [style.background]="item.pct === 100 ? 'var(--teal)' : 'var(--accent)'"
+                   style="height:100%; border-radius:3px;"></div>
+            </div>
+            <span class="badge" style="min-width:80px; justify-content:center;"
+                  [class.badge-green]="item.status === 'complete'"
+                  [class.badge-orange]="item.status === 'in-progress'"
+                  [class.badge-gray]="item.status === 'pending'">
+              {{ item.status }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── Activity Log ─────────────────────────────────────────────── -->
+  @if (p.status === 'active') {
+    <div class="card">
+      <div class="section-header" style="margin-bottom:14px;">
+        <div class="section-title"><i class="ti ti-notes" style="color:var(--accent);"></i> Activity Log</div>
+        <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;"
+                (click)="showNoteForm.update(v => !v)">
+          <i class="ti ti-plus"></i> Add Note
+        </button>
+      </div>
+
+      @if (showNoteForm()) {
+        <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:14px; border:1px dashed var(--border);">
+          <div style="display:grid; grid-template-columns:1fr auto; gap:10px; margin-bottom:10px; align-items:end;">
+            <div>
+              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Note</label>
+              <input type="text" placeholder="Add a note…" class="form-input"
+                     [value]="noteText()"
+                     (input)="noteText.set($any($event.target).value)"
+                     (keydown.enter)="submitNote()" />
+            </div>
+            <div>
+              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Author</label>
+              <input type="text" style="width:100px;" class="form-input"
+                     [value]="noteAuthor()"
+                     (input)="noteAuthor.set($any($event.target).value)" />
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn-ghost" style="font-size:12px;" (click)="showNoteForm.set(false)">Cancel</button>
+            <button class="btn-primary" style="font-size:12px;" (click)="submitNote()">Save Note</button>
+          </div>
+        </div>
+      }
+
+      @if ((p.activityLog?.length ?? 0) > 0) {
+        <div style="display:flex; flex-direction:column; gap:1px;">
+          @for (note of (p.activityLog ?? []).slice().reverse(); track note.id) {
+            <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);">
+              <div style="width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; flex-shrink:0;"
+                   [style.background]="labelColor(note.label)">
+                {{ note.author.substring(0,2).toUpperCase() }}
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:13px; color:var(--text1); line-height:1.5;">{{ note.text }}</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:3px;">{{ note.author }} · {{ fmtTimestamp(note.timestamp) }}</div>
+              </div>
+              <div style="width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0;"
+                   [style.background]="labelColor(note.label)"></div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div style="text-align:center; padding:20px; color:var(--text3); font-size:13px;">
+          <i class="ti ti-notes-off" style="display:block; font-size:24px; margin-bottom:6px;"></i>
+          No activity yet — add the first note
+        </div>
+      }
+    </div>
+  }
+
+} @else {
+  <div class="card" style="text-align:center; padding:48px;">
+    <i class="ti ti-file-x" style="font-size:40px; color:var(--text3); display:block; margin-bottom:12px;"></i>
+    <div style="font-weight:700; margin-bottom:6px;">Property not found</div>
+    <a routerLink="/pipeline" class="btn-ghost" style="display:inline-flex; align-items:center; gap:5px; margin-top:8px;">
+      <i class="ti ti-arrow-left"></i> Back to Pipeline
+    </a>
+  </div>
+}

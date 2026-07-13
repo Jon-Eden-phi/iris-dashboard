@@ -1,0 +1,73 @@
+<!-- KPI strip -->
+<div class="metric-strip">
+  <div class="metric">
+    <div class="metric-l">Total Lost</div>
+    <div class="metric-v">{{ data.lostProperties.length }}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-l">Vendor Withdrew</div>
+    <div class="metric-v">{{ data.lostProperties.filter(p => p.lostReason === 'Vendor withdrew').length }}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-l">Outbid</div>
+    <div class="metric-v">{{ data.lostProperties.filter(p => p.lostReason === 'Outbid').length }}</div>
+  </div>
+  <div class="metric">
+    <div class="metric-l">Other</div>
+    <div class="metric-v">{{ data.lostProperties.filter(p => !['Vendor withdrew','Outbid'].includes(p.lostReason || '')).length }}</div>
+  </div>
+</div>
+
+<!-- Phase filter -->
+<div class="card" style="padding:10px 16px;">
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Phase</span>
+    @for (ph of phases; track ph) {
+      <button class="btn-ghost" style="font-size:12px; padding:5px 11px;"
+              [style.background]="phaseFilter() === ph ? 'var(--accent-soft)' : ''"
+              [style.color]="phaseFilter() === ph ? 'var(--accent)' : ''"
+              [style.border-color]="phaseFilter() === ph ? 'var(--accent)' : ''"
+              (click)="phaseFilter.set(ph)">
+        {{ ph === 'all' ? 'All phases' : ph }}
+      </button>
+    }
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card flush">
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Address</th>
+          <th>Phase</th>
+          <th>Lost at Stage</th>
+          <th>Reason</th>
+          <th>Beds</th>
+          <th>Date Lost</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of filtered(); track p.id) {
+          <tr>
+            <td style="font-weight:600;">{{ p.address }}</td>
+            <td><span class="badge badge-gray">{{ p.phase }}</span></td>
+            <td><span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span></td>
+            <td>
+              <span class="badge"
+                    [class.badge-orange]="p.lostReason === 'Outbid'"
+                    [class.badge-gray]="p.lostReason !== 'Outbid'">
+                {{ p.lostReason }}
+              </span>
+            </td>
+            <td>{{ p.beds ?? '—' }}</td>
+            <td style="color:var(--text3); font-size:12px;">{{ formatDate(p.lostDate) }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text3);">No lost properties for this filter.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
