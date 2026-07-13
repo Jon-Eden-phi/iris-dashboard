@@ -688,6 +688,10 @@
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Report on Title'); showUploadModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload final RoT
                       </button>
+                    } @else if (p.stage === 'Refurbishment' && action.key === 'scope_prepared') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAdditionalWorksModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-tools" style="font-size:11px;"></i> Request additional works
+                      </button>
                     } @else if (p.stage === 'Refurbishment' && action.key === 'survey_reports_received') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); showUploadModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey reports
@@ -1019,6 +1023,30 @@
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showRevertModal.set(false)">Cancel</button>
       <button class="tx-btn-reject" (click)="revertStageAction()"><i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Yes, revert</button>
+    </div>
+  </div>
+}
+
+@if (showAdditionalWorksModal()) {
+  <div class="tx-modal-backdrop" (click)="showAdditionalWorksModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:480px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-tools" style="font-size:14px; margin-right:6px;"></i>Request additional works</span>
+      <button class="tx-modal-close" (click)="showAdditionalWorksModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Description <span style="color:#dc2626;">*</span></label>
+      <textarea class="form-input" style="min-height:80px; resize:vertical; margin-bottom:12px;" placeholder="Describe the additional works required…"
+                [value]="additionalWorksDescription()" (input)="additionalWorksDescription.set($any($event.target).value)"></textarea>
+      <label class="form-label">Estimated cost <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      <input class="form-input" type="number" placeholder="e.g. 2500"
+             [value]="additionalWorksCost()" (input)="additionalWorksCost.set($any($event.target).value)">
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showAdditionalWorksModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="!additionalWorksDescription()" (click)="requestAdditionalWorks()">
+        <i class="ti ti-send" style="font-size:13px;"></i> Submit request
+      </button>
     </div>
   </div>
 }

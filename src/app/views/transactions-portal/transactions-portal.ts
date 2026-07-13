@@ -148,8 +148,11 @@ export class TransactionsPortalComponent {
   showFeeEarnerModal       = signal(false);
   showDraftRotModal        = signal(false);
   showContractPackModal    = signal(false);
-  showInstructSurveysModal = signal(false);
-  legalActionsOpen         = signal(false);
+  showInstructSurveysModal    = signal(false);
+  showAdditionalWorksModal    = signal(false);
+  legalActionsOpen            = signal(false);
+  additionalWorksDescription  = signal('');
+  additionalWorksCost         = signal('');
   searchAssignee        = signal('');
   searchComments        = signal('');
   selectedSearches      = signal<Set<string>>(new Set());
@@ -550,6 +553,25 @@ export class TransactionsPortalComponent {
     this.searchAssignee.set('');
     this.searchComments.set('');
     this.showToast('Searches ordered — solicitor notified', 'ti-search');
+  }
+
+  requestAdditionalWorks(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    const desc = this.additionalWorksDescription().trim();
+    const cost = this.additionalWorksCost().trim();
+    if (!desc) return;
+    this.data.addActivity(p.id, {
+      id: 'addworks_' + Date.now(),
+      text: `Additional works requested: ${desc}${cost ? ' — estimated cost £' + cost : ''}`,
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    this.showAdditionalWorksModal.set(false);
+    this.additionalWorksDescription.set('');
+    this.additionalWorksCost.set('');
+    this.showToast('Additional works request logged', 'ti-tools');
   }
 
   toggleSurveyOrder(s: string): void {
