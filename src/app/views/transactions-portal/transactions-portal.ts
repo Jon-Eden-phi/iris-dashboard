@@ -151,6 +151,9 @@ export class TransactionsPortalComponent {
   showInstructSurveysModal    = signal(false);
   showAdditionalWorksModal    = signal(false);
   showReviewDocModal          = signal(false);
+  showRequestFundsModal       = signal(false);
+  showAuthorityModal          = signal(false);
+  requestFundsNote            = signal('');
   legalActionsOpen            = signal(false);
   additionalWorksDescription  = signal('');
   additionalWorksCost         = signal('');
@@ -384,6 +387,7 @@ export class TransactionsPortalComponent {
       { key: 'compl_statement_appr',   label: 'Completion statement approved' },
       { key: 'funds_requested',        label: 'Funds requested from client' },
       { key: 'funds_received',         label: 'Funds received' },
+      { key: 'authority_to_exchange',  label: 'Authority to exchange and complete' },
       { key: 'exchange_completed',     label: 'Contracts exchanged' },
       { key: 'completion_confirmed',   label: 'Completion confirmed' },
     ],
@@ -424,14 +428,15 @@ export class TransactionsPortalComponent {
       return { label: 'Surveys Complete', done: true };
     }
     if (stage === 'Lettings') {
-      if (!cl['contract_pack'])        return { label: 'Contract Pack Pending', done: false };
-      if (!cl['transfer_circulated'])  return { label: 'Transfer to Circulate', done: false };
-      if (!cl['compl_statement_recv']) return { label: 'Completion Statement Pending', done: false };
-      if (!cl['compl_statement_appr']) return { label: 'Completion Statement – Pending Approval', done: false };
-      if (!cl['funds_requested'])      return { label: 'Funds to Request', done: false };
-      if (!cl['funds_received'])       return { label: 'Funds Pending', done: false };
-      if (!cl['exchange_completed'])   return { label: 'Exchange Pending', done: false };
-      if (!cl['completion_confirmed']) return { label: 'Completion Pending', done: false };
+      if (!cl['contract_pack'])          return { label: 'Contract Pack Pending', done: false };
+      if (!cl['transfer_circulated'])    return { label: 'Transfer to Circulate', done: false };
+      if (!cl['compl_statement_recv'])   return { label: 'Completion Statement Pending', done: false };
+      if (!cl['compl_statement_appr'])   return { label: 'Completion Statement – Pending Approval', done: false };
+      if (!cl['funds_requested'])        return { label: 'Funds to Request', done: false };
+      if (!cl['funds_received'])         return { label: 'Funds Pending', done: false };
+      if (!cl['authority_to_exchange'])  return { label: 'Authority to Exchange – Pending', done: false };
+      if (!cl['exchange_completed'])     return { label: 'Exchange Pending', done: false };
+      if (!cl['completion_confirmed'])   return { label: 'Completion Pending', done: false };
       return { label: 'Ready for Completion', done: true };
     }
     return { label: '', done: false };
@@ -735,6 +740,42 @@ export class TransactionsPortalComponent {
     this.contractPackFileName.set('');
     this.contractReceivedDate.set('');
     this.showToast('Contract pack received — logged to Data Room', 'ti-file-check');
+  }
+
+  requestFunds(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    const note = this.requestFundsNote().trim();
+    this.data.addActivity(p.id, {
+      id: 'funds_req_' + Date.now(),
+      text: `Funds requested from client${note ? '. Note: ' + note : ''}`,
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    if (!this.getTxData(p.id).checklist['funds_requested']) {
+      this.toggleChecklist(p.id, 'funds_requested', 'Funds requested from client');
+    }
+    this.showRequestFundsModal.set(false);
+    this.requestFundsNote.set('');
+    this.showToast('Funds requested — client notified', 'ti-cash');
+  }
+
+  approveAuthorityToExchange(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    this.data.addActivity(p.id, {
+      id: 'auth_exc_' + Date.now(),
+      text: 'Authority to exchange and complete — client approval received',
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    if (!this.getTxData(p.id).checklist['authority_to_exchange']) {
+      this.toggleChecklist(p.id, 'authority_to_exchange', 'Authority to exchange and complete');
+    }
+    this.showAuthorityModal.set(false);
+    this.showToast('Authority to exchange approved', 'ti-circle-check');
   }
 
   revertStageAction(): void {

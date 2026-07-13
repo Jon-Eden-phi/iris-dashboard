@@ -712,6 +712,18 @@
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
                       </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'funds_requested') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showRequestFundsModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-cash" style="font-size:11px;"></i> Request funds
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'funds_received') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="toggleChecklist(p.id, action.key, action.label); $event.stopPropagation()">
+                        <i class="ti ti-circle-check" style="font-size:11px;"></i> Confirm received
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'authority_to_exchange') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAuthorityModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-writing" style="font-size:11px;"></i> Approve authority
+                      </button>
                     } @else {
                       <span style="margin-left:auto; font-size:11px; color:var(--text3); font-weight:400;">Click to mark done</span>
                     }
@@ -1116,6 +1128,52 @@
       <button class="btn-ghost" (click)="showAdditionalWorksModal.set(false)">Cancel</button>
       <button class="btn-primary" [disabled]="!additionalWorksDescription()" (click)="requestAdditionalWorks()">
         <i class="ti ti-send" style="font-size:13px;"></i> Submit request
+      </button>
+    </div>
+  </div>
+}
+
+@if (showRequestFundsModal()) {
+  <div class="tx-modal-backdrop" (click)="showRequestFundsModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:440px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-cash" style="font-size:14px; margin-right:6px;"></i>Request funds from client</span>
+      <button class="tx-modal-close" (click)="showRequestFundsModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body" style="display:flex; flex-direction:column; gap:14px;">
+      <p style="font-size:13px; color:var(--text2); margin:0;">This will log a funds request to the activity feed and mark the checklist item as complete.</p>
+      <div>
+        <label class="tx-form-label">Note (optional)</label>
+        <textarea class="form-control tx-textarea" placeholder="e.g. Requested via email, awaiting bank transfer…" [value]="requestFundsNote()" (input)="requestFundsNote.set($any($event.target).value)"></textarea>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showRequestFundsModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="requestFunds()">
+        <i class="ti ti-send" style="font-size:13px;"></i> Send request
+      </button>
+    </div>
+  </div>
+}
+
+@if (showAuthorityModal()) {
+  <div class="tx-modal-backdrop" (click)="showAuthorityModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:440px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-writing" style="font-size:14px; margin-right:6px;"></i>Authority to exchange and complete</span>
+      <button class="tx-modal-close" (click)="showAuthorityModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <p style="font-size:13px; color:var(--text2); margin:0 0 10px;">Confirm that the client has provided written authority to exchange contracts and proceed to completion.</p>
+      <div style="background:rgba(22,163,74,0.06); border:1px solid rgba(22,163,74,0.2); border-radius:8px; padding:12px 14px; font-size:12.5px; color:#15803d; display:flex; align-items:flex-start; gap:8px;">
+        <i class="ti ti-shield-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+        <span>By approving, you confirm client authority has been received in writing and is on file.</span>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showAuthorityModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="approveAuthorityToExchange()">
+        <i class="ti ti-circle-check" style="font-size:13px;"></i> Approve authority
       </button>
     </div>
   </div>
