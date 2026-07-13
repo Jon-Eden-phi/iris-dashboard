@@ -722,7 +722,19 @@
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'authority_to_exchange') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAuthorityModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-writing" style="font-size:11px;"></i> Approve authority
+                        <i class="ti ti-writing" style="font-size:11px;"></i> Approve — client
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'investor_authority_to_exchange') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInvestorAuthorityModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-building-bank" style="font-size:11px;"></i> Approve — investor
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'exchange_completed') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showExchangeDateModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-exchange" style="font-size:11px;"></i> Complete exchange
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'completion_confirmed') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showCompletionDateModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-flag-check" style="font-size:11px;"></i> Confirm completion
                       </button>
                     } @else {
                       <span style="margin-left:auto; font-size:11px; color:var(--text3); font-weight:400;">Click to mark done</span>
@@ -1174,6 +1186,69 @@
       <button class="btn-ghost" (click)="showAuthorityModal.set(false)">Cancel</button>
       <button class="btn-primary" (click)="approveAuthorityToExchange()">
         <i class="ti ti-circle-check" style="font-size:13px;"></i> Approve authority
+      </button>
+    </div>
+  </div>
+}
+
+@if (showInvestorAuthorityModal()) {
+  <div class="tx-modal-backdrop" (click)="showInvestorAuthorityModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:440px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-building-bank" style="font-size:14px; margin-right:6px;"></i>Authority to exchange — investor</span>
+      <button class="tx-modal-close" (click)="showInvestorAuthorityModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <p style="font-size:13px; color:var(--text2); margin:0 0 10px;">Confirm that the investor has provided written authority to exchange contracts and proceed to completion.</p>
+      <div style="background:rgba(22,163,74,0.06); border:1px solid rgba(22,163,74,0.2); border-radius:8px; padding:12px 14px; font-size:12.5px; color:#15803d; display:flex; align-items:flex-start; gap:8px;">
+        <i class="ti ti-shield-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+        <span>By approving, you confirm investor authority has been received in writing and is on file.</span>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showInvestorAuthorityModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="approveInvestorAuthority()">
+        <i class="ti ti-circle-check" style="font-size:13px;"></i> Approve authority
+      </button>
+    </div>
+  </div>
+}
+
+@if (showExchangeDateModal()) {
+  <div class="tx-modal-backdrop" (click)="showExchangeDateModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:400px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-exchange" style="font-size:14px; margin-right:6px;"></i>Complete exchange</span>
+      <button class="tx-modal-close" (click)="showExchangeDateModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="tx-form-label">Exchange date</label>
+      <input type="date" class="form-control" [value]="exchangeDateInput()" (input)="exchangeDateInput.set($any($event.target).value)" style="width:100%;">
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showExchangeDateModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="!exchangeDateInput()" (click)="completeExchange()">
+        <i class="ti ti-circle-check" style="font-size:13px;"></i> Complete
+      </button>
+    </div>
+  </div>
+}
+
+@if (showCompletionDateModal()) {
+  <div class="tx-modal-backdrop" (click)="showCompletionDateModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:400px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-flag-check" style="font-size:14px; margin-right:6px;"></i>Confirm completion</span>
+      <button class="tx-modal-close" (click)="showCompletionDateModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="tx-form-label">Completion date</label>
+      <input type="date" class="form-control" [value]="completionDateInput()" (input)="completionDateInput.set($any($event.target).value)" style="width:100%;">
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showCompletionDateModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="!completionDateInput()" (click)="confirmCompletion()">
+        <i class="ti ti-flag-check" style="font-size:13px;"></i> Confirm
       </button>
     </div>
   </div>

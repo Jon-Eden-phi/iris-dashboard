@@ -151,9 +151,14 @@ export class TransactionsPortalComponent {
   showInstructSurveysModal    = signal(false);
   showAdditionalWorksModal    = signal(false);
   showReviewDocModal          = signal(false);
-  showRequestFundsModal       = signal(false);
-  showAuthorityModal          = signal(false);
-  requestFundsNote            = signal('');
+  showRequestFundsModal           = signal(false);
+  showAuthorityModal              = signal(false);
+  showInvestorAuthorityModal      = signal(false);
+  showExchangeDateModal           = signal(false);
+  showCompletionDateModal         = signal(false);
+  exchangeDateInput               = signal('');
+  completionDateInput             = signal('');
+  requestFundsNote                = signal('');
   legalActionsOpen            = signal(false);
   additionalWorksDescription  = signal('');
   additionalWorksCost         = signal('');
@@ -387,9 +392,10 @@ export class TransactionsPortalComponent {
       { key: 'compl_statement_appr',   label: 'Completion statement approved' },
       { key: 'funds_requested',        label: 'Funds requested from client' },
       { key: 'funds_received',         label: 'Funds received' },
-      { key: 'authority_to_exchange',  label: 'Authority to exchange and complete' },
-      { key: 'exchange_completed',     label: 'Contracts exchanged' },
-      { key: 'completion_confirmed',   label: 'Completion confirmed' },
+      { key: 'authority_to_exchange',          label: 'Authority to exchange — client signed' },
+      { key: 'investor_authority_to_exchange', label: 'Authority to exchange — investor approved' },
+      { key: 'exchange_completed',             label: 'Contracts exchanged' },
+      { key: 'completion_confirmed',           label: 'Completion confirmed' },
     ],
   };
 
@@ -434,9 +440,10 @@ export class TransactionsPortalComponent {
       if (!cl['compl_statement_appr'])   return { label: 'Completion Statement – Pending Approval', done: false };
       if (!cl['funds_requested'])        return { label: 'Funds to Request', done: false };
       if (!cl['funds_received'])         return { label: 'Funds Pending', done: false };
-      if (!cl['authority_to_exchange'])  return { label: 'Authority to Exchange – Pending', done: false };
-      if (!cl['exchange_completed'])     return { label: 'Exchange Pending', done: false };
-      if (!cl['completion_confirmed'])   return { label: 'Completion Pending', done: false };
+      if (!cl['authority_to_exchange'])          return { label: 'Authority to Exchange – Pending Client', done: false };
+      if (!cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
+      if (!cl['exchange_completed'])             return { label: 'Exchange Pending', done: false };
+      if (!cl['completion_confirmed'])           return { label: 'Completion Pending', done: false };
       return { label: 'Ready for Completion', done: true };
     }
     return { label: '', done: false };
@@ -766,16 +773,79 @@ export class TransactionsPortalComponent {
     if (!p) return;
     this.data.addActivity(p.id, {
       id: 'auth_exc_' + Date.now(),
-      text: 'Authority to exchange and complete — client approval received',
+      text: 'Authority to exchange and complete — client signed',
       author: this.auth.currentUser()?.name ?? 'TX Team',
       timestamp: new Date().toISOString(),
       label: 'action',
     });
     if (!this.getTxData(p.id).checklist['authority_to_exchange']) {
-      this.toggleChecklist(p.id, 'authority_to_exchange', 'Authority to exchange and complete');
+      this.toggleChecklist(p.id, 'authority_to_exchange', 'Authority to exchange — client signed');
     }
     this.showAuthorityModal.set(false);
-    this.showToast('Authority to exchange approved', 'ti-circle-check');
+    this.showToast('Client authority to exchange confirmed', 'ti-circle-check');
+  }
+
+  approveInvestorAuthority(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    this.data.addActivity(p.id, {
+      id: 'inv_auth_' + Date.now(),
+      text: 'Authority to exchange and complete — investor approved',
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    if (!this.getTxData(p.id).checklist['investor_authority_to_exchange']) {
+      this.toggleChecklist(p.id, 'investor_authority_to_exchange', 'Authority to exchange — investor approved');
+    }
+    this.showInvestorAuthorityModal.set(false);
+    this.showToast('Investor authority to exchange confirmed', 'ti-circle-check');
+  }
+
+  completeExchange(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    const dateRaw = this.exchangeDateInput();
+    const dateFormatted = dateRaw
+      ? new Date(dateRaw).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : new Date().toLocaleDateString('en-GB');
+    this.setTxData(p.id, { exchangeDate: dateFormatted });
+    this.data.addActivity(p.id, {
+      id: 'exchange_' + Date.now(),
+      text: `Contracts exchanged on ${dateFormatted}`,
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    if (!this.getTxData(p.id).checklist['exchange_completed']) {
+      this.toggleChecklist(p.id, 'exchange_completed', 'Contracts exchanged');
+    }
+    this.showExchangeDateModal.set(false);
+    this.exchangeDateInput.set('');
+    this.showToast('Exchange completed — date saved', 'ti-trophy');
+  }
+
+  confirmCompletion(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    const dateRaw = this.completionDateInput();
+    const dateFormatted = dateRaw
+      ? new Date(dateRaw).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : new Date().toLocaleDateString('en-GB');
+    this.setTxData(p.id, { completionDate: dateFormatted });
+    this.data.addActivity(p.id, {
+      id: 'completion_' + Date.now(),
+      text: `Completion confirmed on ${dateFormatted}`,
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    if (!this.getTxData(p.id).checklist['completion_confirmed']) {
+      this.toggleChecklist(p.id, 'completion_confirmed', 'Completion confirmed');
+    }
+    this.showCompletionDateModal.set(false);
+    this.completionDateInput.set('');
+    this.showToast('Completion confirmed — property completed', 'ti-trophy');
   }
 
   revertStageAction(): void {
