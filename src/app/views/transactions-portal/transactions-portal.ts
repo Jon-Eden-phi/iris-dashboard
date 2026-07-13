@@ -52,6 +52,7 @@ interface LostTx {
 interface TxPropertyData {
   exchangeDate: string;
   completionDate: string;
+  isInvestorDeal: boolean;
   checklist: Record<string, boolean>;
   txLog: Array<{ text: string; ts: string; author: string }>;
 }
@@ -400,7 +401,13 @@ export class TransactionsPortalComponent {
   };
 
   getTxData(id: string): TxPropertyData {
-    return this.txData()[id] ?? { exchangeDate: '', completionDate: '', checklist: {}, txLog: [] };
+    return this.txData()[id] ?? { exchangeDate: '', completionDate: '', isInvestorDeal: false, checklist: {}, txLog: [] };
+  }
+
+  toggleInvestorDeal(id: string): void {
+    const current = this.getTxData(id).isInvestorDeal ?? false;
+    this.setTxData(id, { isInvestorDeal: !current });
+    this.showToast(!current ? 'Marked as investor deal' : 'Investor deal removed', 'ti-building-bank');
   }
 
   setTxData(id: string, patch: Partial<TxPropertyData>): void {
@@ -441,7 +448,8 @@ export class TransactionsPortalComponent {
       if (!cl['funds_requested'])        return { label: 'Funds to Request', done: false };
       if (!cl['funds_received'])         return { label: 'Funds Pending', done: false };
       if (!cl['authority_to_exchange'])          return { label: 'Authority to Exchange – Pending Client', done: false };
-      if (!cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
+      const isInvestor = this.getTxData(propId).isInvestorDeal;
+      if (isInvestor && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
       if (!cl['exchange_completed'])             return { label: 'Exchange Pending', done: false };
       if (!cl['completion_confirmed'])           return { label: 'Completion Pending', done: false };
       return { label: 'Ready for Completion', done: true };

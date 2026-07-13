@@ -606,6 +606,15 @@
                   }
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
+                  @if (p.stage === 'Lettings') {
+                    <button class="btn-ghost" style="font-size:11px; padding:4px 10px;"
+                            [style.color]="getTxData(p.id).isInvestorDeal ? 'var(--accent)' : 'var(--text3)'"
+                            [style.borderColor]="getTxData(p.id).isInvestorDeal ? 'var(--accent)' : 'var(--border)'"
+                            (click)="toggleInvestorDeal(p.id)">
+                      <i class="ti ti-building-bank" style="font-size:11px;"></i>
+                      {{ getTxData(p.id).isInvestorDeal ? 'Investor deal' : 'Mark investor deal' }}
+                    </button>
+                  }
                   <span class="badge badge-gray">{{ checklistProgress(p.id, p.stage).done }} / {{ checklistProgress(p.id, p.stage).total }}</span>
                 </div>
               </div>
@@ -642,6 +651,7 @@
 
               <div style="display:flex; flex-direction:column; gap:6px;">
                 @for (action of actions; track action.key) {
+                  @if (action.key !== 'investor_authority_to_exchange' || getTxData(p.id).isInvestorDeal) {
                   <div
                     (click)="toggleChecklist(p.id, action.key, action.label)"
                     style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; border:1.5px solid; cursor:pointer; width:100%; transition:.12s; font-size:13px; font-weight:500;"
@@ -740,6 +750,7 @@
                       <span style="margin-left:auto; font-size:11px; color:var(--text3); font-weight:400;">Click to mark done</span>
                     }
                   </div>
+                  }
                 }
               </div>
             </div>
