@@ -700,6 +700,14 @@
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Completion Statement'); showUploadModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload completion statement
                       </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_appr') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#16a34a; border-color:rgba(22,163,74,0.3);" (click)="toggleChecklist(p.id, action.key, action.label); $event.stopPropagation()">
+                        <i class="ti ti-circle-check" style="font-size:11px;"></i> Approve
+                      </button>
+                    } @else if (p.stage === 'Legals' && action.key === 'final_rot_approved') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#16a34a; border-color:rgba(22,163,74,0.3);" (click)="toggleChecklist(p.id, action.key, action.label); $event.stopPropagation()">
+                        <i class="ti ti-circle-check" style="font-size:11px;"></i> Approve
+                      </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'contract_pack') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
