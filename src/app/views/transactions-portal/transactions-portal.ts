@@ -150,9 +150,13 @@ export class TransactionsPortalComponent {
   showContractPackModal    = signal(false);
   showInstructSurveysModal    = signal(false);
   showAdditionalWorksModal    = signal(false);
+  showReviewDocModal          = signal(false);
   legalActionsOpen            = signal(false);
   additionalWorksDescription  = signal('');
   additionalWorksCost         = signal('');
+  requestChangesNote          = signal('');
+  showRequestChangesInput     = signal(false);
+  reviewDocContext            = signal<{ propId: string; checklistKey: string; checklistLabel: string; title: string; docTypes: string[] } | null>(null);
   searchAssignee        = signal('');
   searchComments        = signal('');
   selectedSearches      = signal<Set<string>>(new Set());
@@ -553,6 +557,46 @@ export class TransactionsPortalComponent {
     this.searchAssignee.set('');
     this.searchComments.set('');
     this.showToast('Searches ordered — solicitor notified', 'ti-search');
+  }
+
+  reviewFiles(): DataRoomFile[] {
+    const ctx = this.reviewDocContext();
+    if (!ctx) return [];
+    return this.dataRoom().filter(f => f.propertyId === ctx.propId && ctx.docTypes.includes(f.docType));
+  }
+
+  openReviewModal(propId: string, checklistKey: string, checklistLabel: string, title: string, docTypes: string[]): void {
+    this.reviewDocContext.set({ propId, checklistKey, checklistLabel, title, docTypes });
+    this.requestChangesNote.set('');
+    this.showRequestChangesInput.set(false);
+    this.showReviewDocModal.set(true);
+  }
+
+  approveDocument(): void {
+    const ctx = this.reviewDocContext();
+    if (!ctx) return;
+    this.toggleChecklist(ctx.propId, ctx.checklistKey, ctx.checklistLabel);
+    this.showReviewDocModal.set(false);
+    this.reviewDocContext.set(null);
+    this.showToast(ctx.title + ' approved', 'ti-circle-check');
+  }
+
+  requestDocChanges(): void {
+    const ctx = this.reviewDocContext();
+    const note = this.requestChangesNote().trim();
+    if (!ctx || !note) return;
+    this.data.addActivity(ctx.propId, {
+      id: 'changes_' + Date.now(),
+      text: `Changes requested on ${ctx.title}: ${note}`,
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'warning',
+    });
+    this.showReviewDocModal.set(false);
+    this.reviewDocContext.set(null);
+    this.requestChangesNote.set('');
+    this.showRequestChangesInput.set(false);
+    this.showToast('Changes requested — solicitor notified', 'ti-alert-triangle');
   }
 
   requestAdditionalWorks(): void {

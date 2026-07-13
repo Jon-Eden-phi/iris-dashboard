@@ -701,12 +701,12 @@
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload completion statement
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_appr') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#16a34a; border-color:rgba(22,163,74,0.3);" (click)="toggleChecklist(p.id, action.key, action.label); $event.stopPropagation()">
-                        <i class="ti ti-circle-check" style="font-size:11px;"></i> Approve
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Completion Statement', ['Completion Statement']); $event.stopPropagation()">
+                        <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_approved') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#16a34a; border-color:rgba(22,163,74,0.3);" (click)="toggleChecklist(p.id, action.key, action.label); $event.stopPropagation()">
-                        <i class="ti ti-circle-check" style="font-size:11px;"></i> Approve
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Final Report on Title', ['Report on Title', 'Report on Title (Draft)']); $event.stopPropagation()">
+                        <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'contract_pack') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
@@ -1033,6 +1033,68 @@
       <button class="tx-btn-reject" (click)="revertStageAction()"><i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Yes, revert</button>
     </div>
   </div>
+}
+
+@if (showReviewDocModal()) {
+  @if (reviewDocContext(); as ctx) {
+    <div class="tx-modal-backdrop" (click)="showReviewDocModal.set(false)"></div>
+    <div class="tx-modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+      <div class="tx-modal-header">
+        <span class="tx-modal-title"><i class="ti ti-eye" style="font-size:14px; margin-right:6px;"></i>Review — {{ ctx.title }}</span>
+        <button class="tx-modal-close" (click)="showReviewDocModal.set(false)"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="tx-modal-body">
+        @if (reviewFiles().length === 0) {
+          <div class="tx-empty"><i class="ti ti-file-off"></i>No document uploaded yet — upload the file first before approving</div>
+        } @else {
+          <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:16px;">
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; background:var(--surface2, var(--surface)); padding:8px 12px; border-bottom:1px solid var(--border);">
+              <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">File</span>
+              <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Uploaded</span>
+              <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">By</span>
+            </div>
+            @for (file of reviewFiles(); track file.id) {
+              <div style="display:grid; grid-template-columns:2fr 1fr 1fr; padding:10px 12px; border-top:1px solid var(--border); align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <i class="ti ti-file-description" style="font-size:15px; color:var(--accent);"></i>
+                  <div>
+                    <div style="font-size:13px; font-weight:500;">{{ file.fileName }}</div>
+                    <div style="font-size:11px; color:var(--text3);">{{ file.docType }}</div>
+                  </div>
+                </div>
+                <span style="font-size:12px; color:var(--text2);">{{ file.uploadedAt }}</span>
+                <span style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</span>
+              </div>
+              @if (file.note) {
+                <div style="padding:4px 12px 10px 44px; font-size:12px; color:var(--text3);">Note: {{ file.note }}</div>
+              }
+            }
+          </div>
+        }
+        @if (showRequestChangesInput()) {
+          <label class="form-label">Changes required <span style="color:#dc2626;">*</span></label>
+          <textarea class="form-input" style="min-height:70px; resize:vertical;" placeholder="Describe what needs to be amended…"
+                    [value]="requestChangesNote()" (input)="requestChangesNote.set($any($event.target).value)"></textarea>
+        }
+      </div>
+      <div class="tx-modal-footer">
+        <button class="btn-ghost" (click)="showReviewDocModal.set(false)">Cancel</button>
+        @if (!showRequestChangesInput()) {
+          <button class="btn-ghost" style="color:#b45309; border-color:rgba(180,83,9,0.3);" (click)="showRequestChangesInput.set(true)">
+            <i class="ti ti-edit" style="font-size:13px;"></i> Request changes
+          </button>
+          <button class="btn-primary" [disabled]="reviewFiles().length === 0" (click)="approveDocument()">
+            <i class="ti ti-circle-check" style="font-size:13px;"></i> Approve
+          </button>
+        } @else {
+          <button class="btn-ghost" (click)="showRequestChangesInput.set(false)">Back</button>
+          <button class="btn-primary" [disabled]="!requestChangesNote()" (click)="requestDocChanges()">
+            <i class="ti ti-send" style="font-size:13px;"></i> Submit request
+          </button>
+        }
+      </div>
+    </div>
+  }
 }
 
 @if (showAdditionalWorksModal()) {
