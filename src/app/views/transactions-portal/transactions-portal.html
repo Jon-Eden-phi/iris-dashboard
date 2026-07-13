@@ -514,6 +514,7 @@
                 <div style="font-size:12.5px; color:var(--text3); margin-top:4px;">{{ p.beds ?? '—' }} bed · {{ p.phase ?? '—' }}</div>
                 <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
                   <span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span>
+                  @if (p.isInvestorDeal) { <span class="tx-badge tx-badge-blue"><i class="ti ti-building-bank" style="font-size:10px; margin-right:3px;"></i>Investor deal</span> }
                   @if (p.epcBefore?.r) { <span class="epc-pill badge-{{ p.epcBefore!.r }}">EPC {{ p.epcBefore!.r }}</span> }
                   @if (p.financial?.ap) { <span class="badge badge-gray">£{{ p.financial!.ap!.toLocaleString('en-GB') }}</span> }
                   @if (p.agreedPrice) { <span class="badge badge-green">Agreed £{{ p.agreedPrice.toLocaleString('en-GB') }}</span> }
@@ -606,9 +607,6 @@
                   }
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
-                  @if (p.isInvestorDeal) {
-                    <span class="tx-badge tx-badge-blue" style="font-size:10.5px;"><i class="ti ti-building-bank" style="font-size:10px; margin-right:3px;"></i>Investor deal</span>
-                  }
                   <span class="badge badge-gray">{{ checklistProgress(p.id, p.stage).done }} / {{ checklistProgress(p.id, p.stage).total }}</span>
                 </div>
               </div>
