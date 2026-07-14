@@ -34,11 +34,13 @@ interface DataRoomFile {
 }
 
 // Maps checklist keys to document types they relate to
+// Includes both legal portal types AND the tx portal's Legals stage types so
+// documents uploaded from either portal light up the correct checklist badge.
 const ITEM_DOC_TYPES: Record<string, string[]> = {
-  search_la:       ['Local Authority Search'],
-  search_la_r:     ['Local Authority Search'],
-  search_water:    ['Water & Drainage Search', 'Water Search'],
-  search_env:      ['Environmental Search'],
+  search_la:       ['Local Authority Search', 'Searches'],
+  search_la_r:     ['Local Authority Search', 'Searches'],
+  search_water:    ['Water & Drainage Search', 'Water Search', 'Searches'],
+  search_env:      ['Environmental Search', 'Searches'],
   contract_rx:     ['Draft Contract', 'Contract Pack'],
   contract_rev:    ['Draft Contract', 'Contract Pack'],
   enquiries_out:   ['Enquiries'],
