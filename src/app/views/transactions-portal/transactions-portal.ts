@@ -49,11 +49,20 @@ interface LostTx {
   stageWhenLost: string;
 }
 
+interface TxNote {
+  id: string;
+  text: string;
+  category: 'general' | 'action' | 'warning';
+  author: string;
+  ts: string;
+}
+
 interface TxPropertyData {
   exchangeDate: string;
   completionDate: string;
   checklist: Record<string, boolean>;
   txLog: Array<{ text: string; ts: string; author: string }>;
+  notes?: TxNote[];
 }
 
 interface DataRoomFile {
@@ -215,6 +224,8 @@ export class TransactionsPortalComponent {
   ];
 
   noteInput        = signal('');
+  noteText         = signal('');
+  noteCat          = signal<'general' | 'action' | 'warning'>('general');
   queryDoc         = signal('');
   queryAssignee    = signal('');
   queryText        = signal('');
@@ -238,7 +249,7 @@ export class TransactionsPortalComponent {
     JSON.parse(localStorage.getItem('iris_data_room') ?? '[]')
   );
 
-  recordTab = signal<'overview' | 'dataroom'>('overview');
+  recordTab = signal<'overview' | 'dataroom' | 'parties' | 'notes'>('overview');
   drSearch   = signal('');
   drStageFilter = signal('all');
 
@@ -403,7 +414,34 @@ export class TransactionsPortalComponent {
   };
 
   getTxData(id: string): TxPropertyData {
-    return this.txData()[id] ?? { exchangeDate: '', completionDate: '', checklist: {}, txLog: [] };
+    return this.txData()[id] ?? { exchangeDate: '', completionDate: '', checklist: {}, txLog: [], notes: [] };
+  }
+
+  getPropertyNotes(propId: string): TxNote[] {
+    return this.getTxData(propId).notes ?? [];
+  }
+
+  addPropertyNote(propId: string): void {
+    const text = this.noteText().trim();
+    if (!text) return;
+    const note: TxNote = {
+      id: 'n_' + Date.now(),
+      text,
+      category: this.noteCat(),
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      ts: new Date().toLocaleDateString('en-GB'),
+    };
+    const existing = this.getTxData(propId);
+    this.setTxData(propId, { notes: [...(existing.notes ?? []), note] });
+    this.noteText.set('');
+  }
+
+  usersByRole(role: string) {
+    return this.auth.allUsers.filter(u => u.role === role);
+  }
+
+  initials(name: string): string {
+    return name.split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase();
   }
 
   setTxData(id: string, patch: Partial<TxPropertyData>): void {
