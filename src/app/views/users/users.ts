@@ -11,8 +11,8 @@ export class UsersComponent {
   auth = inject(AuthService);
 
   roleFilter = signal('all');
-  readonly roles = ['all', 'Internal', 'Legal Provider', 'Client'];
-  readonly roleOptions: UserRole[] = ['Internal', 'Legal Provider', 'Client'];
+  readonly roles = ['all', 'Internal', 'Transactions', 'Legal Provider', 'Client'];
+  readonly roleOptions: UserRole[] = ['Internal', 'Transactions', 'Legal Provider', 'Client'];
 
   filtered = computed(() => {
     const r = this.roleFilter();
@@ -78,6 +78,7 @@ export class UsersComponent {
 
   roleColor(role: string): string {
     if (role === 'Internal')       return 'var(--text2)';
+    if (role === 'Transactions')   return '#0f7c6b';
     if (role === 'Legal Provider') return '#6d28d9';
     if (role === 'Client')         return 'var(--accent)';
     return 'var(--text3)';
@@ -85,6 +86,7 @@ export class UsersComponent {
 
   roleBg(role: string): string {
     if (role === 'Internal')       return 'var(--bg)';
+    if (role === 'Transactions')   return 'rgba(15,124,107,0.08)';
     if (role === 'Legal Provider') return '#f3f0ff';
     if (role === 'Client')         return 'var(--accent-soft)';
     return 'var(--bg)';
