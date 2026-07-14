@@ -27,7 +27,21 @@ const INITIAL_USERS: IrisUser[] = [
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private _users = signal<IrisUser[]>(INITIAL_USERS);
+  private readonly STORAGE_KEY = 'iris-users-v1';
+
+  private _loadUsers(): IrisUser[] {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (raw) return JSON.parse(raw) as IrisUser[];
+    } catch { /* ignore */ }
+    return INITIAL_USERS;
+  }
+
+  private _saveUsers(list: IrisUser[]): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(list));
+  }
+
+  private _users = signal<IrisUser[]>(this._loadUsers());
   currentUser = signal<IrisUser | null>(null);
 
   get allUsers(): IrisUser[] { return this._users(); }
@@ -39,15 +53,15 @@ export class AuthService {
   }
 
   addUser(user: IrisUser): void {
-    this._users.update(list => [...list, user]);
+    this._users.update(list => { const n = [...list, user]; this._saveUsers(n); return n; });
   }
 
   updateUser(id: string, changes: Partial<IrisUser>): void {
-    this._users.update(list => list.map(u => u.id === id ? { ...u, ...changes } : u));
+    this._users.update(list => { const n = list.map(u => u.id === id ? { ...u, ...changes } : u); this._saveUsers(n); return n; });
   }
 
   removeUser(id: string): void {
-    this._users.update(list => list.filter(u => u.id !== id));
+    this._users.update(list => { const n = list.filter(u => u.id !== id); this._saveUsers(n); return n; });
   }
 
   isLoggedIn(): boolean { return this.currentUser() !== null; }
