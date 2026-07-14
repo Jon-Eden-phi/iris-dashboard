@@ -68,4 +68,11 @@ export interface Property {
   lostDate?: string;
   completedDate?: string;
   isInvestorDeal?: boolean;
+  tenure?: string;
+  lha?: number;
+  marketRent?: number;
+  floodRisk?: string;
+  leaseRemaining?: string;
+  description?: string;
+  daysOnMarket?: number;
 }

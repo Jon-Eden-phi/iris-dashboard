@@ -57,12 +57,20 @@ interface TxNote {
   ts: string;
 }
 
+interface TxFee {
+  id: string;
+  type: string;
+  amount: number;
+  billingPoint: string;
+}
+
 interface TxPropertyData {
   exchangeDate: string;
   completionDate: string;
   checklist: Record<string, boolean>;
   txLog: Array<{ text: string; ts: string; author: string }>;
   notes?: TxNote[];
+  fees?: TxFee[];
 }
 
 interface DataRoomFile {
@@ -249,7 +257,8 @@ export class TransactionsPortalComponent {
     JSON.parse(localStorage.getItem('iris_data_room') ?? '[]')
   );
 
-  recordTab = signal<'overview' | 'dataroom' | 'parties' | 'notes'>('overview');
+  recordTab  = signal<'overview' | 'dataroom' | 'property' | 'media' | 'fees' | 'milestones' | 'parties' | 'notes'>('overview');
+  mediaSubTab = signal<'inspection' | 'agent' | 'floorplan' | 'matterport'>('inspection');
   drSearch   = signal('');
   drStageFilter = signal('all');
 
@@ -442,6 +451,59 @@ export class TransactionsPortalComponent {
 
   initials(name: string): string {
     return name.split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase();
+  }
+
+  // ── Fees ────────────────────────────────────────────────────
+  showAddFeeModal  = signal(false);
+  feeType          = signal('Acquisition Fee');
+  feeAmount        = signal('');
+  feeBillingPoint  = signal('Exchange');
+
+  readonly feeTypes = [
+    'Acquisition Fee', 'Acquisition fee %', 'Associated surveys',
+    'Conveyancing Costs', 'Disbursement Fees', 'Due Diligence Fees',
+    'Floorplan Fee', 'HBC Spend', 'Iris Data Room Setup',
+    'Land Registry Fee', 'Leasehold surplus fee', 'Legal Lease Advice',
+    'Negotiation Fee', 'Other',
+  ];
+
+  readonly billingPoints = ['Acquisition', 'On instruction', 'Exchange', 'Completion'];
+
+  getPropertyFees(propId: string): TxFee[] {
+    return this.getTxData(propId).fees ?? [];
+  }
+
+  addFee(propId: string): void {
+    const amount = parseFloat(this.feeAmount());
+    if (!amount) return;
+    const fee: TxFee = { id: 'f_' + Date.now(), type: this.feeType(), amount, billingPoint: this.feeBillingPoint() };
+    const existing = this.getTxData(propId);
+    this.setTxData(propId, { fees: [...(existing.fees ?? []), fee] });
+    this.feeAmount.set('');
+    this.showAddFeeModal.set(false);
+  }
+
+  removeFee(propId: string, feeId: string): void {
+    const existing = this.getTxData(propId);
+    this.setTxData(propId, { fees: (existing.fees ?? []).filter(f => f.id !== feeId) });
+  }
+
+  feesTotal(propId: string): number {
+    return this.getPropertyFees(propId).reduce((a, f) => a + f.amount, 0);
+  }
+
+  // ── Property display helpers ─────────────────────────────────
+  fmt(n: number | undefined): string {
+    if (!n) return '—';
+    return '£' + n.toLocaleString('en-GB');
+  }
+
+  epcColor(r: string): string {
+    const m: Record<string, string> = {
+      A: '#00a651', B: '#50b848', C: '#b2d235',
+      D: '#fff200', E: '#f7941d', F: '#f15a24', G: '#ed1b24',
+    };
+    return m[r] ?? '#ccc';
   }
 
   setTxData(id: string, patch: Partial<TxPropertyData>): void {

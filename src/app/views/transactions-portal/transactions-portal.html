@@ -396,7 +396,7 @@
         @if (selectedProperty(); as p) {
 
           <!-- Record tabs -->
-          <div style="display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:16px;">
+          <div style="display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:16px; overflow-x:auto; white-space:nowrap;">
             <button (click)="recordTab.set('overview')"
               style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
               [style.border-bottom-color]="recordTab() === 'overview' ? 'var(--accent)' : 'transparent'"
@@ -411,6 +411,33 @@
               @if (filesForProperty(p.id).length > 0) {
                 <span class="badge badge-gray" style="margin-left:6px;">{{ filesForProperty(p.id).length }}</span>
               }
+            </button>
+            <button (click)="recordTab.set('property')"
+              style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
+              [style.border-bottom-color]="recordTab() === 'property' ? 'var(--accent)' : 'transparent'"
+              [style.color]="recordTab() === 'property' ? 'var(--accent)' : 'var(--text3)'">
+              <i class="ti ti-building" style="font-size:13px; margin-right:5px;"></i>Property
+            </button>
+            <button (click)="recordTab.set('media')"
+              style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
+              [style.border-bottom-color]="recordTab() === 'media' ? 'var(--accent)' : 'transparent'"
+              [style.color]="recordTab() === 'media' ? 'var(--accent)' : 'var(--text3)'">
+              <i class="ti ti-photo" style="font-size:13px; margin-right:5px;"></i>Media
+            </button>
+            <button (click)="recordTab.set('fees')"
+              style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
+              [style.border-bottom-color]="recordTab() === 'fees' ? 'var(--accent)' : 'transparent'"
+              [style.color]="recordTab() === 'fees' ? 'var(--accent)' : 'var(--text3)'">
+              <i class="ti ti-coin" style="font-size:13px; margin-right:5px;"></i>Fees
+              @if (getPropertyFees(p.id).length > 0) {
+                <span class="badge badge-gray" style="margin-left:6px;">{{ getPropertyFees(p.id).length }}</span>
+              }
+            </button>
+            <button (click)="recordTab.set('milestones')"
+              style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
+              [style.border-bottom-color]="recordTab() === 'milestones' ? 'var(--accent)' : 'transparent'"
+              [style.color]="recordTab() === 'milestones' ? 'var(--accent)' : 'var(--text3)'">
+              <i class="ti ti-flag" style="font-size:13px; margin-right:5px;"></i>Milestones
             </button>
             <button (click)="recordTab.set('parties')"
               style="padding:8px 20px; font-size:13px; font-weight:600; border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.15s;"
@@ -831,6 +858,229 @@
           }
 
           } <!-- end overview tab -->
+
+          <!-- ── PROPERTY TAB ─────────────────────────── -->
+          @if (recordTab() === 'property') {
+
+            <!-- Key stats strip -->
+            <div class="card" style="padding:0; overflow:hidden;">
+              <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:0;">
+                <div style="padding:16px 18px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:4px;">Agreed Price</div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text1);">{{ fmt(p.agreedPrice ?? p.financial?.ap) }}</div>
+                </div>
+                <div style="padding:16px 18px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:4px;">Capex</div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text1);">{{ fmt(p.financial?.capex) }}</div>
+                </div>
+                <div style="padding:16px 18px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:4px;">Gross Yield</div>
+                  <div style="font-size:18px; font-weight:800; color:#16a34a;">{{ p.financial?.yield?.toFixed(1) ?? '—' }}%</div>
+                </div>
+                <div style="padding:16px 18px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:4px;">Social Rent pw</div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text1);">{{ fmt(p.financial?.sp) }}</div>
+                </div>
+                <div style="padding:16px 18px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:4px;">LHA p.a.</div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text1);">{{ p.lha ? fmt(p.lha) : '—' }}</div>
+                </div>
+                <div style="padding:16px 18px; border-bottom:1px solid var(--border);">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:4px;">Market Rent p.a.</div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text1);">{{ p.marketRent ? fmt(p.marketRent) : '—' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Details grid + EPC side by side -->
+            <div style="display:grid; grid-template-columns:1fr auto; gap:14px; align-items:start;">
+              <div class="card">
+                <div class="tx-section-header" style="margin-bottom:14px;">
+                  <span class="tx-section-title"><i class="ti ti-list-details"></i> Property details</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px;">
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Type</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.type ?? 'N/A' }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Bedrooms</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.beds ?? 'N/A' }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Postcode</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1); font-family:monospace;">{{ p.postcode ?? 'N/A' }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Tenure</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.tenure ?? 'N/A' }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Flood Risk</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.floodRisk ?? 'N/A' }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Lease Remaining</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.leaseRemaining ?? 'N/A' }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Trans. Costs</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ fmt(p.financial?.tc) }}</div>
+                  </div>
+                  <div style="padding:10px 12px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Days on Market</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.daysOnMarket ?? 'N/A' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              @if (p.epcBefore) {
+                <div class="card" style="min-width:190px;">
+                  <div class="tx-section-header" style="margin-bottom:14px;">
+                    <span class="tx-section-title"><i class="ti ti-bolt"></i> EPC</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:12px; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                      <div style="width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; color:#fff; flex-shrink:0;" [style.background]="epcColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
+                      <div>
+                        <div style="font-size:10px; color:var(--text3);">Before</div>
+                        <div style="font-size:13px; font-weight:700;">{{ p.epcBefore.s }} SAP</div>
+                      </div>
+                    </div>
+                    @if (p.epcAfter) {
+                      <i class="ti ti-arrow-down" style="color:var(--text3); font-size:14px;"></i>
+                      <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                        <div style="width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; color:#fff; flex-shrink:0;" [style.background]="epcColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
+                        <div>
+                          <div style="font-size:10px; color:var(--text3);">After refurb</div>
+                          <div style="font-size:13px; font-weight:700;">{{ p.epcAfter.s }} SAP</div>
+                        </div>
+                      </div>
+                      <div style="text-align:center; background:rgba(22,163,74,.07); border-radius:8px; padding:6px 14px; width:100%;">
+                        <div style="font-size:20px; font-weight:800; color:#16a34a;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
+                        <div style="font-size:10px; color:var(--text3);">SAP uplift</div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (p.description) {
+              <div class="card">
+                <div class="tx-section-header" style="margin-bottom:10px;">
+                  <span class="tx-section-title"><i class="ti ti-align-left"></i> Description</span>
+                </div>
+                <div style="font-size:13px; color:var(--text2); line-height:1.7;">{{ p.description }}</div>
+              </div>
+            }
+
+          } <!-- end property tab -->
+
+          <!-- ── MEDIA TAB ──────────────────────────────── -->
+          @if (recordTab() === 'media') {
+
+            <!-- Sub-tabs -->
+            <div style="display:flex; gap:6px; margin-bottom:16px;">
+              @for (sub of [['inspection','Inspection','ti-camera'],['agent','Agent listing','ti-building-estate'],['floorplan','Floor Plan','ti-layout-2'],['matterport','Matterport','ti-cube-3d-sphere']] ; track sub[0]) {
+                <button (click)="mediaSubTab.set($any(sub[0]))"
+                  style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; border:1.5px solid; cursor:pointer; transition:.15s; display:flex; align-items:center; gap:5px;"
+                  [style.background]="mediaSubTab() === sub[0] ? 'var(--accent)' : 'transparent'"
+                  [style.border-color]="mediaSubTab() === sub[0] ? 'var(--accent)' : 'var(--border)'"
+                  [style.color]="mediaSubTab() === sub[0] ? '#fff' : 'var(--text2)'">
+                  <i class="ti {{ sub[2] }}" style="font-size:12px;"></i> {{ sub[1] }}
+                </button>
+              }
+            </div>
+
+            <!-- Photo grid -->
+            <div class="card">
+              <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px;">
+                @for (slot of [1,2,3,4,5,6,7,8]; track slot) {
+                  <div style="aspect-ratio:4/3; border-radius:8px; border:1.5px dashed var(--border); background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; color:var(--text3); cursor:pointer; transition:.15s;"
+                       style="font-size:11px;">
+                    <i class="ti ti-photo-plus" style="font-size:22px; opacity:.4;"></i>
+                    <span style="font-size:10px; opacity:.5;">Photo {{ slot }}</span>
+                  </div>
+                }
+              </div>
+              <div style="font-size:11px; color:var(--text3); display:flex; align-items:center; gap:5px;">
+                <i class="ti ti-info-circle"></i> Photo upload will be available in a future update.
+              </div>
+            </div>
+
+          } <!-- end media tab -->
+
+          <!-- ── FEES TAB ───────────────────────────────── -->
+          @if (recordTab() === 'fees') {
+            <div class="card">
+              <div class="tx-section-header" style="margin-bottom:14px;">
+                <span class="tx-section-title"><i class="ti ti-coin"></i> Fee schedule</span>
+                <button class="btn-primary" style="font-size:12px; padding:5px 12px;" (click)="showAddFeeModal.set(true)">
+                  <i class="ti ti-plus" style="font-size:11px; margin-right:4px;"></i>Add fee
+                </button>
+              </div>
+
+              @if (getPropertyFees(p.id).length > 0) {
+                <table>
+                  <thead>
+                    <tr><th>Fee type</th><th>Billing point</th><th class="num-cell">Amount</th><th></th></tr>
+                  </thead>
+                  <tbody>
+                    @for (fee of getPropertyFees(p.id); track fee.id) {
+                      <tr>
+                        <td style="font-weight:600;">{{ fee.type }}</td>
+                        <td><span class="badge badge-gray" style="font-size:11px;">{{ fee.billingPoint }}</span></td>
+                        <td class="num-cell" style="font-weight:700;">{{ fmt(fee.amount) }}</td>
+                        <td style="text-align:right;">
+                          <button style="background:none; border:none; cursor:pointer; color:var(--text3); padding:4px;" (click)="removeFee(p.id, fee.id)">
+                            <i class="ti ti-trash" style="font-size:13px;"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                    <tr style="border-top:2px solid var(--border);">
+                      <td colspan="2" style="font-weight:700; color:var(--text2);">Total</td>
+                      <td class="num-cell" style="font-weight:800; color:var(--text1);">{{ fmt(feesTotal(p.id)) }}</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              } @else {
+                <div style="text-align:center; padding:28px 20px; color:var(--text3); font-size:13px;">
+                  <i class="ti ti-coin" style="font-size:28px; display:block; margin-bottom:8px; opacity:.3;"></i>
+                  No fees added yet.
+                </div>
+              }
+            </div>
+          } <!-- end fees tab -->
+
+          <!-- ── MILESTONES TAB ─────────────────────────── -->
+          @if (recordTab() === 'milestones') {
+            <div class="card">
+              <div class="tx-section-header" style="margin-bottom:16px;">
+                <span class="tx-section-title"><i class="ti ti-flag"></i> Key milestones</span>
+              </div>
+
+              @if (getTxData(p.id).txLog.length > 0) {
+                <div style="position:relative; padding-left:28px;">
+                  <div style="position:absolute; left:7px; top:8px; bottom:8px; width:2px; background:var(--border); border-radius:2px;"></div>
+                  @for (entry of getTxData(p.id).txLog; track entry.ts) {
+                    <div style="position:relative; margin-bottom:18px;">
+                      <div style="position:absolute; left:-24px; top:3px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--bg-card);"></div>
+                      <div style="font-size:11px; color:var(--text3); margin-bottom:2px;">{{ entry.ts }} · {{ entry.author }}</div>
+                      <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ entry.text }}</div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div style="text-align:center; padding:28px 20px; color:var(--text3); font-size:13px;">
+                  <i class="ti ti-flag" style="font-size:28px; display:block; margin-bottom:8px; opacity:.3;"></i>
+                  No milestones recorded yet — complete checklist actions to populate this timeline.
+                </div>
+              }
+            </div>
+          } <!-- end milestones tab -->
 
           <!-- ── PARTIES TAB ──────────────────────────── -->
           @if (recordTab() === 'parties') {
@@ -1318,6 +1568,33 @@
       <button class="btn-primary" [disabled]="!additionalWorksDescription()" (click)="requestAdditionalWorks()">
         <i class="ti ti-send" style="font-size:13px;"></i> Submit request
       </button>
+    </div>
+  </div>
+}
+
+@if (showAddFeeModal()) {
+  <div class="tx-modal-backdrop" (click)="showAddFeeModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title">Add fee</span>
+      <button class="tx-modal-close" (click)="showAddFeeModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Fee type</label>
+      <select class="form-select" style="margin-bottom:14px;" [value]="feeType()" (change)="feeType.set($any($event.target).value)">
+        @for (t of feeTypes; track t) { <option [value]="t">{{ t }}</option> }
+      </select>
+      <label class="form-label">Amount (£)</label>
+      <input class="form-input" type="number" placeholder="e.g. 3500" style="margin-bottom:14px;"
+             [value]="feeAmount()" (input)="feeAmount.set($any($event.target).value)" />
+      <label class="form-label">Billing point</label>
+      <select class="form-select" [value]="feeBillingPoint()" (change)="feeBillingPoint.set($any($event.target).value)">
+        @for (b of billingPoints; track b) { <option [value]="b">{{ b }}</option> }
+      </select>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showAddFeeModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="addFee(selectedId()!)">Add fee</button>
     </div>
   </div>
 }

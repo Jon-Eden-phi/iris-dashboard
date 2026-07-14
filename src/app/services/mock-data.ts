@@ -6,7 +6,7 @@ import { Agent } from '../models/agent.model';
 @Injectable({ providedIn: 'root' })
 export class MockDataService {
 
-  private readonly STORAGE_KEY = 'iris-props-v5';
+  private readonly STORAGE_KEY = 'iris-props-v6';
 
   private _props = signal<Property[]>([
     // ── ACQ pipeline (mock) ──────────────────────────────────────────────────
@@ -31,8 +31,8 @@ export class MockDataService {
     { id: 'p008', address: '26 Dunster Road',         postcode: 'BS4 1BU',  phase: 'Bristol P3',    stage: 'Refurbishment',    beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 70 }, financial: { ap: 290000, capex: 32000, tc: 5200, yield: 5.0 }, agreedPrice: 270000, status: 'active' },
 
     // ── Lettings / Exchange & Completion (real) ──────────────────────────────
-    { id: 'p009', address: '26 Norton Farm Road',     postcode: 'BS10 7ER', phase: 'Bristol P3',    stage: 'Lettings',         beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 75 }, financial: { ap: 335000, capex: 18000, tc: 4800, yield: 5.8 }, agreedPrice: 330000, status: 'active', isInvestorDeal: true },
-    { id: 'p010', address: '44 Brendon Rise',         postcode: 'TN34 3QD', phase: 'Hastings ESPH', stage: 'Lettings',         beds: 3, type: 'House',         epcBefore: { r: 'F', s: 36 }, financial: { ap: 150000, capex: 48000, tc: 12584, yield: 4.8 }, agreedPrice: 150000, status: 'active' },
+    { id: 'p009', address: '26 Norton Farm Road',     postcode: 'BS10 7ER', phase: 'Bristol P3',    stage: 'Lettings',         beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 75 }, epcAfter: { r: 'B', s: 84 }, financial: { ap: 335000, capex: 18000, tc: 4800, sp: 850, yield: 5.8 }, agreedPrice: 330000, status: 'active', isInvestorDeal: true, tenure: 'Freehold', lha: 12480, marketRent: 18000, floodRisk: 'Low', leaseRemaining: 'N/A', daysOnMarket: 62, description: 'Three-bedroom semi-detached property in Brentry, Bristol. Benefits from driveway parking, south-facing rear garden and recently upgraded kitchen. EPC C — target B post-refurb.', viewing: { agentName: 'Rachel Ford', agentCompany: 'Fox & Sons', agentEmail: 'r.ford@foxandsons.co.uk', agentPhone: '0117 902 5000', reportCondition: 'good' } },
+    { id: 'p010', address: '44 Brendon Rise',         postcode: 'TN34 3QD', phase: 'Hastings ESPH', stage: 'Lettings',         beds: 3, type: 'House',         epcBefore: { r: 'F', s: 36 }, epcAfter: { r: 'C', s: 76 }, financial: { ap: 150000, capex: 48000, tc: 12584, sp: 680, yield: 4.8 }, agreedPrice: 150000, status: 'active', tenure: 'Leasehold', lha: 8736, marketRent: 10800, floodRisk: 'Very Low', leaseRemaining: '85 yrs', daysOnMarket: 91, description: 'Three-bedroom terraced house in Ore, Hastings. Requires significant improvement works to bring to EPC C — scope includes full insulation, new boiler and double glazing throughout.', viewing: { agentName: 'James Harlow', agentCompany: 'Jacobs', agentEmail: 'j.harlow@jacobs-ea.co.uk', agentPhone: '01424 421 200', reportCondition: 'fair' } },
   ]);
   get properties(): Property[] { return this._props(); }
 
