@@ -31,7 +31,10 @@ export class LoginComponent {
       const ok = this.auth.login(this.email(), this.password());
       if (ok) {
         const role = this.auth.currentUser()?.role;
-        const dest = role === 'Client' ? '/client-portal' : role === 'Transactions' ? '/transactions-portal' : '/pipeline';
+        const dest = role === 'Client' ? '/client-portal'
+                   : role === 'Transactions' ? '/transactions-portal'
+                   : role === 'Legal Provider' ? '/legal-portal'
+                   : '/pipeline';
         this.router.navigate([dest]);
       } else {
         this.error.set('Invalid email or password.');

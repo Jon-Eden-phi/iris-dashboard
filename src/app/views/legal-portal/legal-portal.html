@@ -1,0 +1,247 @@
+<div class="lg-layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────── -->
+  <aside class="lg-sidebar">
+    <div class="lg-logo">
+      <div class="lg-logo-mark">L</div>
+      <div>
+        <div class="lg-logo-name">Legal</div>
+        <div class="lg-logo-sub">Conveyancing</div>
+      </div>
+    </div>
+
+    <div class="lg-nav-section">Matters</div>
+    <a class="lg-nav-item" [class.active]="view() === 'matters'" (click)="navTo('matters')">
+      <i class="ti ti-briefcase"></i> Active matters
+      <span class="lg-nav-badge" style="margin-left:auto;">{{ activeMatters().length }}</span>
+    </a>
+
+    @if (selectedProperty(); as p) {
+      <div class="lg-nav-section">Working matter</div>
+      <a class="lg-nav-item" [class.active]="view() === 'record'" (click)="navTo('record')" style="font-size:12px;">
+        <i class="ti ti-file-text"></i>
+        <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">{{ p.address }}</span>
+        @let prog = checkProgress(p.id);
+        <span class="lg-nav-badge" style="margin-left:4px; flex-shrink:0;">{{ prog.done }}/{{ prog.total }}</span>
+      </a>
+    }
+
+    <div style="flex:1"></div>
+    <div class="lg-sidebar-footer">
+      <div class="lg-avatar">{{ initials(auth.currentUser()?.name ?? 'U') }}</div>
+      <div style="min-width:0;">
+        <div class="lg-user-name">{{ auth.currentUser()?.name }}</div>
+        <div class="lg-user-role">Legal Provider</div>
+      </div>
+      <button class="lg-signout-btn" (click)="logout()" title="Sign out">
+        <i class="ti ti-logout"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ───────────────────────────────────────── -->
+  <main class="lg-main">
+
+    <!-- TOP BAR -->
+    <div class="lg-topbar">
+      @if (view() === 'matters') {
+        <span class="lg-topbar-title">Active matters</span>
+        <span class="lg-topbar-sub">{{ activeMatters().length }} properties in conveyancing</span>
+      }
+      @if (view() === 'record' && selectedProperty(); as p) {
+        <span class="lg-topbar-title">{{ p.address }}</span>
+        <span class="lg-topbar-sub">{{ p.postcode }} · Conveyancing</span>
+      }
+    </div>
+
+    <!-- CONTENT -->
+    <div class="lg-content">
+
+      <!-- ── MATTERS LIST ──────────────────────────────── -->
+      @if (view() === 'matters') {
+        @if (activeMatters().length === 0) {
+          <div class="lg-empty">
+            <i class="ti ti-briefcase" style="font-size:32px; color:var(--text3); margin-bottom:12px;"></i>
+            <div style="font-size:14px; font-weight:600; color:var(--text2);">No active matters</div>
+            <div style="font-size:12px; color:var(--text3); margin-top:4px;">Properties move here when the Transactions team advances them to Legals stage.</div>
+          </div>
+        } @else {
+          <div class="lg-matter-grid">
+            @for (p of activeMatters(); track p.id) {
+              @let prog = checkProgress(p.id);
+              @let ready = isExchangeReady(p.id);
+              <div class="lg-matter-card" (click)="openRecord(p)">
+                <div class="lg-matter-card-header">
+                  <div>
+                    <div class="lg-matter-ref">{{ getMatter(p.id).solicitorRef || p.id }}</div>
+                    <div class="lg-matter-address">{{ p.address }}</div>
+                    <div class="lg-matter-sub">{{ p.postcode }} · {{ p.beds ?? '—' }} bed · {{ p.phase }}</div>
+                  </div>
+                  @if (ready) {
+                    <span class="lg-badge lg-badge-green"><i class="ti ti-check" style="font-size:10px;"></i> Exchange ready</span>
+                  } @else {
+                    <span class="lg-badge lg-badge-amber">In progress</span>
+                  }
+                </div>
+
+                <!-- Progress bar -->
+                <div style="margin-top:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.04em;">Conveyancing progress</span>
+                    <span style="font-size:12px; font-weight:700; color:var(--text2);">{{ prog.done }}/{{ prog.total }}</span>
+                  </div>
+                  <div class="lg-progress-track">
+                    <div class="lg-progress-fill" [style.width.%]="(prog.done / prog.total) * 100"
+                         [style.background]="ready ? 'var(--teal)' : 'var(--accent)'"></div>
+                  </div>
+                </div>
+
+                <!-- Stage groups -->
+                <div style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;">
+                  @for (g of checklistGroups; track g.label) {
+                    @let gp = groupProgress(p.id, g);
+                    <div class="lg-group-pill" [class.complete]="gp === g.items.length">
+                      {{ g.label }} {{ gp }}/{{ g.items.length }}
+                    </div>
+                  }
+                </div>
+
+                <!-- Dates -->
+                @let m = getMatter(p.id);
+                @if (m.targetExchange || m.targetCompletion) {
+                  <div style="display:flex; gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                    @if (m.targetExchange) {
+                      <div>
+                        <div style="font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); font-weight:600;">Target exchange</div>
+                        <div style="font-size:13px; font-weight:700; margin-top:2px;">{{ m.targetExchange }}</div>
+                      </div>
+                    }
+                    @if (m.targetCompletion) {
+                      <div>
+                        <div style="font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); font-weight:600;">Target completion</div>
+                        <div style="font-size:13px; font-weight:700; margin-top:2px;">{{ m.targetCompletion }}</div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- ── MATTER RECORD ─────────────────────────────── -->
+      @if (view() === 'record') {
+        @if (selectedProperty(); as p) {
+          @let m = getMatter(p.id);
+          @let prog = checkProgress(p.id);
+
+          <!-- Header card -->
+          <div class="lg-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+              <div>
+                <div style="font-size:11px; font-weight:700; color:var(--teal); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">{{ p.id }}</div>
+                <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em;">{{ p.address }}, {{ p.postcode }}</div>
+                <div style="font-size:12.5px; color:var(--text3); margin-top:4px;">{{ p.beds ?? '—' }} bed · {{ p.phase }}</div>
+                <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                  @if (p.agreedPrice) {
+                    <span class="lg-badge lg-badge-teal">Agreed £{{ p.agreedPrice.toLocaleString('en-GB') }}</span>
+                  }
+                  @if (isExchangeReady(p.id)) {
+                    <span class="lg-badge lg-badge-green"><i class="ti ti-check" style="font-size:10px;"></i> Exchange ready</span>
+                  }
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px; color:var(--text3); margin-bottom:4px;">Conveyancing progress</div>
+                <div style="font-size:24px; font-weight:800; color:var(--accent);">{{ prog.done }}<span style="font-size:14px; color:var(--text3); font-weight:500;">/{{ prog.total }}</span></div>
+                <div class="lg-progress-track" style="width:140px; margin-top:6px;">
+                  <div class="lg-progress-fill" [style.width.%]="(prog.done / prog.total) * 100"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ref + Key dates row -->
+            <div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; align-items:flex-end;">
+              <div>
+                <div class="lg-field-label">Solicitor reference</div>
+                <input class="lg-input" style="width:180px;" placeholder="e.g. WS/2025/4821"
+                       [value]="m.solicitorRef"
+                       (change)="setSolicitorRef(p.id, $any($event.target).value)">
+              </div>
+              <div>
+                <div class="lg-field-label">Target exchange</div>
+                <input class="lg-input" type="date"
+                       [value]="m.targetExchange"
+                       (change)="setDate(p.id, 'targetExchange', $any($event.target).value)">
+              </div>
+              <div>
+                <div class="lg-field-label">Target completion</div>
+                <input class="lg-input" type="date"
+                       [value]="m.targetCompletion"
+                       (change)="setDate(p.id, 'targetCompletion', $any($event.target).value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Checklist -->
+          <div class="lg-card">
+            <div class="lg-section-title" style="margin-bottom:16px;"><i class="ti ti-checklist"></i> Conveyancing checklist</div>
+            <div class="lg-checklist-grid">
+              @for (group of checklistGroups; track group.label) {
+                @let gp = groupProgress(p.id, group);
+                <div class="lg-checklist-group">
+                  <div class="lg-checklist-group-header">
+                    <span>{{ group.label }}</span>
+                    <span class="lg-group-count" [class.complete]="gp === group.items.length">{{ gp }}/{{ group.items.length }}</span>
+                  </div>
+                  @for (item of group.items; track item.key) {
+                    <label class="lg-check-row" [class.checked]="m.checklist[item.key]">
+                      <input type="checkbox" [checked]="m.checklist[item.key]"
+                             (change)="toggleCheck(p.id, item.key)" style="display:none;">
+                      <div class="lg-check-box" [class.checked]="m.checklist[item.key]">
+                        @if (m.checklist[item.key]) { <i class="ti ti-check" style="font-size:11px;"></i> }
+                      </div>
+                      <span>{{ item.label }}</span>
+                    </label>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="lg-card">
+            <div class="lg-section-title" style="margin-bottom:14px;"><i class="ti ti-notes"></i> Matter notes</div>
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+              <textarea class="lg-input lg-textarea" placeholder="Add a note…"
+                        [value]="noteText()"
+                        (input)="noteText.set($any($event.target).value)"
+                        (keydown.meta.enter)="addNote(p.id)"
+                        (keydown.ctrl.enter)="addNote(p.id)"></textarea>
+              <button class="lg-btn-primary" style="align-self:flex-end;" (click)="addNote(p.id)">Add</button>
+            </div>
+            @if (m.notes.length === 0) {
+              <div class="lg-empty-inline">No notes yet</div>
+            } @else {
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                @for (note of m.notes; track note.id) {
+                  <div class="lg-note">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                      <div class="lg-note-avatar">{{ initials(note.author) }}</div>
+                      <span style="font-size:12px; font-weight:600;">{{ note.author }}</span>
+                      <span style="font-size:11px; color:var(--text3); margin-left:auto;">{{ note.ts }}</span>
+                    </div>
+                    <div style="font-size:13px; color:var(--text2); line-height:1.5;">{{ note.text }}</div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+        }
+      }
+
+    </div>
+  </main>
+</div>

@@ -19,6 +19,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'pipeline', pathMatch: 'full' },
       { path: 'client-portal',       loadComponent: () => import('./views/client-portal/client-portal').then(m => m.ClientPortalComponent) },
       { path: 'transactions-portal', loadComponent: () => import('./views/transactions-portal/transactions-portal').then(m => m.TransactionsPortalComponent) },
+      { path: 'legal-portal',        loadComponent: () => import('./views/legal-portal/legal-portal').then(m => m.LegalPortalComponent) },
       { path: 'pipeline',      loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent) },
       { path: 'map',           loadComponent: () => import('./views/map/map').then(m => m.MapComponent) },
       { path: 'lost',          loadComponent: () => import('./views/lost/lost').then(m => m.LostComponent) },
