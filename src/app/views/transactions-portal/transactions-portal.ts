@@ -644,11 +644,12 @@ export class TransactionsPortalComponent {
   instructSurveyOrder(): void {
     const p = this.selectedProperty();
     if (!p) return;
-    const surveys = Array.from(this.selectedSurveyOrders());
-    if (!surveys.length) return;
+    const surveyTypes = Array.from(this.selectedSurveyOrders());
+    if (!surveyTypes.length) return;
     const assignee = this.surveyOrderAssignee() || 'Aziza Surveys';
     const comments = this.surveyOrderComments().trim();
-    const logText = `Surveys instructed (${surveys.join(', ')}) — assigned to ${assignee}${comments ? '. ' + comments : ''}`;
+    const today = new Date().toLocaleDateString('en-GB');
+    const logText = `Surveys instructed (${surveyTypes.join(', ')}) — assigned to ${assignee}${comments ? '. ' + comments : ''}`;
     this.data.addActivity(p.id, {
       id: 'surveys_' + Date.now(),
       text: logText,
@@ -656,6 +657,20 @@ export class TransactionsPortalComponent {
       timestamp: new Date().toISOString(),
       label: 'action',
     });
+    // Add each survey to the tracker
+    this.surveys.update(list => [
+      ...list,
+      ...surveyTypes.map(type => ({
+        property: p.address,
+        type,
+        provider: assignee,
+        instructed: today,
+        siteVisit: null,
+        returned: null,
+        status: 'Instructed' as const,
+        cost: 0,
+      })),
+    ]);
     if (!this.getTxData(p.id).checklist['surveys_ordered']) {
       this.toggleChecklist(p.id, 'surveys_ordered', 'Surveys ordered');
     }
