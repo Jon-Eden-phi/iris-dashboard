@@ -366,7 +366,6 @@ export class TransactionsPortalComponent {
     MemorandumOfSale: [
       { key: 'mos_received',       label: 'MoS received from vendor' },
       { key: 'mos_sent_sols',      label: 'MoS sent to solicitor' },
-      { key: 'fee_earner_added',   label: 'Fee earner assigned' },
       { key: 'sols_confirmed',     label: 'Solicitor confirmed receipt' },
     ],
     Legals: [
