@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
@@ -94,6 +95,7 @@ export class TransactionsPortalComponent {
   auth   = inject(AuthService);
   data   = inject(MockDataService);
   router = inject(Router);
+  private doc = inject(DOCUMENT);
 
   constructor() {
     effect(() => {
@@ -346,6 +348,7 @@ export class TransactionsPortalComponent {
   openRecord(p: Property): void {
     this.selectedId.set(p.id);
     this.view.set('record');
+    this.doc.querySelector('.tx-content')?.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   stageColor(stage: string): string {
@@ -594,7 +597,10 @@ export class TransactionsPortalComponent {
     return null;
   }
 
-  navTo(v: TxView): void { this.view.set(v); }
+  navTo(v: TxView): void {
+    this.view.set(v);
+    this.doc.querySelector('.tx-content')?.scrollTo({ top: 0, behavior: 'instant' });
+  }
 
   uploadDocument(): void {
     const p = this.selectedProperty();
