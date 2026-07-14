@@ -419,68 +419,82 @@
             <div class="card">
               <div class="tx-section-header" style="margin-bottom:14px;">
                 <span class="tx-section-title"><i class="ti ti-folders"></i> Data Room — {{ p.address }}</span>
-                <button class="btn-primary" style="font-size:12px; padding:6px 14px;" (click)="showUploadModal.set(true)">
-                  <i class="ti ti-upload" style="font-size:12px;"></i> Upload files
-                </button>
-              </div>
-              <!-- Filters -->
-              <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
-                <input class="form-input tx-input" style="flex:1; min-width:160px;" placeholder="Search files…"
-                       [value]="drSearch()" (input)="drSearch.set($any($event.target).value)">
-                <select class="form-select tx-select" [value]="drStageFilter()" (change)="drStageFilter.set($any($event.target).value)">
-                  <option value="all">All stages</option>
-                  @for (s of txStages; track s) { <option [value]="s">{{ stageLabel(s) }}</option> }
-                </select>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <input class="form-input" style="font-size:12px; padding:6px 10px; width:180px;" placeholder="Search files…"
+                         [value]="drSearch()" (input)="drSearch.set($any($event.target).value)">
+                  <button class="btn-primary" style="font-size:12px; padding:6px 14px;" (click)="showUploadModal.set(true)">
+                    <i class="ti ti-upload" style="font-size:12px;"></i> Upload
+                  </button>
+                </div>
               </div>
 
-              @if (filesByStage(p.id).length === 0) {
-                <div class="tx-empty"><i class="ti ti-folder-open"></i>No documents uploaded yet — click Upload files to add</div>
-              } @else {
-                <table>
-                  <thead>
-                    <tr>
-                      <th style="width:40%;">Files</th>
-                      <th>Document type</th>
-                      <th>Uploaded</th>
-                      <th>Uploaded by</th>
-                      <th>Note</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (group of filesByStage(p.id); track group.stage) {
-                      <!-- Stage folder row -->
-                      <tr (click)="toggleDrStage(group.stage)" style="cursor:pointer; background:var(--surface2, var(--surface));">
-                        <td colspan="6" style="font-weight:700; font-size:12.5px; padding:10px 12px;">
-                          <i [class]="drExpandedStages().has(group.stage) ? 'ti ti-chevron-down' : 'ti ti-chevron-right'" style="font-size:12px; margin-right:6px; color:var(--text3);"></i>
-                          <i class="ti ti-folder-filled" style="font-size:14px; margin-right:6px; color:#f59e0b;"></i>
-                          {{ stageLabel(group.stage) }}
-                          <span class="badge badge-gray" style="margin-left:8px;">{{ group.files.length }}</span>
-                        </td>
-                      </tr>
-                      @if (drExpandedStages().has(group.stage)) {
-                        @for (file of group.files; track file.id) {
-                          <tr>
-                            <td style="padding-left:32px;">
-                              <i class="ti ti-file-description" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>
-                              <span style="font-size:13px;">{{ file.fileName }}</span>
-                            </td>
-                            <td><span class="badge badge-gray">{{ file.docType }}</span></td>
-                            <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
-                            <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
-                            <td style="font-size:12px; color:var(--text3); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
-                            <td>
-                              <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteFile(file.id)">
-                                <i class="ti ti-trash" style="font-size:12px;"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        }
-                      }
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                @for (section of dataRoomSections; track section.stage) {
+                  @let sectionFiles = filesForStageSection(p.id, section.stage);
+                  @let isOpen = drExpandedStages().has(section.stage);
+                  <!-- Section header -->
+                  <div (click)="toggleDrStage(section.stage)"
+                       style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; cursor:pointer; border:1px solid var(--border); background:var(--bg); user-select:none;"
+                       [style.border-color]="isOpen ? 'var(--accent)' : 'var(--border)'"
+                       [style.background]="isOpen ? 'rgba(232,96,28,0.03)' : 'var(--bg)'">
+                    <i [class]="isOpen ? 'ti ti-chevron-down' : 'ti ti-chevron-right'" style="font-size:12px; color:var(--text3); flex-shrink:0;"></i>
+                    <i class="ti ti-folder-filled" style="font-size:15px; color:#f59e0b; flex-shrink:0;"></i>
+                    <span style="font-size:13px; font-weight:700; flex:1;">{{ section.label }}</span>
+                    @if (sectionFiles.length > 0) {
+                      <span class="badge badge-gray">{{ sectionFiles.length }} {{ sectionFiles.length === 1 ? 'file' : 'files' }}</span>
+                    } @else {
+                      <span style="font-size:11px; color:var(--text3);">No documents</span>
                     }
-                  </tbody>
-                </table>
-              }
+                    @if (section.stage === p.stage) {
+                      <span class="tx-badge tx-badge-amber" style="font-size:10px;">Current stage</span>
+                    }
+                  </div>
+
+                  <!-- Section content -->
+                  @if (isOpen) {
+                    <div style="border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:4px;">
+                      @if (sectionFiles.length === 0) {
+                        <div class="tx-empty" style="padding:20px 0;">
+                          <i class="ti ti-folder-open" style="font-size:22px;"></i>
+                          No documents uploaded for this stage yet
+                        </div>
+                      } @else {
+                        <table>
+                          <thead>
+                            <tr>
+                              <th style="width:35%;">File name</th>
+                              <th>Document type</th>
+                              <th>Uploaded</th>
+                              <th>Uploaded by</th>
+                              <th>Note</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (file of sectionFiles; track file.id) {
+                              <tr>
+                                <td>
+                                  <i class="ti ti-file-description" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>
+                                  <span style="font-size:13px;">{{ file.fileName }}</span>
+                                </td>
+                                <td><span class="badge badge-gray">{{ file.docType }}</span></td>
+                                <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
+                                <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
+                                <td style="font-size:12px; color:var(--text3); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
+                                <td>
+                                  <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteFile(file.id)">
+                                    <i class="ti ti-trash" style="font-size:12px;"></i>
+                                  </button>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      }
+                    </div>
+                  }
+                }
+              </div>
             </div>
           }
 

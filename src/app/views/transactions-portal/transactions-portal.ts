@@ -89,24 +89,28 @@ export class TransactionsPortalComponent {
 
   filesForProperty(propId: string): DataRoomFile[] {
     const q = this.drSearch().toLowerCase();
-    const sf = this.drStageFilter();
     return this.dataRoom().filter(f => {
       if (f.propertyId !== propId) return false;
-      if (sf !== 'all' && f.stage !== sf) return false;
       if (q && !f.fileName.toLowerCase().includes(q) && !f.docType.toLowerCase().includes(q)) return false;
       return true;
     });
   }
 
-  filesByStage(propId: string): { stage: string; files: DataRoomFile[] }[] {
-    const files = this.filesForProperty(propId);
-    const map = new Map<string, DataRoomFile[]>();
-    for (const f of files) {
-      if (!map.has(f.stage)) map.set(f.stage, []);
-      map.get(f.stage)!.push(f);
-    }
-    return Array.from(map.entries()).map(([stage, files]) => ({ stage, files }));
+  filesForStageSection(propId: string, stage: string): DataRoomFile[] {
+    const q = this.drSearch().toLowerCase();
+    return this.dataRoom().filter(f => {
+      if (f.propertyId !== propId || f.stage !== stage) return false;
+      if (q && !f.fileName.toLowerCase().includes(q) && !f.docType.toLowerCase().includes(q)) return false;
+      return true;
+    });
   }
+
+  readonly dataRoomSections = [
+    { stage: 'MemorandumOfSale', label: 'MoS',                  icon: 'ti-file-text'    },
+    { stage: 'Legals',           label: 'Conveyancing',          icon: 'ti-scale'        },
+    { stage: 'Refurbishment',    label: 'Surveys',               icon: 'ti-clipboard'    },
+    { stage: 'Lettings',         label: 'Exchange / Completion', icon: 'ti-home-check'   },
+  ];
 
   deleteFile(fileId: string): void {
     this.dataRoom.update(list => list.filter(f => f.id !== fileId));
