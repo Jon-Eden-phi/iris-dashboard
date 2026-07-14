@@ -693,6 +693,12 @@
 
               <div style="display:flex; flex-direction:column; gap:6px;">
                 @for (action of actions; track action.key) {
+                  @if (action.key === 'authority_to_exchange' && !getTxData(p.id).checklist['authority_to_exchange'] && solicitorSignedOffExchange(p.id)) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has given exchange sign-off</strong> — request client authority to proceed to exchange.</span>
+                    </div>
+                  }
                   @if (action.key !== 'investor_authority_to_exchange' || p.isInvestorDeal) {
                   <div
                     (click)="toggleChecklist(p.id, action.key, action.label)"

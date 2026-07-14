@@ -822,6 +822,13 @@ export class TransactionsPortalComponent {
     this.showToast('Fee earner added', 'ti-user-check');
   }
 
+  solicitorSignedOffExchange(propId: string): boolean {
+    try {
+      const data = JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}');
+      return !!data[propId]?.checklist?.exchange_ready;
+    } catch { return false; }
+  }
+
   mosDocs(propId: string): DataRoomFile[] {
     return this.dataRoom().filter(f => f.propertyId === propId && f.docType === 'MoS');
   }
