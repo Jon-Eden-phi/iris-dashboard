@@ -34,23 +34,16 @@ interface DataRoomFile {
 }
 
 // Maps checklist keys to document types they relate to
-// Includes both legal portal types AND the tx portal's Legals stage types so
-// documents uploaded from either portal light up the correct checklist badge.
+// Only items where there is an actual document to review before signing off.
+// Action-only confirmations (ordered, raised, sent, sign-off, exchanged etc.) have no entry.
 const ITEM_DOC_TYPES: Record<string, string[]> = {
-  search_la:       ['Local Authority Search', 'Searches'],
-  search_la_r:     ['Local Authority Search', 'Searches'],
-  search_water:    ['Water & Drainage Search', 'Water Search', 'Searches'],
-  search_env:      ['Environmental Search', 'Searches'],
-  contract_rx:     ['Draft Contract', 'Contract Pack'],
-  contract_rev:    ['Draft Contract', 'Contract Pack'],
-  enquiries_out:   ['Enquiries'],
-  enquiries_in:    ['Enquiries', 'Replies to Enquiries'],
-  title_report:    ['Report on Title', 'Draft Report on Title'],
-  title_sent:      ['Report on Title'],
-  funds:           ['Funds Confirmation', 'Completion Statement'],
-  exchange_ready:  ['Transfer Deed', 'TR1'],
-  exchanged:       ['Transfer Deed', 'TR1', 'Exchange Documents'],
-  completed:       ['Completion Statement', 'TR1'],
+  search_la_r:   ['Local Authority Search', 'Searches'],
+  search_water:  ['Water & Drainage Search', 'Water Search', 'Searches'],
+  search_env:    ['Environmental Search', 'Searches'],
+  contract_rx:   ['Draft Contract', 'Contract Pack'],
+  contract_rev:  ['Draft Contract', 'Contract Pack'],
+  enquiries_in:  ['Enquiries', 'Replies to Enquiries'],
+  title_report:  ['Report on Title', 'Draft Report on Title'],
 };
 
 const CHECKLIST_GROUPS = [
