@@ -116,7 +116,8 @@ export class LegalPortalComponent {
   readonly checklistGroups = CHECKLIST_GROUPS;
   readonly itemDocTypes    = ITEM_DOC_TYPES;
 
-  private legalData = signal<Record<string, LegalMatterData>>(this._loadLegal());
+  private legalData  = signal<Record<string, LegalMatterData>>(this._loadLegal());
+  private txDataSig  = signal<Record<string, any>>(this._txRaw());
 
   // Shared data room with transactions portal
   private dataRoom = signal<DataRoomFile[]>(
@@ -130,6 +131,12 @@ export class LegalPortalComponent {
     effect(() => {
       localStorage.setItem(DR_KEY, JSON.stringify(this.dataRoom()));
     });
+    const win = this.doc.defaultView;
+    if (win) {
+      win.addEventListener('storage', (e: StorageEvent) => {
+        if (e.key === 'iris_tx_data') this.txDataSig.set(this._txRaw());
+      });
+    }
   }
 
   private _loadLegal(): Record<string, LegalMatterData> {
@@ -148,17 +155,13 @@ export class LegalPortalComponent {
     return this.legalData()[id] ?? this._defaultMatter();
   }
 
-  private txRaw(): Record<string, any> {
-    try { return JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}'); } catch { return {}; }
-  }
-
-  get activeMatters(): Property[] {
-    const tx = this.txRaw();
+  activeMatters = computed(() => {
+    const tx = this.txDataSig();
     return this.data.properties.filter((p: Property) =>
       p.status === 'active' &&
       (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
     );
-  }
+  });
 
   selectedProperty = computed(() => {
     const id = this.selectedId();
@@ -193,7 +196,11 @@ export class LegalPortalComponent {
   }
 
   hasAuthorityToExchange(propId: string): boolean {
-    return !!this.txRaw()[propId]?.authorityToExchange;
+    return !!this.txDataSig()[propId]?.authorityToExchange;
+  }
+
+  private _txRaw(): Record<string, any> {
+    try { return JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}'); } catch { return {}; }
   }
 
   isExchangeReady(propId: string): boolean {
