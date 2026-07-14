@@ -51,6 +51,9 @@
       @if (view() === 'record' && selectedProperty(); as p) {
         <span class="lg-topbar-title">{{ p.address }}</span>
         <span class="lg-topbar-sub">{{ p.postcode }} · Conveyancing</span>
+        <button class="lg-btn-primary" style="margin-left:auto; font-size:12px; padding:6px 14px;" (click)="showUploadModal.set(true)">
+          <i class="ti ti-upload" style="font-size:12px;"></i> Upload document
+        </button>
       }
     </div>
 
@@ -63,7 +66,7 @@
           <div class="lg-empty">
             <i class="ti ti-briefcase" style="font-size:32px; color:var(--text3); margin-bottom:12px;"></i>
             <div style="font-size:14px; font-weight:600; color:var(--text2);">No active matters</div>
-            <div style="font-size:12px; color:var(--text3); margin-top:4px;">Properties move here when the Transactions team advances them to Legals stage.</div>
+            <div style="font-size:12px; color:var(--text3); margin-top:4px;">Properties appear here when the Transactions team advances them to Legals stage.</div>
           </div>
         } @else {
           <div class="lg-matter-grid">
@@ -84,7 +87,6 @@
                   }
                 </div>
 
-                <!-- Progress bar -->
                 <div style="margin-top:14px;">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <span style="font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:.04em;">Conveyancing progress</span>
@@ -96,7 +98,6 @@
                   </div>
                 </div>
 
-                <!-- Stage groups -->
                 <div style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;">
                   @for (g of checklistGroups; track g.label) {
                     @let gp = groupProgress(p.id, g);
@@ -106,7 +107,6 @@
                   }
                 </div>
 
-                <!-- Dates -->
                 @let m = getMatter(p.id);
                 @if (m.targetExchange || m.targetCompletion) {
                   <div style="display:flex; gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
@@ -161,7 +161,6 @@
               </div>
             </div>
 
-            <!-- Ref + Key dates row -->
             <div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; align-items:flex-end;">
               <div>
                 <div class="lg-field-label">Solicitor reference</div>
@@ -186,7 +185,10 @@
 
           <!-- Checklist -->
           <div class="lg-card">
-            <div class="lg-section-title" style="margin-bottom:16px;"><i class="ti ti-checklist"></i> Conveyancing checklist</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
+              <div class="lg-section-title"><i class="ti ti-checklist"></i> Conveyancing checklist</div>
+              <span style="font-size:12px; color:var(--text3);">Click a document badge to review before signing off</span>
+            </div>
             <div class="lg-checklist-grid">
               @for (group of checklistGroups; track group.label) {
                 @let gp = groupProgress(p.id, group);
@@ -196,18 +198,76 @@
                     <span class="lg-group-count" [class.complete]="gp === group.items.length">{{ gp }}/{{ group.items.length }}</span>
                   </div>
                   @for (item of group.items; track item.key) {
-                    <label class="lg-check-row" [class.checked]="m.checklist[item.key]">
-                      <input type="checkbox" [checked]="m.checklist[item.key]"
-                             (change)="toggleCheck(p.id, item.key)" style="display:none;">
-                      <div class="lg-check-box" [class.checked]="m.checklist[item.key]">
+                    @let itemDocs = docsForItem(p.id, item.key);
+                    <div class="lg-check-row" [class.checked]="m.checklist[item.key]">
+                      <div class="lg-check-box" [class.checked]="m.checklist[item.key]"
+                           (click)="toggleCheck(p.id, item.key)" style="cursor:pointer;">
                         @if (m.checklist[item.key]) { <i class="ti ti-check" style="font-size:11px;"></i> }
                       </div>
-                      <span>{{ item.label }}</span>
-                    </label>
+                      <span style="flex:1; cursor:pointer;" (click)="toggleCheck(p.id, item.key)">{{ item.label }}</span>
+                      @if (itemDocs.length > 0) {
+                        <button class="lg-doc-chip" (click)="openReview(item.label, itemDocs)"
+                                title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
+                          <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }}
+                        </button>
+                      } @else if (itemDocTypes[item.key]?.length) {
+                        <span class="lg-doc-chip lg-doc-chip-empty" title="No documents uploaded yet">
+                          <i class="ti ti-file-off" style="font-size:10px;"></i>
+                        </span>
+                      }
+                    </div>
                   }
                 </div>
               }
             </div>
+          </div>
+
+          <!-- Documents -->
+          <div class="lg-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div class="lg-section-title"><i class="ti ti-folders"></i> Documents</div>
+              <button class="lg-btn-outline" (click)="showUploadModal.set(true)">
+                <i class="ti ti-upload" style="font-size:12px;"></i> Upload
+              </button>
+            </div>
+
+            @if (docsForProperty(p.id).length === 0) {
+              <div class="lg-empty-inline">
+                No documents yet. Upload contracts, searches, and correspondence here.
+              </div>
+            } @else {
+              <table class="lg-table">
+                <thead>
+                  <tr>
+                    <th>File name</th>
+                    <th>Document type</th>
+                    <th>Uploaded</th>
+                    <th>By</th>
+                    <th>Note</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (file of docsForProperty(p.id); track file.id) {
+                    <tr>
+                      <td>
+                        <i class="ti ti-file-description" style="font-size:13px; color:#0f7c6b; margin-right:6px;"></i>
+                        <span style="font-size:13px;">{{ file.fileName }}</span>
+                      </td>
+                      <td><span class="lg-badge lg-badge-gray">{{ file.docType }}</span></td>
+                      <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
+                      <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
+                      <td style="font-size:12px; color:var(--text3); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
+                      <td>
+                        <button class="lg-btn-outline" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteDoc(file.id)">
+                          <i class="ti ti-trash" style="font-size:12px;"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
           </div>
 
           <!-- Notes -->
@@ -244,4 +304,90 @@
 
     </div>
   </main>
+
+  <!-- ── DOCUMENT REVIEW MODAL ────────────────────────── -->
+  @if (reviewModal(); as modal) {
+    <div class="lg-modal-backdrop" (click)="reviewModal.set(null)">
+      <div class="lg-modal" (click)="$event.stopPropagation()">
+        <div class="lg-modal-header">
+          <div>
+            <div class="lg-modal-title">{{ modal.title }}</div>
+            <div class="lg-modal-sub">{{ modal.files.length }} document{{ modal.files.length > 1 ? 's' : '' }} available</div>
+          </div>
+          <button class="lg-modal-close" (click)="reviewModal.set(null)"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="padding:20px; display:flex; flex-direction:column; gap:8px;">
+          @for (file of modal.files; track file.id) {
+            <div class="lg-doc-row">
+              <i class="ti ti-file-description" style="font-size:22px; color:#0f7c6b; flex-shrink:0;"></i>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.fileName }}</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:2px;">{{ file.docType }} · Uploaded {{ file.uploadedAt }} by {{ file.uploadedBy }}</div>
+                @if (file.note) {
+                  <div style="font-size:12px; color:var(--text2); margin-top:3px;">{{ file.note }}</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div style="padding:0 20px 20px;">
+          <button class="lg-btn-primary" style="width:100%;" (click)="reviewModal.set(null)">Done reviewing</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── UPLOAD MODAL ──────────────────────────────────── -->
+  @if (showUploadModal() && selectedProperty(); as p) {
+    <div class="lg-modal-backdrop" (click)="showUploadModal.set(false)">
+      <div class="lg-modal" (click)="$event.stopPropagation()">
+        <div class="lg-modal-header">
+          <div class="lg-modal-title">Upload document</div>
+          <button class="lg-modal-close" (click)="showUploadModal.set(false)"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="padding:20px; display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <div class="lg-field-label">Document type <span style="color:#dc2626;">*</span></div>
+            <select class="lg-input" style="width:100%;"
+                    [value]="uploadDocType()"
+                    (change)="uploadDocType.set($any($event.target).value)">
+              <option value="">Select type…</option>
+              <option>Local Authority Search</option>
+              <option>Water & Drainage Search</option>
+              <option>Environmental Search</option>
+              <option>Draft Contract</option>
+              <option>Contract Pack</option>
+              <option>Enquiries</option>
+              <option>Replies to Enquiries</option>
+              <option>Report on Title</option>
+              <option>Funds Confirmation</option>
+              <option>Transfer Deed</option>
+              <option>Completion Statement</option>
+              <option>TR1</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <div class="lg-field-label">File name</div>
+            <input class="lg-input" style="width:100%;" placeholder="Leave blank to auto-generate"
+                   [value]="uploadFileName()"
+                   (input)="uploadFileName.set($any($event.target).value)">
+          </div>
+          <div>
+            <div class="lg-field-label">Note (optional)</div>
+            <input class="lg-input" style="width:100%;" placeholder="Any relevant notes"
+                   [value]="uploadNote()"
+                   (input)="uploadNote.set($any($event.target).value)">
+          </div>
+        </div>
+        <div style="padding:0 20px 20px; display:flex; gap:8px;">
+          <button class="lg-btn-outline" style="flex:1;" (click)="showUploadModal.set(false)">Cancel</button>
+          <button class="lg-btn-primary" style="flex:2;" [disabled]="!uploadDocType()" (click)="uploadDoc(p.id)">
+            <i class="ti ti-upload" style="font-size:13px;"></i> Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>

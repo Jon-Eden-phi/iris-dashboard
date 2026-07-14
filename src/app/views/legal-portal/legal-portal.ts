@@ -22,6 +22,35 @@ interface LegalMatterData {
   targetCompletion: string;
 }
 
+interface DataRoomFile {
+  id: string;
+  propertyId: string;
+  stage: string;
+  fileName: string;
+  docType: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  note: string;
+}
+
+// Maps checklist keys to document types they relate to
+const ITEM_DOC_TYPES: Record<string, string[]> = {
+  search_la:       ['Local Authority Search'],
+  search_la_r:     ['Local Authority Search'],
+  search_water:    ['Water & Drainage Search', 'Water Search'],
+  search_env:      ['Environmental Search'],
+  contract_rx:     ['Draft Contract', 'Contract Pack'],
+  contract_rev:    ['Draft Contract', 'Contract Pack'],
+  enquiries_out:   ['Enquiries'],
+  enquiries_in:    ['Enquiries', 'Replies to Enquiries'],
+  title_report:    ['Report on Title', 'Draft Report on Title'],
+  title_sent:      ['Report on Title'],
+  funds:           ['Funds Confirmation', 'Completion Statement'],
+  exchange_ready:  ['Transfer Deed', 'TR1'],
+  exchanged:       ['Transfer Deed', 'TR1', 'Exchange Documents'],
+  completed:       ['Completion Statement', 'TR1'],
+};
+
 const CHECKLIST_GROUPS = [
   {
     label: 'Searches',
@@ -60,6 +89,7 @@ const CHECKLIST_GROUPS = [
 ];
 
 const LEGAL_DATA_KEY = 'iris_legal_data';
+const DR_KEY = 'iris_data_room';
 
 @Component({
   selector: 'app-legal-portal',
@@ -73,21 +103,39 @@ export class LegalPortalComponent {
   router = inject(Router);
   private doc = inject(DOCUMENT);
 
-  view      = signal<LegalView>('matters');
+  view       = signal<LegalView>('matters');
   selectedId = signal<string | null>(null);
   noteText   = signal('');
 
-  readonly checklistGroups = CHECKLIST_GROUPS;
+  // Document review modal
+  reviewModal = signal<{ title: string; files: DataRoomFile[] } | null>(null);
 
-  private legalData = signal<Record<string, LegalMatterData>>(this._load());
+  // Upload modal
+  showUploadModal = signal(false);
+  uploadDocType   = signal('');
+  uploadFileName  = signal('');
+  uploadNote      = signal('');
+
+  readonly checklistGroups = CHECKLIST_GROUPS;
+  readonly itemDocTypes    = ITEM_DOC_TYPES;
+
+  private legalData = signal<Record<string, LegalMatterData>>(this._loadLegal());
+
+  // Shared data room with transactions portal
+  private dataRoom = signal<DataRoomFile[]>(
+    JSON.parse(localStorage.getItem(DR_KEY) ?? '[]')
+  );
 
   constructor() {
     effect(() => {
       localStorage.setItem(LEGAL_DATA_KEY, JSON.stringify(this.legalData()));
     });
+    effect(() => {
+      localStorage.setItem(DR_KEY, JSON.stringify(this.dataRoom()));
+    });
   }
 
-  private _load(): Record<string, LegalMatterData> {
+  private _loadLegal(): Record<string, LegalMatterData> {
     try {
       const raw = localStorage.getItem(LEGAL_DATA_KEY);
       if (raw) return JSON.parse(raw);
@@ -103,7 +151,6 @@ export class LegalPortalComponent {
     return this.legalData()[id] ?? this._defaultMatter();
   }
 
-  // Properties currently in Legals stage
   activeMatters = computed(() =>
     this.data.properties.filter((p: Property) => p.stage === 'Legals' && p.status === 'active')
   );
@@ -124,7 +171,7 @@ export class LegalPortalComponent {
     this.doc.querySelector('.lg-content')?.scrollTo({ top: 0, behavior: 'instant' });
   }
 
-  // Checklist
+  // ── Checklist ─────────────────────────────────────────
   toggleCheck(propId: string, key: string): void {
     this.legalData.update(all => {
       const m = { ...(all[propId] ?? this._defaultMatter()) };
@@ -142,8 +189,8 @@ export class LegalPortalComponent {
 
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
-    const prereqs = ['search_la_r','search_water','search_env','contract_rev','enquiries_in','title_sent','funds'];
-    return prereqs.every(k => m.checklist[k]);
+    return ['search_la_r','search_water','search_env','contract_rev','enquiries_in','title_sent','funds']
+      .every(k => m.checklist[k]);
   }
 
   groupProgress(propId: string, group: typeof CHECKLIST_GROUPS[0]): number {
@@ -151,7 +198,49 @@ export class LegalPortalComponent {
     return group.items.filter(i => m.checklist[i.key]).length;
   }
 
-  // Notes
+  // ── Document room ──────────────────────────────────────
+  docsForProperty(propId: string): DataRoomFile[] {
+    return this.dataRoom().filter(f => f.propertyId === propId);
+  }
+
+  docsForItem(propId: string, itemKey: string): DataRoomFile[] {
+    const types = ITEM_DOC_TYPES[itemKey] ?? [];
+    if (!types.length) return [];
+    return this.dataRoom().filter(
+      f => f.propertyId === propId && types.some(t => f.docType.toLowerCase().includes(t.toLowerCase()))
+    );
+  }
+
+  openReview(itemLabel: string, files: DataRoomFile[]): void {
+    this.reviewModal.set({ title: itemLabel, files });
+  }
+
+  uploadDoc(propId: string): void {
+    const docType  = this.uploadDocType().trim();
+    const fileName = this.uploadFileName().trim() || docType.replace(/\s+/g, '_') + '.pdf';
+    if (!docType) return;
+    const file: DataRoomFile = {
+      id: 'dr_' + Date.now(),
+      propertyId: propId,
+      stage: 'Legals',
+      fileName,
+      docType,
+      uploadedBy: this.auth.currentUser()?.name ?? 'Solicitor',
+      uploadedAt: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      note: this.uploadNote().trim(),
+    };
+    this.dataRoom.update(list => [...list, file]);
+    this.uploadDocType.set('');
+    this.uploadFileName.set('');
+    this.uploadNote.set('');
+    this.showUploadModal.set(false);
+  }
+
+  deleteDoc(fileId: string): void {
+    this.dataRoom.update(list => list.filter(f => f.id !== fileId));
+  }
+
+  // ── Notes ──────────────────────────────────────────────
   addNote(propId: string): void {
     const text = this.noteText().trim();
     if (!text) return;
@@ -169,7 +258,7 @@ export class LegalPortalComponent {
     this.noteText.set('');
   }
 
-  // Key dates
+  // ── Dates / ref ────────────────────────────────────────
   setDate(propId: string, field: 'targetExchange' | 'targetCompletion', val: string): void {
     this.legalData.update(all => {
       const m = { ...(all[propId] ?? this._defaultMatter()) };
