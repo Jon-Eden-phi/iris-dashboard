@@ -167,6 +167,17 @@ export class TransactionsPortalComponent {
   uploadDocType      = signal('MoS');
   uploadNote         = signal('');
   uploadFileName     = signal('');
+  selectedFile       = signal<File | null>(null);
+
+  triggerTxFileInput(): void {
+    this.doc.getElementById('tx-file-input')?.click();
+  }
+
+  onTxFileSelected(event: Event): void {
+    const f = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFile.set(f);
+    if (f && !this.uploadFileName()) this.uploadFileName.set(f.name);
+  }
   revertComment      = signal('');
 
   showSearchesModal        = signal(false);
@@ -610,7 +621,7 @@ export class TransactionsPortalComponent {
     if (!p) return;
     const docType = this.uploadDocType();
     const note = this.uploadNote().trim();
-    const fileName = this.uploadFileName() || docType + '_document.pdf';
+    const fileName = this.uploadFileName().trim() || this.selectedFile()?.name || docType + '_document.pdf';
     // Save to data room
     const newFile: DataRoomFile = {
       id: 'dr_' + Date.now(),
@@ -647,6 +658,9 @@ export class TransactionsPortalComponent {
     this.showUploadModal.set(false);
     this.uploadNote.set('');
     this.uploadFileName.set('');
+    this.selectedFile.set(null);
+    const txInput = this.doc.getElementById('tx-file-input') as HTMLInputElement | null;
+    if (txInput) txInput.value = '';
     this.showToast(docType + ' uploaded — saved to Data Room', 'ti-upload');
   }
 
