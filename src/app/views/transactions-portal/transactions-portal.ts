@@ -808,6 +808,10 @@ export class TransactionsPortalComponent {
     this.showToast('Fee earner added', 'ti-user-check');
   }
 
+  mosDocs(propId: string): DataRoomFile[] {
+    return this.dataRoom().filter(f => f.propertyId === propId && f.docType === 'MoS');
+  }
+
   instructSolicitor(p: Property): void {
     if (!this.getTxData(p.id).checklist['mos_sent_sols']) {
       this.toggleChecklist(p.id, 'mos_sent_sols', 'MoS sent to solicitor');

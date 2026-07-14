@@ -1871,18 +1871,40 @@
       <button class="tx-modal-close" (click)="showInstructSolicitorModal.set(false)"><i class="ti ti-x"></i></button>
     </div>
     <div class="tx-modal-body">
-      <p style="font-size:13px; color:var(--text2); margin-bottom:10px;">
-        This will mark the MoS as sent and open the matter in the <strong>Legal Portal</strong>.
-      </p>
-      <p style="font-size:12px; color:var(--text3);">
-        The solicitor will see this property in their portal immediately and can access all documents uploaded to the data room.
-      </p>
+      @if (selectedProperty(); as p) {
+        @let mos = mosDocs(p.id);
+        @if (mos.length > 0) {
+          <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">
+            The following MoS will be shared with the solicitor via the legal portal:
+          </p>
+          @for (f of mos; track f.id) {
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(22,163,74,0.06); border:1px solid rgba(22,163,74,0.2); border-radius:7px; margin-bottom:8px;">
+              <i class="ti ti-file-text" style="font-size:16px; color:#16a34a; flex-shrink:0;"></i>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:13px; font-weight:600; color:var(--text1); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ f.fileName }}</div>
+                <div style="font-size:11px; color:var(--text3);">Uploaded {{ f.uploadedAt }} · {{ f.uploadedBy }}</div>
+              </div>
+              <i class="ti ti-circle-check" style="font-size:16px; color:#16a34a; flex-shrink:0;"></i>
+            </div>
+          }
+        } @else {
+          <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.2); border-radius:7px;">
+            <i class="ti ti-alert-triangle" style="font-size:16px; color:#b45309; flex-shrink:0; margin-top:1px;"></i>
+            <div>
+              <div style="font-size:13px; font-weight:600; color:#b45309; margin-bottom:3px;">No MoS uploaded</div>
+              <div style="font-size:12px; color:var(--text3);">Upload the Memorandum of Sale first using the <strong>Upload MoS</strong> button above.</div>
+            </div>
+          </div>
+        }
+      }
     </div>
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showInstructSolicitorModal.set(false)">Cancel</button>
-      <button class="btn-primary" (click)="instructSolicitor(selectedProperty()!)">
-        <i class="ti ti-scale" style="font-size:13px;"></i> Instruct solicitor
-      </button>
+      @if (selectedProperty(); as p) {
+        <button class="btn-primary" [disabled]="mosDocs(p.id).length === 0" (click)="instructSolicitor(p)">
+          <i class="ti ti-scale" style="font-size:13px;"></i> Instruct solicitor
+        </button>
+      }
     </div>
   </div>
 }
