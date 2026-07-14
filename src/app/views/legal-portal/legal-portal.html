@@ -82,6 +82,8 @@
                   </div>
                   @if (ready) {
                     <span class="lg-badge lg-badge-green"><i class="ti ti-check" style="font-size:10px;"></i> Exchange ready</span>
+                  } @else if (hasAuthorityToExchange(p.id)) {
+                    <span class="lg-badge" style="background:rgba(22,163,74,0.1); color:#15803d;"><i class="ti ti-writing" style="font-size:10px;"></i> Authority given</span>
                   } @else {
                     <span class="lg-badge lg-badge-amber">In progress</span>
                   }
@@ -197,6 +199,12 @@
                     <span>{{ group.label }}</span>
                     <span class="lg-group-count" [class.complete]="gp === group.items.length">{{ gp }}/{{ group.items.length }}</span>
                   </div>
+                  @if (group.label === 'Exchange' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {
+                    <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:6px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Authority to exchange received</strong> — TX team has confirmed. You may now proceed to exchange.</span>
+                    </div>
+                  }
                   @for (item of group.items; track item.key) {
                     @let itemDocs = docsForItem(p.id, item.key);
                     <div class="lg-check-row" [class.checked]="m.checklist[item.key]">

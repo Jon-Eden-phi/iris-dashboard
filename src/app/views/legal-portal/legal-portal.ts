@@ -190,6 +190,10 @@ export class LegalPortalComponent {
     return { done, total };
   }
 
+  hasAuthorityToExchange(propId: string): boolean {
+    return !!this.txData()[propId]?.authorityToExchange;
+  }
+
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
     return ['search_la_r','search_water','search_env','contract_rev','enquiries_in','title_sent','funds']

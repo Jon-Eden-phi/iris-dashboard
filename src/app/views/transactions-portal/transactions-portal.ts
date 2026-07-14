@@ -73,6 +73,7 @@ interface TxPropertyData {
   notes?: TxNote[];
   fees?: TxFee[];
   solicitorInstructed?: boolean;
+  authorityToExchange?: boolean;
 }
 
 interface DataRoomFile {
@@ -932,8 +933,9 @@ export class TransactionsPortalComponent {
     if (!this.getTxData(p.id).checklist['authority_to_exchange']) {
       this.toggleChecklist(p.id, 'authority_to_exchange', 'Authority to exchange — client signed');
     }
+    this.setTxData(p.id, { authorityToExchange: true });
     this.showAuthorityModal.set(false);
-    this.showToast('Client authority to exchange confirmed', 'ti-circle-check');
+    this.showToast('Client authority to exchange confirmed — solicitor notified', 'ti-circle-check');
   }
 
   approveInvestorAuthority(): void {
@@ -951,8 +953,9 @@ export class TransactionsPortalComponent {
     if (!this.getTxData(p.id).checklist['investor_authority_to_exchange']) {
       this.toggleChecklist(p.id, 'investor_authority_to_exchange', 'Authority to exchange — investor approved');
     }
+    this.setTxData(p.id, { authorityToExchange: true });
     this.showInvestorAuthorityModal.set(false);
-    this.showToast('Investor authority to exchange confirmed', 'ti-circle-check');
+    this.showToast('Investor authority to exchange confirmed — solicitor notified', 'ti-circle-check');
   }
 
   completeExchange(): void {
