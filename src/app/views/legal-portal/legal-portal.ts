@@ -117,6 +117,8 @@ export class LegalPortalComponent {
   uploadDocType   = signal('');
   uploadFileName  = signal('');
   uploadNote      = signal('');
+  selectedFile    = signal<File | null>(null);
+
 
   readonly checklistGroups = CHECKLIST_GROUPS;
   readonly itemDocTypes    = ITEM_DOC_TYPES;
@@ -217,11 +219,21 @@ export class LegalPortalComponent {
     this.reviewModal.set({ title: itemLabel, files });
   }
 
+  triggerFileInput(): void {
+    this.doc.getElementById('lg-file-input')?.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const f = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFile.set(f);
+    if (f && !this.uploadFileName()) this.uploadFileName.set(f.name);
+  }
+
   uploadDoc(propId: string): void {
-    const docType  = this.uploadDocType().trim();
-    const fileName = this.uploadFileName().trim() || docType.replace(/\s+/g, '_') + '.pdf';
-    if (!docType) return;
-    const file: DataRoomFile = {
+    const docType = this.uploadDocType().trim();
+    if (!docType || !this.selectedFile()) return;
+    const fileName = this.uploadFileName().trim() || this.selectedFile()!.name;
+    const entry: DataRoomFile = {
       id: 'dr_' + Date.now(),
       propertyId: propId,
       stage: 'Legals',
@@ -231,11 +243,15 @@ export class LegalPortalComponent {
       uploadedAt: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       note: this.uploadNote().trim(),
     };
-    this.dataRoom.update(list => [...list, file]);
+    this.dataRoom.update(list => [...list, entry]);
     this.uploadDocType.set('');
     this.uploadFileName.set('');
     this.uploadNote.set('');
+    this.selectedFile.set(null);
     this.showUploadModal.set(false);
+    // Reset the file input so the same file can be re-selected later
+    const input = this.doc.getElementById('lg-file-input') as HTMLInputElement | null;
+    if (input) input.value = '';
   }
 
   deleteDoc(fileId: string): void {

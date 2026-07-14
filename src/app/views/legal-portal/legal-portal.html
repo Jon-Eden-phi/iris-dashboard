@@ -340,6 +340,7 @@
 
   <!-- ── UPLOAD MODAL ──────────────────────────────────── -->
   @if (showUploadModal() && selectedProperty(); as p) {
+    <input type="file" id="lg-file-input" style="display:none" (change)="onFileSelected($event)">
     <div class="lg-modal-backdrop" (click)="showUploadModal.set(false)">
       <div class="lg-modal" (click)="$event.stopPropagation()">
         <div class="lg-modal-header">
@@ -347,6 +348,20 @@
           <button class="lg-modal-close" (click)="showUploadModal.set(false)"><i class="ti ti-x"></i></button>
         </div>
         <div style="padding:20px; display:flex; flex-direction:column; gap:14px;">
+
+          <!-- File picker -->
+          <div class="lg-file-drop" (click)="triggerFileInput()">
+            @if (selectedFile(); as f) {
+              <i class="ti ti-file-check" style="font-size:22px; color:#0f7c6b;"></i>
+              <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ f.name }}</div>
+              <div style="font-size:11px; color:var(--text3);">{{ (f.size / 1024).toFixed(0) }} KB · Click to change</div>
+            } @else {
+              <i class="ti ti-upload" style="font-size:22px; color:var(--text3);"></i>
+              <div style="font-size:13px; font-weight:600; color:var(--text2);">Click to choose a file</div>
+              <div style="font-size:11px; color:var(--text3);">PDF, Word, Excel or image</div>
+            }
+          </div>
+
           <div>
             <div class="lg-field-label">Document type <span style="color:#dc2626;">*</span></div>
             <select class="lg-input" style="width:100%;"
@@ -369,12 +384,6 @@
             </select>
           </div>
           <div>
-            <div class="lg-field-label">File name</div>
-            <input class="lg-input" style="width:100%;" placeholder="Leave blank to auto-generate"
-                   [value]="uploadFileName()"
-                   (input)="uploadFileName.set($any($event.target).value)">
-          </div>
-          <div>
             <div class="lg-field-label">Note (optional)</div>
             <input class="lg-input" style="width:100%;" placeholder="Any relevant notes"
                    [value]="uploadNote()"
@@ -383,7 +392,10 @@
         </div>
         <div style="padding:0 20px 20px; display:flex; gap:8px;">
           <button class="lg-btn-outline" style="flex:1;" (click)="showUploadModal.set(false)">Cancel</button>
-          <button class="lg-btn-primary" style="flex:2;" [disabled]="!uploadDocType()" (click)="uploadDoc(p.id)">
+          <button class="lg-btn-primary" style="flex:2;"
+                  [disabled]="!uploadDocType() || !selectedFile()"
+                  [style.opacity]="(!uploadDocType() || !selectedFile()) ? '0.5' : '1'"
+                  (click)="uploadDoc(p.id)">
             <i class="ti ti-upload" style="font-size:13px;"></i> Upload
           </button>
         </div>
