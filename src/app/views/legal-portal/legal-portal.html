@@ -211,9 +211,10 @@
                           <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }}
                         </button>
                       } @else if (itemDocTypes[item.key]?.length) {
-                        <span class="lg-doc-chip lg-doc-chip-empty" title="No documents uploaded yet">
-                          <i class="ti ti-file-off" style="font-size:10px;"></i>
-                        </span>
+                        <button class="lg-doc-chip lg-doc-chip-empty" title="No documents — click to upload"
+                                (click)="uploadDocType.set(itemDocTypes[item.key][0]); showUploadModal.set(true)">
+                          <i class="ti ti-file-plus" style="font-size:10px;"></i>
+                        </button>
                       }
                     </div>
                   }

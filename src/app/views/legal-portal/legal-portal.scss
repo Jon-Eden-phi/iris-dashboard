@@ -284,7 +284,8 @@
   &:hover { background: rgba(15,124,107,0.18); }
   &.lg-doc-chip-empty {
     background: var(--bg); color: var(--text3);
-    border-color: var(--border); cursor: default;
+    border-color: var(--border); cursor: pointer;
+    &:hover { background: var(--border); color: var(--text2); }
   }
 }
 
