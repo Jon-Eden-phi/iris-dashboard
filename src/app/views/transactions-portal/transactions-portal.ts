@@ -822,11 +822,21 @@ export class TransactionsPortalComponent {
     this.showToast('Fee earner added', 'ti-user-check');
   }
 
+  private _legalData(): Record<string, any> {
+    try { return JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}'); } catch { return {}; }
+  }
+
+  legalCheck(propId: string, key: string): boolean {
+    return !!this._legalData()[propId]?.checklist?.[key];
+  }
+
+  legalAllSearchesDone(propId: string): boolean {
+    const cl = this._legalData()[propId]?.checklist ?? {};
+    return !!(cl['search_la_r'] && cl['search_water'] && cl['search_env']);
+  }
+
   solicitorSignedOffExchange(propId: string): boolean {
-    try {
-      const data = JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}');
-      return !!data[propId]?.checklist?.exchange_ready;
-    } catch { return false; }
+    return this.legalCheck(propId, 'exchange_ready');
   }
 
   mosDocs(propId: string): DataRoomFile[] {

@@ -699,6 +699,42 @@
                       <span><strong>Solicitor has given exchange sign-off</strong> — request client authority to proceed to exchange.</span>
                     </div>
                   }
+                  @if (action.key === 'searches_received' && !getTxData(p.id).checklist['searches_received'] && legalAllSearchesDone(p.id)) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has received all searches</strong> — local authority, water &amp; drainage, and environmental results are in.</span>
+                    </div>
+                  }
+                  @if (p.stage === 'Legals' && action.key === 'contract_pack_received' && !getTxData(p.id).checklist['contract_pack_received'] && legalCheck(p.id, 'contract_rx')) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has received the draft contract</strong> — confirm receipt of the contract pack.</span>
+                    </div>
+                  }
+                  @if (action.key === 'draft_rot_received' && !getTxData(p.id).checklist['draft_rot_received'] && legalCheck(p.id, 'title_report')) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has prepared the report on title</strong> — confirm receipt of the draft RoT.</span>
+                    </div>
+                  }
+                  @if (action.key === 'enquiries_raised' && !getTxData(p.id).checklist['enquiries_raised'] && legalCheck(p.id, 'enquiries_out')) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has raised enquiries</strong> — enquiries have been submitted to the seller's solicitor.</span>
+                    </div>
+                  }
+                  @if (action.key === 'exchange_completed' && !getTxData(p.id).checklist['exchange_completed'] && legalCheck(p.id, 'exchanged')) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor confirms contracts have been exchanged</strong> — mark this transaction as exchanged.</span>
+                    </div>
+                  }
+                  @if (action.key === 'completion_confirmed' && !getTxData(p.id).checklist['completion_confirmed'] && legalCheck(p.id, 'completed')) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor confirms completion</strong> — the transaction has completed. Mark as confirmed.</span>
+                    </div>
+                  }
                   @if (action.key !== 'investor_authority_to_exchange' || p.isInvestorDeal) {
                   <div
                     (click)="toggleChecklist(p.id, action.key, action.label)"

@@ -199,6 +199,10 @@ export class LegalPortalComponent {
     return !!this.txDataSig()[propId]?.authorityToExchange;
   }
 
+  txCheck(propId: string, key: string): boolean {
+    return !!this.txDataSig()[propId]?.checklist?.[key];
+  }
+
   private _txRaw(): Record<string, any> {
     try { return JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}'); } catch { return {}; }
   }
