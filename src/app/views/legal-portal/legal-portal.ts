@@ -117,9 +117,6 @@ export class LegalPortalComponent {
   readonly itemDocTypes    = ITEM_DOC_TYPES;
 
   private legalData = signal<Record<string, LegalMatterData>>(this._loadLegal());
-  private txData    = signal<Record<string, any>>(
-    JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
-  );
 
   // Shared data room with transactions portal
   private dataRoom = signal<DataRoomFile[]>(
@@ -151,12 +148,17 @@ export class LegalPortalComponent {
     return this.legalData()[id] ?? this._defaultMatter();
   }
 
-  activeMatters = computed(() =>
-    this.data.properties.filter((p: Property) =>
+  private txRaw(): Record<string, any> {
+    try { return JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}'); } catch { return {}; }
+  }
+
+  get activeMatters(): Property[] {
+    const tx = this.txRaw();
+    return this.data.properties.filter((p: Property) =>
       p.status === 'active' &&
-      (p.stage === 'Legals' || this.txData()[p.id]?.solicitorInstructed)
-    )
-  );
+      (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
+    );
+  }
 
   selectedProperty = computed(() => {
     const id = this.selectedId();
@@ -191,7 +193,7 @@ export class LegalPortalComponent {
   }
 
   hasAuthorityToExchange(propId: string): boolean {
-    return !!this.txData()[propId]?.authorityToExchange;
+    return !!this.txRaw()[propId]?.authorityToExchange;
   }
 
   isExchangeReady(propId: string): boolean {
