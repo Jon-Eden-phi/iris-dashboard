@@ -72,6 +72,7 @@ interface TxPropertyData {
   txLog: Array<{ text: string; ts: string; author: string }>;
   notes?: TxNote[];
   fees?: TxFee[];
+  solicitorInstructed?: boolean;
 }
 
 interface DataRoomFile {
@@ -173,6 +174,7 @@ export class TransactionsPortalComponent {
   showContractPackModal    = signal(false);
   showInstructSurveysModal    = signal(false);
   showAdditionalWorksModal    = signal(false);
+  showInstructSolicitorModal  = signal(false);
   showReviewDocModal          = signal(false);
   showRequestFundsModal           = signal(false);
   showAuthorityModal              = signal(false);
@@ -803,6 +805,15 @@ export class TransactionsPortalComponent {
     this.showFeeEarnerModal.set(false);
     this.feeEarnerName.set('');
     this.showToast('Fee earner added', 'ti-user-check');
+  }
+
+  instructSolicitor(p: Property): void {
+    if (!this.getTxData(p.id).checklist['mos_sent_sols']) {
+      this.toggleChecklist(p.id, 'mos_sent_sols', 'MoS sent to solicitor');
+    }
+    this.setTxData(p.id, { solicitorInstructed: true });
+    this.showInstructSolicitorModal.set(false);
+    this.showToast('Solicitor instructed — matter opened in legal portal', 'ti-scale');
   }
 
   uploadDraftRot(): void {

@@ -117,6 +117,9 @@ export class LegalPortalComponent {
   readonly itemDocTypes    = ITEM_DOC_TYPES;
 
   private legalData = signal<Record<string, LegalMatterData>>(this._loadLegal());
+  private txData    = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
+  );
 
   // Shared data room with transactions portal
   private dataRoom = signal<DataRoomFile[]>(
@@ -149,7 +152,10 @@ export class LegalPortalComponent {
   }
 
   activeMatters = computed(() =>
-    this.data.properties.filter((p: Property) => p.stage === 'Legals' && p.status === 'active')
+    this.data.properties.filter((p: Property) =>
+      p.status === 'active' &&
+      (p.stage === 'Legals' || this.txData()[p.id]?.solicitorInstructed)
+    )
   );
 
   selectedProperty = computed(() => {
