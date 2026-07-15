@@ -558,26 +558,32 @@
           @if (recordTab() === 'overview') {
 
           <!-- Stage tracker -->
-          <div class="card" style="overflow-x:auto;">
-            <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px; display:flex; gap:0; align-items:center;">
-              <span style="padding:2px 8px; border-radius:4px; background:rgba(124,58,237,0.07); color:#7c3aed; border:1px solid rgba(124,58,237,0.15);">Acquisitions</span>
-              <span style="flex:1; height:1px; background:var(--border); margin:0 6px;"></span>
-              <span style="padding:2px 8px; border-radius:4px; background:rgba(232,96,28,0.07); color:var(--accent); border:1px solid rgba(232,96,28,0.15);">Transactions</span>
-            </div>
-            <div class="tx-stage-tracker" style="min-width:560px;">
+          <div class="card">
+            <div class="tx-stage-tracker">
               @for (s of allStages; track s; let i = $index; let first = $first) {
-                @if (!first) { <div class="tx-stage-connector" [class.done]="allStages.indexOf(p.stage) > i"></div> }
+                @if (!first) {
+                  @if (i === 4) {
+                    <div style="width:1px; height:28px; background:var(--border); flex-shrink:0; margin:0 4px; align-self:center;"></div>
+                  } @else {
+                    <div class="tx-stage-connector" [class.done]="allStages.indexOf(p.stage) > i"></div>
+                  }
+                }
                 <div class="tx-stage-step"
                      [class.done]="allStages.indexOf(p.stage) > i"
                      [class.current]="p.stage === s"
-                     [class.todo]="allStages.indexOf(p.stage) < i">
-                  <div class="tx-stage-dot">
-                    @if (allStages.indexOf(p.stage) > i) { <i class="ti ti-check"></i> }
+                     [class.todo]="allStages.indexOf(p.stage) < i"
+                     style="flex-shrink:1;">
+                  <div class="tx-stage-dot" style="width:24px; height:24px; font-size:10px;">
+                    @if (allStages.indexOf(p.stage) > i) { <i class="ti ti-check" style="font-size:10px;"></i> }
                     @else { {{ i + 1 }} }
                   </div>
-                  <div class="tx-stage-label">{{ allStageLabels[s] }}</div>
+                  <div class="tx-stage-label" style="font-size:9.5px; max-width:64px;">{{ allStageLabels[s] }}</div>
                 </div>
               }
+            </div>
+            <div style="display:flex; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:10px; font-weight:600;">
+              <span style="color:#7c3aed;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#7c3aed; margin-right:4px;"></span>Stages 1–4 Acquisitions</span>
+              <span style="color:var(--accent);"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-right:4px;"></span>Stages 5–8 Transactions</span>
             </div>
           </div>
 
