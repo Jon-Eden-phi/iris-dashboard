@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { DatePipe, DOCUMENT } from '@angular/common';
+import { DatePipe, TitleCasePipe, DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
@@ -97,7 +97,7 @@ interface DataRoomFile {
 
 @Component({
   selector: 'app-transactions-portal',
-  imports: [DatePipe],
+  imports: [DatePipe, TitleCasePipe],
   templateUrl: './transactions-portal.html',
   styleUrl: './transactions-portal.scss',
 })
@@ -164,9 +164,10 @@ export class TransactionsPortalComponent {
     });
   }
 
-  view          = signal<TxView>('homes');
-  selectedId    = signal<string | null>(null);
-  acqSelectedId = signal<string | null>(null);
+  view              = signal<TxView>('homes');
+  selectedId        = signal<string | null>(null);
+  acqSelectedId     = signal<string | null>(null);
+  selectedStageView = signal<string | null>(null);
   searchQuery   = signal('');
   stageFilter   = signal('all');
   sortOrder     = signal('modified');
@@ -390,6 +391,7 @@ export class TransactionsPortalComponent {
 
   openRecord(p: Property): void {
     this.selectedId.set(p.id);
+    this.selectedStageView.set(null);
     this.view.set('record');
     this.doc.querySelector('.tx-content')?.scrollTo({ top: 0, behavior: 'instant' });
   }

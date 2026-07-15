@@ -568,12 +568,17 @@
                     <div class="tx-stage-connector" [class.done]="allStages.indexOf(p.stage) > i"></div>
                   }
                 }
+                @let isPastOrCurrent = allStages.indexOf(p.stage) >= i;
                 <div class="tx-stage-step"
                      [class.done]="allStages.indexOf(p.stage) > i"
                      [class.current]="p.stage === s"
                      [class.todo]="allStages.indexOf(p.stage) < i"
-                     style="flex-shrink:1;">
-                  <div class="tx-stage-dot" style="width:24px; height:24px; font-size:10px;">
+                     style="flex-shrink:1;"
+                     [style.cursor]="isPastOrCurrent ? 'pointer' : 'default'"
+                     (click)="isPastOrCurrent && selectedStageView.set(selectedStageView() === s ? null : s)">
+                  <div class="tx-stage-dot" style="width:24px; height:24px; font-size:10px;"
+                       [style.outline]="selectedStageView() === s ? '2px solid var(--accent)' : 'none'"
+                       [style.outline-offset]="'3px'">
                     @if (allStages.indexOf(p.stage) > i) { <i class="ti ti-check" style="font-size:10px;"></i> }
                     @else { {{ i + 1 }} }
                   </div>
@@ -584,8 +589,129 @@
             <div style="display:flex; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:10px; font-weight:600;">
               <span style="color:#7c3aed;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#7c3aed; margin-right:4px;"></span>Stages 1–4 Acquisitions</span>
               <span style="color:var(--accent);"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-right:4px;"></span>Stages 5–8 Transactions</span>
+              <span style="margin-left:auto; color:var(--text3); font-weight:400;">Click any completed stage to view details</span>
             </div>
           </div>
+
+          <!-- Stage detail panel -->
+          @if (selectedStageView(); as sv) {
+            <div class="card" style="border-left:3px solid var(--accent);">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                <div style="font-size:14px; font-weight:700; color:var(--text1);">
+                  <i class="ti ti-history" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>{{ allStageLabels[sv] }} — stage history
+                </div>
+                <button class="btn-ghost" style="font-size:11px; padding:3px 8px;" (click)="selectedStageView.set(null)">
+                  <i class="ti ti-x" style="font-size:11px;"></i> Close
+                </button>
+              </div>
+
+              <!-- Negotiations -->
+              @if (sv === 'Negotiations') {
+                @if (p.offers && p.offers.length > 0) {
+                  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                      <tr>
+                        <th style="text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); padding:4px 10px 8px;">Amount</th>
+                        <th style="text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); padding:4px 10px 8px;">Status</th>
+                        <th style="text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); padding:4px 10px 8px;">Date</th>
+                        <th style="text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); padding:4px 10px 8px;">Submitted by</th>
+                        <th style="text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); padding:4px 10px 8px;">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (offer of p.offers; track offer.id) {
+                        <tr style="border-top:1px solid var(--border);">
+                          <td style="padding:10px; font-weight:700; color:var(--text1);">£{{ offer.amount.toLocaleString() }}</td>
+                          <td style="padding:10px;">
+                            <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px;"
+                                  [style.background]="offer.status === 'accepted' ? 'rgba(15,124,107,0.1)' : offer.status === 'rejected' ? 'rgba(220,38,38,0.08)' : offer.status === 'countered' ? 'rgba(234,179,8,0.1)' : 'rgba(0,0,0,0.06)'"
+                                  [style.color]="offer.status === 'accepted' ? '#0f7c6b' : offer.status === 'rejected' ? '#dc2626' : offer.status === 'countered' ? '#854d0e' : 'var(--text2)'">
+                              {{ offer.status | titlecase }}
+                            </span>
+                          </td>
+                          <td style="padding:10px; color:var(--text3);">{{ offer.date }}</td>
+                          <td style="padding:10px; color:var(--text3);">{{ offer.submittedBy }}</td>
+                          <td style="padding:10px; color:var(--text3); font-size:12px;">{{ offer.notes ?? '—' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  @if (p.agreedPrice) {
+                    <div style="margin-top:12px; padding:10px 14px; background:rgba(15,124,107,0.07); border-radius:7px; font-size:13px; color:#0f7c6b; font-weight:600;">
+                      <i class="ti ti-circle-check" style="margin-right:6px;"></i>Final agreed price: £{{ p.agreedPrice.toLocaleString() }}
+                    </div>
+                  }
+                } @else {
+                  <div style="font-size:13px; color:var(--text3); padding:16px 0;">No offers recorded for this property.</div>
+                }
+              }
+
+              <!-- Viewing -->
+              @if (sv === 'Viewing') {
+                @if (p.viewing) {
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 24px;">
+                    @if (p.viewing.agentName)    { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Agent</div><div style="font-size:13px; font-weight:600;">{{ p.viewing.agentName }}@if(p.viewing.agentCompany){ · {{ p.viewing.agentCompany }} }</div></div> }
+                    @if (p.viewing.date)         { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Date &amp; time</div><div style="font-size:13px; font-weight:600;">{{ p.viewing.date }}@if(p.viewing.time){ at {{ p.viewing.time }} }</div></div> }
+                    @if (p.viewing.attendee)     { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Attendee</div><div style="font-size:13px; font-weight:600;">{{ p.viewing.attendee }}</div></div> }
+                    @if (p.viewing.reportCondition) { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Condition</div><div style="font-size:13px; font-weight:600;">{{ p.viewing.reportCondition | titlecase }}</div></div> }
+                  </div>
+                  @if (p.viewing.reportNotes) {
+                    <div style="margin-top:12px;">
+                      <div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:5px;">Viewing notes</div>
+                      <div style="font-size:13px; color:var(--text2); background:var(--bg); padding:10px 14px; border-radius:7px; border:1px solid var(--border); line-height:1.5;">{{ p.viewing.reportNotes }}</div>
+                    </div>
+                  }
+                } @else {
+                  <div style="font-size:13px; color:var(--text3); padding:16px 0;">No viewing data recorded.</div>
+                }
+              }
+
+              <!-- Client Approval -->
+              @if (sv === 'ClientApproval') {
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px 24px;">
+                  @if (p.clientApprovedBy)  { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Approved by</div><div style="font-size:13px; font-weight:600;">{{ p.clientApprovedBy }}</div></div> }
+                  @if (p.clientMaxPrice)    { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Max price authorised</div><div style="font-size:13px; font-weight:600;">£{{ p.clientMaxPrice.toLocaleString() }}</div></div> }
+                  @if (p.viewing?.clientReview) { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Review status</div><div style="font-size:13px; font-weight:600;">{{ p.viewing!.clientReview | titlecase }}</div></div> }
+                </div>
+              }
+
+              <!-- MoS -->
+              @if (sv === 'MemorandumOfSale') {
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; margin-bottom:14px;">
+                  @if (p.agreedPrice) { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Agreed price</div><div style="font-size:15px; font-weight:800; color:#0f7c6b;">£{{ p.agreedPrice.toLocaleString() }}</div></div> }
+                  @if (p.financial?.ap) { <div><div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); margin-bottom:3px;">Asking price</div><div style="font-size:15px; font-weight:800; color:var(--text1);">£{{ p.financial!.ap.toLocaleString() }}</div></div> }
+                </div>
+                @let mosCl = getTxData(p.id).checklist;
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  @for (action of stageActions['MemorandumOfSale']; track action.key) {
+                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2);">
+                      <i [class]="mosCl[action.key] ? 'ti ti-circle-check' : 'ti ti-circle'" style="font-size:14px;" [style.color]="mosCl[action.key] ? '#0f7c6b' : 'var(--border)'"></i>
+                      {{ action.label }}
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Legals / Refurbishment / Lettings — show checklist read-only -->
+              @if (sv === 'Legals' || sv === 'Refurbishment' || sv === 'Lettings') {
+                @let svCl = getTxData(p.id).checklist;
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  @for (action of stageActions[sv]; track action.key) {
+                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2);">
+                      <i [class]="svCl[action.key] ? 'ti ti-circle-check' : 'ti ti-circle'" style="font-size:14px;" [style.color]="svCl[action.key] ? '#0f7c6b' : 'var(--border)'"></i>
+                      {{ action.label }}
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Draft — no persisted data -->
+              @if (sv === 'Draft') {
+                <div style="font-size:13px; color:var(--text3); padding:16px 0;">Draft details are not persisted — check the Acquisitions portal for property-level notes.</div>
+              }
+
+            </div>
+          }
 
           <!-- Property header -->
           <div class="card">
