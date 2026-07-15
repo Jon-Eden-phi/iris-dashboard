@@ -6,7 +6,7 @@ import { Agent } from '../models/agent.model';
 @Injectable({ providedIn: 'root' })
 export class MockDataService {
 
-  private readonly STORAGE_KEY = 'iris-props-v6';
+  private readonly STORAGE_KEY = 'iris-props-v7';
 
   private _props = signal<Property[]>([
     // ── ACQ pipeline (mock) ──────────────────────────────────────────────────
@@ -98,21 +98,140 @@ export class MockDataService {
         { id: 'n005b', text: 'Counter-offer of £385k submitted. Awaiting response.',    author: 'Aryan', timestamp: '2026-06-25T15:10:00Z', label: 'action'  as NoteLabel },
       ],
     }));
+    // ── TX properties: backfill acquisition history ─────────────────────────
+    // p001 — 15 Hallards Close (MoS)
     this._mutate('p001', p => ({ ...p,
+      viewing: { agentName: 'Claire Hobbs', agentCompany: 'Savills · Bristol', agentEmail: 'c.hobbs@savills.com', agentPhone: '0117 910 2200', date: '2026-04-08', time: '11:00', attendee: 'Aryan', reportCondition: 'good', reportNotes: 'Structurally sound. Some cosmetic work needed in kitchen and bathroom. Roof felt is aging but not urgent. Good natural light throughout.' },
+      clientApprovedBy: 'David Mensah', clientMaxPrice: 285000,
+      offers: [
+        { id: 'op001a', amount: 270000, status: 'rejected',  date: '2026-04-15T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor holding firm at £280k' },
+        { id: 'op001b', amount: 277500, status: 'countered', date: '2026-04-22T14:00:00Z', submittedBy: 'Aryan', notes: 'Vendor countered at £282k' },
+        { id: 'op001c', amount: 280000, status: 'accepted',  date: '2026-04-28T09:30:00Z', submittedBy: 'Aryan' },
+      ],
       activityLog: [
-        { id: 'np001a', text: 'Offer of £280k accepted. MoS issued by vendor solicitor.', author: 'Aryan', timestamp: '2026-05-14T11:00:00Z', label: 'success' as NoteLabel },
-        { id: 'np001b', text: 'MoS signed and returned. Conveyancer instructed.',         author: 'Aryan', timestamp: '2026-05-20T09:30:00Z', label: 'action'  as NoteLabel },
+        { id: 'np001a', text: 'Offer of £280k accepted. MoS issued by vendor solicitor.', author: 'Aryan',         timestamp: '2026-05-14T11:00:00Z', label: 'success' as NoteLabel },
+        { id: 'np001b', text: 'MoS signed and returned. Conveyancer instructed.',         author: 'Aryan',         timestamp: '2026-05-20T09:30:00Z', label: 'action'  as NoteLabel },
       ],
     }));
+
+    // p002 — GFF 22 Rock Lane (MoS)
+    this._mutate('p002', p => ({ ...p,
+      viewing: { agentName: 'Tom Ashford', agentCompany: 'Jacobs · Hastings', agentEmail: 't.ashford@jacobs-ea.co.uk', agentPhone: '01424 421 200', date: '2026-04-10', time: '13:00', attendee: 'Megan Doyle', reportCondition: 'fair', reportNotes: 'Ground-floor flat in reasonable condition. Damp issue in rear bedroom to investigate. Lease is 85 years — acceptable. Parking permit available.' },
+      clientApprovedBy: 'Sarah Okafor', clientMaxPrice: 170000,
+      offers: [
+        { id: 'op002a', amount: 155000, status: 'rejected',  date: '2026-04-18T10:00:00Z', submittedBy: 'Megan Doyle', notes: 'Vendor wants closer to asking' },
+        { id: 'op002b', amount: 163000, status: 'accepted',  date: '2026-04-25T15:30:00Z', submittedBy: 'Megan Doyle' },
+      ],
+      activityLog: [
+        { id: 'np002a', text: 'Offer of £163k accepted. Awaiting MoS from vendor.',  author: 'Megan Doyle', timestamp: '2026-05-02T09:00:00Z', label: 'success' as NoteLabel },
+      ],
+    }));
+
+    // p003 — 32 Orchard Avenue (MoS)
+    this._mutate('p003', p => ({ ...p,
+      viewing: { agentName: 'Laura Kim', agentCompany: 'Fox & Sons · Bristol', agentEmail: 'l.kim@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-03-28', time: '10:00', attendee: 'Aryan', reportCondition: 'good', reportNotes: 'Well-maintained end-terrace. New boiler installed 2024. Rear extension planning permission granted but not built. EPC B already achieved.' },
+      clientApprovedBy: 'David Mensah', clientMaxPrice: 305000,
+      offers: [
+        { id: 'op003a', amount: 290000, status: 'countered', date: '2026-04-03T11:00:00Z', submittedBy: 'Aryan', notes: 'Vendor countered at £300k' },
+        { id: 'op003b', amount: 297500, status: 'accepted',  date: '2026-04-09T10:00:00Z', submittedBy: 'Aryan' },
+      ],
+      activityLog: [
+        { id: 'np003a', text: 'Offer of £297.5k accepted. MoS in progress.',  author: 'Aryan', timestamp: '2026-04-25T09:00:00Z', label: 'success' as NoteLabel },
+      ],
+    }));
+
+    // p004 — 94 Middleton Road (Legals)
     this._mutate('p004', p => ({ ...p,
+      viewing: { agentName: 'James Parker', agentCompany: 'Savills · Wimbledon', agentEmail: 'j.parker@savills.com', agentPhone: '020 8947 1200', date: '2026-03-12', time: '14:00', attendee: 'Ryan Okonkwo', reportCondition: 'good', reportNotes: 'Three-bed terraced in good order. Some surface damp in utility room — likely condensation. New windows throughout in 2023. South-facing garden. Strong rental demand in the area.' },
+      clientApprovedBy: 'Sarah Okafor', clientMaxPrice: 480000,
+      offers: [
+        { id: 'op004a', amount: 450000, status: 'rejected',  date: '2026-03-20T10:00:00Z', submittedBy: 'Ryan Okonkwo', notes: 'Vendor not accepting below £460k' },
+        { id: 'op004b', amount: 458000, status: 'countered', date: '2026-03-26T14:00:00Z', submittedBy: 'Ryan Okonkwo', notes: 'Vendor countered at £463k' },
+        { id: 'op004c', amount: 461500, status: 'accepted',  date: '2026-04-01T09:00:00Z', submittedBy: 'Ryan Okonkwo' },
+      ],
       activityLog: [
-        { id: 'np004a', text: 'Searches ordered. ETA 10 working days.',                  author: 'Jiya Chowdhury', timestamp: '2026-06-01T09:00:00Z', label: 'action' as NoteLabel },
-        { id: 'np004b', text: 'Searches received. Draft RoT sent to fee earner.',        author: 'Jiya Chowdhury', timestamp: '2026-06-18T14:00:00Z', label: 'info'   as NoteLabel },
+        { id: 'np004a', text: 'Searches ordered. ETA 10 working days.',            author: 'Jiya Chowdhury', timestamp: '2026-06-01T09:00:00Z', label: 'action'  as NoteLabel },
+        { id: 'np004b', text: 'Searches received. Draft RoT sent to fee earner.',  author: 'Jiya Chowdhury', timestamp: '2026-06-18T14:00:00Z', label: 'info'    as NoteLabel },
       ],
     }));
-    this._mutate('p009', p => ({ ...p,
+
+    // p005 — 120 Rye Road (Legals)
+    this._mutate('p005', p => ({ ...p,
+      viewing: { agentName: 'Sophie Wallis', agentCompany: 'Parsons Son & Basley', agentEmail: 's.wallis@psb.co.uk', agentPhone: '01424 430 600', date: '2026-03-18', time: '11:00', attendee: 'Megan Doyle', reportCondition: 'fair', reportNotes: 'First-floor flat. Some dated interior — kitchen and bathroom need full refurb. Structural report clear. Managing agent confirmed no service charge arrears. EPC D — significant capex required to reach C.' },
+      clientApprovedBy: 'David Mensah', clientMaxPrice: 190000,
+      offers: [
+        { id: 'op005a', amount: 175000, status: 'rejected',  date: '2026-03-25T10:00:00Z', submittedBy: 'Megan Doyle', notes: 'Vendor set minimum at £185k' },
+        { id: 'op005b', amount: 185000, status: 'accepted',  date: '2026-03-31T15:00:00Z', submittedBy: 'Megan Doyle' },
+      ],
       activityLog: [
-        { id: 'np009a', text: 'Contracts exchanged. Completion set for 25 July 2026.',   author: 'Jiya Chowdhury', timestamp: '2026-07-01T10:00:00Z', label: 'success' as NoteLabel },
+        { id: 'np005a', text: 'Offer of £185k accepted. Solicitor instructed.',  author: 'Megan Doyle', timestamp: '2026-05-05T09:00:00Z', label: 'success' as NoteLabel },
+      ],
+    }));
+
+    // p006 — 74 Avenue Road (Refurbishment)
+    this._mutate('p006', p => ({ ...p,
+      viewing: { agentName: 'Mark Evans', agentCompany: 'Kinleigh Folkard & Hayward', agentEmail: 'm.evans@kfh.co.uk', agentPhone: '020 8677 9900', date: '2026-02-14', time: '10:30', attendee: 'Ryan Okonkwo', reportCondition: 'fair', reportNotes: 'Terraced property needing full refurb. No central heating — requires full system installation. Rear extension opportunity. Planning officer confirmed permitted development rights intact.' },
+      clientApprovedBy: 'Sarah Okafor', clientMaxPrice: 480000,
+      offers: [
+        { id: 'op006a', amount: 455000, status: 'rejected',  date: '2026-02-20T09:00:00Z', submittedBy: 'Ryan Okonkwo', notes: 'Vendor had another offer' },
+        { id: 'op006b', amount: 465000, status: 'accepted',  date: '2026-02-27T11:00:00Z', submittedBy: 'Ryan Okonkwo' },
+      ],
+      activityLog: [
+        { id: 'np006a', text: 'Contracts exchanged. Refurb contractor mobilising.',  author: 'Aryan', timestamp: '2026-05-15T09:00:00Z', label: 'success' as NoteLabel },
+      ],
+      agreedPrice: 465000,
+    }));
+
+    // p007 — 148 Malvern Way (Refurbishment)
+    this._mutate('p007', p => ({ ...p,
+      viewing: { agentName: 'Ben Foster', agentCompany: 'Jacobs · Hastings', agentEmail: 'b.foster@jacobs-ea.co.uk', agentPhone: '01424 421 200', date: '2026-02-20', time: '14:00', attendee: 'Megan Doyle', reportCondition: 'poor', reportNotes: 'Property in poor condition — full strip-out required. Roof needs replacement within 2 years. Good bones structurally. Large garden. Permitted development for loft conversion confirmed.' },
+      clientApprovedBy: 'David Mensah', clientMaxPrice: 215000,
+      offers: [
+        { id: 'op007a', amount: 195000, status: 'countered', date: '2026-02-28T10:00:00Z', submittedBy: 'Megan Doyle', notes: 'Vendor countered at £212k' },
+        { id: 'op007b', amount: 207000, status: 'countered', date: '2026-03-06T14:00:00Z', submittedBy: 'Megan Doyle', notes: 'Vendor reduced to £210k — final offer' },
+        { id: 'op007c', amount: 210000, status: 'accepted',  date: '2026-03-10T09:30:00Z', submittedBy: 'Megan Doyle' },
+      ],
+      activityLog: [
+        { id: 'np007a', text: 'Refurb works commenced. Expected completion August 2026.',  author: 'Aryan', timestamp: '2026-06-01T09:00:00Z', label: 'action' as NoteLabel },
+      ],
+    }));
+
+    // p008 — 26 Dunster Road (Refurbishment)
+    this._mutate('p008', p => ({ ...p,
+      viewing: { agentName: 'Rachel Ford', agentCompany: 'Fox & Sons · Bristol', agentEmail: 'r.ford@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-02-25', time: '11:30', attendee: 'Aryan', reportCondition: 'fair', reportNotes: 'Semi-detached in reasonable structural condition. Rear bathroom dated, kitchen serviceable. Side access for skip/materials. EPC C — capex scope mainly cosmetic and insulation works.' },
+      clientApprovedBy: 'David Mensah', clientMaxPrice: 295000,
+      offers: [
+        { id: 'op008a', amount: 260000, status: 'rejected',  date: '2026-03-04T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor has set floor at £270k' },
+        { id: 'op008b', amount: 270000, status: 'accepted',  date: '2026-03-10T14:00:00Z', submittedBy: 'Aryan' },
+      ],
+      activityLog: [
+        { id: 'np008a', text: 'Refurb underway. Phase 1 (bathroom/kitchen) complete.',  author: 'Aryan', timestamp: '2026-06-20T09:00:00Z', label: 'action' as NoteLabel },
+      ],
+    }));
+
+    // p009 — 26 Norton Farm Road (Lettings)
+    this._mutate('p009', p => ({ ...p,
+      clientApprovedBy: 'Sarah Okafor', clientMaxPrice: 340000,
+      offers: [
+        { id: 'op009a', amount: 320000, status: 'rejected',  date: '2026-01-15T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor wanted closer to asking' },
+        { id: 'op009b', amount: 330000, status: 'accepted',  date: '2026-01-22T11:00:00Z', submittedBy: 'Aryan' },
+      ],
+      activityLog: [
+        { id: 'np009a', text: 'Contracts exchanged. Completion set for 25 July 2026.',  author: 'Jiya Chowdhury', timestamp: '2026-07-01T10:00:00Z', label: 'success' as NoteLabel },
+        { id: 'np009b', text: 'Refurb completed. Property listed with letting agent.',   author: 'Aryan',          timestamp: '2026-07-10T09:00:00Z', label: 'action'  as NoteLabel },
+      ],
+    }));
+
+    // p010 — 44 Brendon Rise (Lettings)
+    this._mutate('p010', p => ({ ...p,
+      viewing: { agentName: 'James Harlow', agentCompany: 'Jacobs', agentEmail: 'j.harlow@jacobs-ea.co.uk', agentPhone: '01424 421 200', date: '2026-01-18', time: '10:00', attendee: 'Megan Doyle', reportCondition: 'poor', reportNotes: 'Full refurb required. EPC F — extensive insulation, glazing and heating works needed to hit EPC C target. Structural survey clear. Large garden, on-street parking.' },
+      clientApprovedBy: 'David Mensah', clientMaxPrice: 155000,
+      offers: [
+        { id: 'op010a', amount: 140000, status: 'countered', date: '2026-01-25T14:00:00Z', submittedBy: 'Megan Doyle', notes: 'Vendor countered at £152k' },
+        { id: 'op010b', amount: 150000, status: 'accepted',  date: '2026-02-01T10:00:00Z', submittedBy: 'Megan Doyle' },
+      ],
+      activityLog: [
+        { id: 'np010a', text: 'Refurb completed. EPC C achieved. Tenant found.',  author: 'Aryan', timestamp: '2026-07-05T09:00:00Z', label: 'success' as NoteLabel },
       ],
     }));
   }
