@@ -51,7 +51,8 @@ const CHECKLIST_GROUPS = [
   {
     label: 'MoS',
     items: [
-      { key: 'mos_received', label: 'MoS received' },
+      { key: 'mos_received',   label: 'MoS received' },
+      { key: 'sols_confirmed', label: 'Matter opened & receipt confirmed to TX' },
     ],
   },
   {
