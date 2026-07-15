@@ -135,6 +135,9 @@ export class LegalPortalComponent {
     if (win) {
       win.addEventListener('storage', (e: StorageEvent) => {
         if (e.key === 'iris_tx_data') this.txDataSig.set(this._txRaw());
+        if (e.key === DR_KEY) {
+          try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
+        }
       });
     }
   }

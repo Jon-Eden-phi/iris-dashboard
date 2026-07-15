@@ -106,6 +106,14 @@ export class TransactionsPortalComponent {
     effect(() => {
       localStorage.setItem(this.DR_KEY, JSON.stringify(this.dataRoom()));
     });
+    const win = this.doc.defaultView;
+    if (win) {
+      win.addEventListener('storage', (e: StorageEvent) => {
+        if (e.key === this.DR_KEY) {
+          try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
+        }
+      });
+    }
   }
 
   filesForProperty(propId: string): DataRoomFile[] {
