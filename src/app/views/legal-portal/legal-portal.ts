@@ -37,6 +37,7 @@ interface DataRoomFile {
 // Only items where there is an actual document to review before signing off.
 // Action-only confirmations (ordered, raised, sent, sign-off, exchanged etc.) have no entry.
 const ITEM_DOC_TYPES: Record<string, string[]> = {
+  mos_received:  ['MoS', 'Memorandum of Sale'],
   search_la_r:   ['Local Authority Search', 'Searches'],
   search_water:  ['Water & Drainage Search', 'Water Search', 'Searches'],
   search_env:    ['Environmental Search', 'Searches'],
@@ -47,6 +48,12 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
 };
 
 const CHECKLIST_GROUPS = [
+  {
+    label: 'MoS',
+    items: [
+      { key: 'mos_received', label: 'MoS received' },
+    ],
+  },
   {
     label: 'Searches',
     items: [
@@ -162,7 +169,7 @@ export class LegalPortalComponent {
     const tx = this.txDataSig();
     return this.data.properties.filter((p: Property) =>
       p.status === 'active' &&
-      (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
+      (p.stage === 'MemorandumOfSale' || p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
     );
   });
 

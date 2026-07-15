@@ -906,9 +906,14 @@
                     @if (getTxData(p.id).checklist[action.key]) {
                       <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">Done</span>
                     } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showUploadModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload MoS
-                      </button>
+                      @if (legalCheck(p.id, 'mos_received')) {
+                        <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Received by legal</span>
+                      } @else {
+                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Handled by legal team</span>
+                        <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('MoS'); showUploadModal.set(true); $event.stopPropagation()">
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload if needed
+                        </button>
+                      }
                     } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_sent_sols') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSolicitorModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-scale" style="font-size:11px;"></i> Instruct solicitor
