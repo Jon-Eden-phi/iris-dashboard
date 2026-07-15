@@ -169,7 +169,7 @@ export class LegalPortalComponent {
     const tx = this.txDataSig();
     return this.data.properties.filter((p: Property) =>
       p.status === 'active' &&
-      (p.stage === 'MemorandumOfSale' || p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
+      (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
     );
   });
 
