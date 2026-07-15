@@ -774,18 +774,40 @@
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showSearchesModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-search" style="font-size:11px;"></i> Order searches
                       </button>
+                    } @else if (p.stage === 'Legals' && action.key === 'searches_received') {
+                      @if (txHasDocs(p.id, ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])) {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Search Results', ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches']); $event.stopPropagation()">
+                          <i class="ti ti-eye" style="font-size:11px;"></i> View searches
+                        </button>
+                      } @else {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Searches'); showUploadModal.set(true); $event.stopPropagation()">
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload results
+                        </button>
+                      }
                     } @else if (p.stage === 'Legals' && action.key === 'draft_rot_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showDraftRotModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload draft RoT
-                      </button>
+                      @if (txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Draft Report on Title', ['Report on Title', 'Draft Report on Title']); $event.stopPropagation()">
+                          <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
+                        </button>
+                      } @else {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showDraftRotModal.set(true); $event.stopPropagation()">
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload draft RoT
+                        </button>
+                      }
                     } @else if (p.stage === 'Refurbishment' && action.key === 'surveys_ordered') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order surveys
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Report on Title'); showUploadModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload final RoT
-                      </button>
+                      @if (txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Report on Title', ['Report on Title', 'Draft Report on Title']); $event.stopPropagation()">
+                          <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
+                        </button>
+                      } @else {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Report on Title'); showUploadModal.set(true); $event.stopPropagation()">
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload final RoT
+                        </button>
+                      }
                     } @else if (p.stage === 'Refurbishment' && action.key === 'scope_prepared') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAdditionalWorksModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-tools" style="font-size:11px;"></i> Request additional works
@@ -803,7 +825,7 @@
                         <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_approved') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Final Report on Title', ['Report on Title', 'Report on Title (Draft)']); $event.stopPropagation()">
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Final Report on Title', ['Report on Title', 'Draft Report on Title']); $event.stopPropagation()">
                         <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'contract_pack') {

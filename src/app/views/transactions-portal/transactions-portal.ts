@@ -839,6 +839,10 @@ export class TransactionsPortalComponent {
     return this.legalCheck(propId, 'exchange_ready');
   }
 
+  txHasDocs(propId: string, docTypes: string[]): boolean {
+    return this.dataRoom().some(f => f.propertyId === propId && docTypes.includes(f.docType));
+  }
+
   mosDocs(propId: string): DataRoomFile[] {
     return this.dataRoom().filter(f => f.propertyId === propId && f.docType === 'MoS');
   }
@@ -861,7 +865,7 @@ export class TransactionsPortalComponent {
       id: 'dr_' + Date.now(),
       propertyId: p.id,
       stage: p.stage,
-      docType: 'Report on Title (Draft)',
+      docType: 'Draft Report on Title',
       fileName,
       uploadedBy: this.auth.currentUser()?.name ?? 'TX Team',
       uploadedAt: new Date().toLocaleDateString('en-GB'),
