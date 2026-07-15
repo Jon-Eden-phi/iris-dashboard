@@ -143,10 +143,14 @@ export class TransactionsPortalComponent {
   }
 
   readonly dataRoomSections = [
-    { stage: 'MemorandumOfSale', label: 'MoS',                  icon: 'ti-file-text'    },
-    { stage: 'Legals',           label: 'Conveyancing',          icon: 'ti-scale'        },
-    { stage: 'Refurbishment',    label: 'Surveys',               icon: 'ti-clipboard'    },
-    { stage: 'Lettings',         label: 'Exchange / Completion', icon: 'ti-home-check'   },
+    { stage: 'Draft',              label: 'Draft',               icon: 'ti-pencil'       },
+    { stage: 'ClientApproval',     label: 'Client Approval',     icon: 'ti-user-check'   },
+    { stage: 'Viewing',            label: 'Viewing',             icon: 'ti-eye'          },
+    { stage: 'Negotiations',       label: 'Negotiations',        icon: 'ti-messages'     },
+    { stage: 'MemorandumOfSale',   label: 'MoS',                 icon: 'ti-file-text'    },
+    { stage: 'Legals',             label: 'Conveyancing',        icon: 'ti-scale'        },
+    { stage: 'Refurbishment',      label: 'Surveys & Refurb',    icon: 'ti-clipboard'    },
+    { stage: 'Lettings',           label: 'Exchange / Lettings', icon: 'ti-home-check'   },
   ];
 
   deleteFile(fileId: string): void {
@@ -384,6 +388,12 @@ export class TransactionsPortalComponent {
   acqProperty = computed(() => {
     const id = this.acqSelectedId();
     return id ? this.data.getProperty(id) : undefined;
+  });
+
+  // Active property regardless of which record view is open
+  currentProperty = computed(() => {
+    const v = this.view();
+    return v === 'acq-record' ? this.acqProperty() : this.selectedProperty();
   });
 
   readonly allStages = ALL_STAGES;
@@ -654,7 +664,7 @@ export class TransactionsPortalComponent {
   }
 
   uploadDocument(): void {
-    const p = this.selectedProperty();
+    const p = this.currentProperty();
     if (!p) return;
     const docType = this.uploadDocType();
     const note = this.uploadNote().trim();

@@ -488,6 +488,7 @@
               <div style="display:flex; flex-direction:column; gap:8px;">
                 @for (section of dataRoomSections; track section.stage) {
                   @let sectionFiles = filesForStageSection(p.id, section.stage);
+                  @if (sectionFiles.length > 0 || section.stage === p.stage) {
                   @let isOpen = drExpandedStages().has(section.stage);
                   <!-- Section header -->
                   <div (click)="toggleDrStage(section.stage)"
@@ -550,6 +551,7 @@
                       }
                     </div>
                   }
+                  } <!-- end @if sectionFiles.length > 0 || current stage -->
                 }
               </div>
             </div>
