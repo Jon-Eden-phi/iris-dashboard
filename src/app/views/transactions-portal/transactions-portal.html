@@ -485,49 +485,72 @@
                 </div>
               </div>
 
-              @let allDrFiles = filesForProperty(p.id);
-              @if (allDrFiles.length === 0) {
-                <div class="tx-empty" style="padding:32px 0;">
-                  <i class="ti ti-folder-open" style="font-size:28px;"></i>
-                  No documents yet — click Upload to add contracts, reports and correspondence
-                </div>
-              } @else {
-                <div style="border:1px solid var(--border); border-radius:8px; overflow:hidden;">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th style="width:32%;">File name</th>
-                        <th>Document type</th>
-                        <th>Stage</th>
-                        <th>Uploaded</th>
-                        <th>Uploaded by</th>
-                        <th>Note</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (file of allDrFiles; track file.id) {
-                        <tr>
-                          <td>
-                            <i class="ti ti-file-description" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>
-                            <span style="font-size:13px;">{{ file.fileName }}</span>
-                          </td>
-                          <td><span class="badge badge-gray">{{ file.docType }}</span></td>
-                          <td><span class="badge badge-gray" style="color:var(--text3);">{{ allStageLabels[file.stage] ?? file.stage }}</span></td>
-                          <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
-                          <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
-                          <td style="font-size:12px; color:var(--text3); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
-                          <td>
-                            <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteFile(file.id)">
-                              <i class="ti ti-trash" style="font-size:12px;"></i>
-                            </button>
-                          </td>
-                        </tr>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                @for (section of dataRoomSections; track section.stage) {
+                  @let sectionFiles = filesForStageSection(p.id, section.stage);
+                  @let isOpen = drExpandedStages().has(section.stage);
+                  <!-- Section header -->
+                  <div (click)="toggleDrStage(section.stage)"
+                       style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; cursor:pointer; border:1px solid var(--border); background:var(--bg); user-select:none;"
+                       [style.border-color]="isOpen ? 'var(--accent)' : 'var(--border)'"
+                       [style.background]="isOpen ? 'rgba(232,96,28,0.03)' : 'var(--bg)'">
+                    <i [class]="isOpen ? 'ti ti-chevron-down' : 'ti ti-chevron-right'" style="font-size:12px; color:var(--text3); flex-shrink:0;"></i>
+                    <i class="ti ti-folder-filled" style="font-size:15px; color:#f59e0b; flex-shrink:0;"></i>
+                    <span style="font-size:13px; font-weight:700; flex:1;">{{ section.label }}</span>
+                    @if (sectionFiles.length > 0) {
+                      <span class="badge badge-gray">{{ sectionFiles.length }} {{ sectionFiles.length === 1 ? 'file' : 'files' }}</span>
+                    } @else {
+                      <span style="font-size:11px; color:var(--text3);">No documents</span>
+                    }
+                    @if (section.stage === p.stage) {
+                      <span class="tx-badge tx-badge-amber" style="font-size:10px;">Current stage</span>
+                    }
+                  </div>
+                  <!-- Section content -->
+                  @if (isOpen) {
+                    <div style="border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:4px;">
+                      @if (sectionFiles.length === 0) {
+                        <div class="tx-empty" style="padding:20px 0;">
+                          <i class="ti ti-folder-open" style="font-size:22px;"></i>
+                          No documents uploaded for this stage yet
+                        </div>
+                      } @else {
+                        <table>
+                          <thead>
+                            <tr>
+                              <th style="width:35%;">File name</th>
+                              <th>Document type</th>
+                              <th>Uploaded</th>
+                              <th>Uploaded by</th>
+                              <th>Note</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (file of sectionFiles; track file.id) {
+                              <tr>
+                                <td>
+                                  <i class="ti ti-file-description" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>
+                                  <span style="font-size:13px;">{{ file.fileName }}</span>
+                                </td>
+                                <td><span class="badge badge-gray">{{ file.docType }}</span></td>
+                                <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
+                                <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
+                                <td style="font-size:12px; color:var(--text3); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
+                                <td>
+                                  <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteFile(file.id)">
+                                    <i class="ti ti-trash" style="font-size:12px;"></i>
+                                  </button>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
                       }
-                    </tbody>
-                  </table>
-                </div>
-              }
+                    </div>
+                  }
+                }
+              </div>
             </div>
           }
 
