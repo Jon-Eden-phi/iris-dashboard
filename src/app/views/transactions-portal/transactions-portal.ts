@@ -1,13 +1,14 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
 import { Property } from '../../models/property.model';
 
-type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record';
+type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record';
 
 const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
+const ACQ_STAGES = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
 
 const TX_STAGE_LABELS: Record<string, string> = {
   MemorandumOfSale: 'MoS',
@@ -15,6 +16,13 @@ const TX_STAGE_LABELS: Record<string, string> = {
   Refurbishment: 'Surveys',
   Lettings: 'Exchange / Completion',
 };
+
+const ALL_STAGE_LABELS: Record<string, string> = {
+  Draft: 'Draft', ClientApproval: 'Client Appr.', Viewing: 'Viewing', Negotiations: 'Negotiate',
+  MemorandumOfSale: 'MoS', Legals: 'Legals', Refurbishment: 'Refurb', Lettings: 'Lettings',
+};
+
+const ALL_STAGES = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
 
 interface Survey {
   property: string;
@@ -89,7 +97,7 @@ interface DataRoomFile {
 
 @Component({
   selector: 'app-transactions-portal',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './transactions-portal.html',
   styleUrl: './transactions-portal.scss',
 })
@@ -158,6 +166,7 @@ export class TransactionsPortalComponent {
 
   view          = signal<TxView>('homes');
   selectedId    = signal<string | null>(null);
+  acqSelectedId = signal<string | null>(null);
   searchQuery   = signal('');
   stageFilter   = signal('all');
   sortOrder     = signal('modified');
@@ -367,9 +376,27 @@ export class TransactionsPortalComponent {
     return id ? this.data.getProperty(id) : undefined;
   });
 
+  acqProperties = computed(() =>
+    this.data.properties.filter((p: Property) => p.status === 'active' && ACQ_STAGES.has(p.stage))
+  );
+
+  acqProperty = computed(() => {
+    const id = this.acqSelectedId();
+    return id ? this.data.getProperty(id) : undefined;
+  });
+
+  readonly allStages = ALL_STAGES;
+  readonly allStageLabels = ALL_STAGE_LABELS;
+
   openRecord(p: Property): void {
     this.selectedId.set(p.id);
     this.view.set('record');
+    this.doc.querySelector('.tx-content')?.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  openAcqRecord(p: Property): void {
+    this.acqSelectedId.set(p.id);
+    this.view.set('acq-record');
     this.doc.querySelector('.tx-content')?.scrollTo({ top: 0, behavior: 'instant' });
   }
 
