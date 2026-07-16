@@ -36,9 +36,23 @@ export class SetupComponent implements OnInit {
 
   ngOnInit(): void {
     const token = this.route.snapshot.paramMap.get('token') ?? '';
-    const inv   = this.invites.getByToken(token);
-    if (inv) this.invite.set(inv);
-    else     this.invalid.set(true);
+
+    // Try localStorage first (same-browser flow)
+    const stored = this.invites.getByToken(token);
+    if (stored) { this.invite.set(stored); return; }
+
+    // Fall back to URL-encoded invite data (cross-browser / different device)
+    const data = this.route.snapshot.queryParamMap.get('d');
+    if (data) {
+      try {
+        const decoded: PendingInvite = JSON.parse(atob(data));
+        if (this.invites.isUsed(decoded.token)) { this.invalid.set(true); return; }
+        this.invite.set(decoded);
+        return;
+      } catch { /* malformed — fall through */ }
+    }
+
+    this.invalid.set(true);
   }
 
   submit(): void {
@@ -66,6 +80,7 @@ export class SetupComponent implements OnInit {
       password: pass,
       notificationPrefs: this.notifPrefs(),
     });
+    this.invites.markUsed(inv.token);
     this.invites.remove(inv.token);
     this.done.set(true);
   }

@@ -15,7 +15,8 @@ export interface PendingInvite {
 
 @Injectable({ providedIn: 'root' })
 export class InvitesService {
-  private readonly STORAGE_KEY = 'iris-invites-v1';
+  private readonly STORAGE_KEY      = 'iris-invites-v1';
+  private readonly USED_STORAGE_KEY = 'iris-used-tokens-v1';
 
   private _load(): PendingInvite[] {
     try {
@@ -44,5 +45,23 @@ export class InvitesService {
 
   remove(token: string): void {
     this._invites.update(list => { const n = list.filter(i => i.token !== token); this._save(n); return n; });
+  }
+
+  isUsed(token: string): boolean {
+    try {
+      const raw = localStorage.getItem(this.USED_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as string[]).includes(token) : false;
+    } catch { return false; }
+  }
+
+  markUsed(token: string): void {
+    try {
+      const raw  = localStorage.getItem(this.USED_STORAGE_KEY);
+      const list: string[] = raw ? JSON.parse(raw) : [];
+      if (!list.includes(token)) {
+        list.push(token);
+        localStorage.setItem(this.USED_STORAGE_KEY, JSON.stringify(list));
+      }
+    } catch { /* ignore */ }
   }
 }

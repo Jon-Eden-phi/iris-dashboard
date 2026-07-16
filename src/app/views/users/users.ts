@@ -99,7 +99,7 @@ export class UsersComponent {
     const role: UserRole = companyRole === 'Conveyancer' ? 'Legal Provider'
       : (companyRole === 'Purchaser' || companyRole === 'Recipient') ? 'Client'
       : 'Internal';
-    this.invites.add({
+    const inviteObj = {
       token, email,
       organisation: this.inviteOrg(),
       companyRole,
@@ -108,8 +108,10 @@ export class UsersComponent {
       isAdmin: false,
       role,
       createdAt: Date.now(),
-    });
-    this.generatedLink.set(`${window.location.origin}/setup/${token}`);
+    };
+    this.invites.add(inviteObj);
+    const encoded = btoa(JSON.stringify(inviteObj));
+    this.generatedLink.set(`${window.location.origin}/setup/${token}?d=${encoded}`);
     this.showInviteLink.set(true);
   }
 
