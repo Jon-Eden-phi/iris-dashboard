@@ -32,7 +32,16 @@ export class AuthService {
   private _loadUsers(): IrisUser[] {
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (raw) return JSON.parse(raw) as IrisUser[];
+      const stored: IrisUser[] = raw ? JSON.parse(raw) : [];
+      // Upsert INITIAL_USERS so code-side changes (new accounts, password resets) always apply
+      const merged = [...stored];
+      for (const seed of INITIAL_USERS) {
+        const idx = merged.findIndex(u => u.id === seed.id);
+        if (idx >= 0) merged[idx] = { ...merged[idx], ...seed };
+        else merged.push(seed);
+      }
+      this._saveUsers(merged);
+      return merged;
     } catch { /* ignore */ }
     return INITIAL_USERS;
   }
