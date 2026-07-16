@@ -14,6 +14,7 @@
     <table>
       <thead>
         <tr>
+          <th style="width:48px;"></th>
           <th>Company name</th>
           <th>Address</th>
           <th>Company role</th>
@@ -24,6 +25,15 @@
       <tbody>
         @for (c of companies.all$(); track c.id) {
           <tr>
+            <td>
+              @if (c.logo) {
+                <img [src]="c.logo" alt="" style="height:28px; max-width:40px; object-fit:contain; border-radius:4px;" />
+              } @else {
+                <div style="width:32px; height:28px; border-radius:4px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text3);">
+                  {{ c.name[0] }}
+                </div>
+              }
+            </td>
             <td style="font-weight:700;">{{ c.name }}</td>
             <td style="font-size:12px; color:var(--text2);">{{ c.address || '—' }}</td>
             <td>
@@ -50,7 +60,7 @@
         }
         @if (companies.all.length === 0) {
           <tr>
-            <td colspan="5" style="text-align:center; padding:32px; color:var(--text3); font-size:13px;">
+            <td colspan="6" style="text-align:center; padding:32px; color:var(--text3); font-size:13px;">
               No companies yet. Click <strong>Add Company</strong> to get started.
             </td>
           </tr>
@@ -69,6 +79,31 @@
 
       <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Add company</div>
       <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">Company details will auto-fill when selected in the Add User form.</div>
+
+      <!-- Logo drop zone -->
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company logo <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+      @if (addLogo()) {
+        <div style="position:relative; display:inline-block; margin-bottom:14px;">
+          <img [src]="addLogo()" alt="Logo preview"
+               style="height:56px; max-width:180px; object-fit:contain; border-radius:8px; border:1px solid var(--border); padding:6px; background:#fff;" />
+          <button (click)="addLogo.set('')"
+                  style="position:absolute; top:-7px; right:-7px; width:20px; height:20px; border-radius:50%; border:none; background:#ef4444; color:#fff; cursor:pointer; font-size:11px; display:flex; align-items:center; justify-content:center; line-height:1;">
+            &times;
+          </button>
+        </div>
+      } @else {
+        <div tabindex="0"
+             (dragover)="$event.preventDefault(); addLogoDragging.set(true)"
+             (dragleave)="addLogoDragging.set(false)"
+             (drop)="onLogoDrop($event)"
+             (paste)="onLogoPaste($event)"
+             style="border-radius:10px; padding:18px 14px; text-align:center; cursor:pointer; margin-bottom:14px; transition:all .15s; font-size:12px; color:var(--text3);"
+             [style.border]="addLogoDragging() ? '2px dashed var(--accent)' : '2px dashed var(--border)'"
+             [style.background]="addLogoDragging() ? 'var(--accent-soft)' : 'var(--bg)'">
+          <i class="ti ti-photo" style="font-size:22px; display:block; margin-bottom:5px; opacity:.5;"></i>
+          Drag an image here, or click and paste (Ctrl+V)
+        </div>
+      }
 
       <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company name</label>
       <input class="form-input" type="text" placeholder="e.g. Acme Solicitors" style="margin-bottom:14px;"

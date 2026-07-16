@@ -30,6 +30,8 @@ export class CompaniesComponent {
   showAdd         = signal(false);
   addName         = signal('');
   addAddress      = signal('');
+  addLogo         = signal('');
+  addLogoDragging = signal(false);
 
   addRoleMode     = signal<'select' | 'custom'>('select');
   addRoleSelect   = signal('');
@@ -64,8 +66,34 @@ export class CompaniesComponent {
     this.addFnCustom.set('');
   }
 
+  onLogoDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.addLogoDragging.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file?.type.startsWith('image/')) { this._readLogoFile(file); return; }
+    const url = event.dataTransfer?.getData('text/uri-list')?.split('\n')[0]?.trim();
+    if (url && url.startsWith('http')) this.addLogo.set(url);
+  }
+
+  onLogoPaste(event: ClipboardEvent): void {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) { this._readLogoFile(file); break; }
+      }
+    }
+  }
+
+  private _readLogoFile(file: File): void {
+    const reader = new FileReader();
+    reader.onload = e => this.addLogo.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
   openAdd(): void {
-    this.addName.set(''); this.addAddress.set('');
+    this.addName.set(''); this.addAddress.set(''); this.addLogo.set('');
     this.addRoleMode.set('select'); this.addRoleSelect.set(''); this.addRoleCustom.set('');
     this.addFnMode.set('select'); this.addFnSelect.set(''); this.addFnCustom.set('');
     this.addError.set('');
@@ -88,6 +116,7 @@ export class CompaniesComponent {
       address: this.addAddress().trim(),
       companyRole: role,
       functionArea: fn,
+      logo: this.addLogo() || undefined,
     });
     this.showAdd.set(false);
   }
