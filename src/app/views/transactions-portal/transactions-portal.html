@@ -5,7 +5,7 @@
     <div class="nav-logo">
       <div class="nav-logo-mark">T</div>
       <div>
-        <div class="tx-logo-name">Transactions</div>
+        <div class="tx-logo-name">Purchasing</div>
       </div>
     </div>
 
@@ -68,7 +68,7 @@
       <div class="tx-avatar">{{ (auth.currentUser()?.name ?? 'U').substring(0,2).toUpperCase() }}</div>
       <div style="min-width:0;">
         <div class="tx-user-name">{{ auth.currentUser()?.name }}</div>
-        <div class="tx-user-role">Transactions</div>
+        <div class="tx-user-role">Purchasing</div>
       </div>
       <button class="tx-signout-btn" (click)="logout()" title="Sign out">
         <i class="ti ti-logout"></i>
@@ -81,11 +81,11 @@
 
     <!-- TOP BAR -->
     <div class="tx-topbar">
-      @if (view() === 'homes')     { <span class="tx-topbar-title">Homes</span><span class="tx-topbar-sub">{{ filteredProperties().length }} of {{ txProperties().length }} in Transactions</span> }
+      @if (view() === 'homes')     { <span class="tx-topbar-title">Homes</span><span class="tx-topbar-sub">{{ filteredProperties().length }} of {{ txProperties().length }} in Purchasing</span> }
       @if (view() === 'queries')   { <span class="tx-topbar-title">My queries</span><span class="tx-topbar-sub">{{ openQueryCount }} open</span> }
-      @if (view() === 'lost')      { <span class="tx-topbar-title">Aborted transactions</span><span class="tx-topbar-sub">{{ lostTx().length }} aborted</span> }
-      @if (view() === 'surveys')   { <span class="tx-topbar-title">Survey tracker</span><span class="tx-topbar-sub">Technical surveys across all active transactions</span> }
-      @if (view() === 'teamdash')  { <span class="tx-topbar-title">Team dashboard</span><span class="tx-topbar-sub">Workload across the Transactions team</span> }
+      @if (view() === 'lost')      { <span class="tx-topbar-title">Aborted purchasing</span><span class="tx-topbar-sub">{{ lostTx().length }} aborted</span> }
+      @if (view() === 'surveys')   { <span class="tx-topbar-title">Survey tracker</span><span class="tx-topbar-sub">Technical surveys across all active purchasing</span> }
+      @if (view() === 'teamdash')  { <span class="tx-topbar-title">Team dashboard</span><span class="tx-topbar-sub">Workload across the Purchasing team</span> }
       @if (view() === 'suppliers') { <span class="tx-topbar-title">Surveyor directory</span><span class="tx-topbar-sub">Approved surveying suppliers</span> }
       @if (view() === 'record' && selectedProperty(); as p) { <span class="tx-topbar-title">{{ p.address }}</span><span class="tx-topbar-sub">{{ p.postcode }} · {{ stageLabel(p.stage) }}</span> }
       @if (view() === 'acquisitions') { <span class="tx-topbar-title">Pipeline view</span><span class="tx-topbar-sub">{{ acqProperties().length }} properties in acquisitions — read only</span> }
@@ -155,7 +155,7 @@
 
         <div class="card">
           <div class="tx-section-header">
-            <span class="tx-section-title"><i class="ti ti-home-2"></i> Properties in Transactions</span>
+            <span class="tx-section-title"><i class="ti ti-home-2"></i> Properties in Purchasing</span>
             <span class="badge badge-gray">{{ filteredProperties().length }} shown</span>
           </div>
           @if (filteredProperties().length === 0) {
@@ -291,11 +291,11 @@
       @if (view() === 'lost') {
         <div class="card">
           <div class="tx-section-header">
-            <span class="tx-section-title"><i class="ti ti-archive"></i> Aborted transactions</span>
+            <span class="tx-section-title"><i class="ti ti-archive"></i> Aborted purchasing</span>
             <span class="badge badge-gray">{{ lostTx().length }}</span>
           </div>
           @if (lostTx().length === 0) {
-            <div class="tx-empty"><i class="ti ti-circle-check"></i>No aborted transactions</div>
+            <div class="tx-empty"><i class="ti ti-circle-check"></i>No aborted purchasing</div>
           } @else {
             <table>
               <thead><tr><th>Address</th><th>Stage when aborted</th><th>Reason</th><th>Detail</th><th>Date</th><th></th></tr></thead>
@@ -362,7 +362,7 @@
       @if (view() === 'teamdash') {
         <div class="card">
           <div class="tx-section-header">
-            <span class="tx-section-title"><i class="ti ti-users"></i> Transactions per team member</span>
+            <span class="tx-section-title"><i class="ti ti-users"></i> Purchasing per team member</span>
           </div>
           <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
             @for (t of teamWorkload; track t.name) {
@@ -593,7 +593,7 @@
             </div>
             <div style="display:flex; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:10px; font-weight:600;">
               <span style="color:#7c3aed;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#7c3aed; margin-right:4px;"></span>Stages 1–4 Sourcing</span>
-              <span style="color:var(--accent);"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-right:4px;"></span>Stages 5–8 Transactions</span>
+              <span style="color:var(--accent);"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-right:4px;"></span>Stages 5–8 Purchasing</span>
               <span style="margin-left:auto; color:var(--text3); font-weight:400;">Click any completed stage to view details</span>
             </div>
           </div>
@@ -1349,7 +1349,7 @@
             <!-- Transactions team -->
             <div class="card">
               <div class="tx-section-header" style="margin-bottom:14px;">
-                <span class="tx-section-title"><i class="ti ti-briefcase"></i> Transactions team</span>
+                <span class="tx-section-title"><i class="ti ti-briefcase"></i> Purchasing team</span>
               </div>
               @if (usersByRole('Transactions').length > 0) {
                 <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px;">
@@ -1364,7 +1364,7 @@
                   }
                 </div>
               } @else {
-                <div style="font-size:13px; color:var(--text3);">No Transactions users.</div>
+                <div style="font-size:13px; color:var(--text3);">No Purchasing users.</div>
               }
             </div>
 
