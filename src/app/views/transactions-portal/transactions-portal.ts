@@ -921,6 +921,17 @@ export class TransactionsPortalComponent {
     return this.dataRoom().some(f => f.propertyId === propId && docTypes.includes(f.docType));
   }
 
+  txHasAllSearches(propId: string): boolean {
+    return this.txHasDocs(propId, ['Local Authority Search']) &&
+           this.txHasDocs(propId, ['Water & Drainage Search']) &&
+           this.txHasDocs(propId, ['Environmental Search']);
+  }
+
+  remainingSearchTypes(propId: string): string[] {
+    return ['Local Authority Search', 'Water & Drainage Search', 'Environmental Search']
+      .filter(t => !this.txHasDocs(propId, [t]));
+  }
+
   mosDocs(propId: string): DataRoomFile[] {
     return this.dataRoom().filter(f => f.propertyId === propId && f.docType === 'MoS');
   }
