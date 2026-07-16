@@ -1,5 +1,117 @@
-<div class="card" style="padding:40px 28px; text-align:center; color:var(--text3);">
-  <i class="ti ti-building" style="font-size:36px; margin-bottom:10px; display:block;"></i>
-  <div style="font-size:15px; font-weight:700; color:var(--text2); margin-bottom:6px;">Companies</div>
-  <div style="font-size:13px;">Company management coming soon.</div>
+<!-- Toolbar -->
+<div class="card" style="padding:10px 16px; margin-bottom:14px;">
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span style="font-size:13px; font-weight:600; color:var(--text2);">{{ companies.all.length }} {{ companies.all.length === 1 ? 'company' : 'companies' }}</span>
+    <button class="btn-primary" style="margin-left:auto; font-size:12px; padding:6px 14px;" (click)="openAdd()">
+      <i class="ti ti-plus" style="margin-right:4px;"></i>Add Company
+    </button>
+  </div>
 </div>
+
+<!-- Companies table -->
+<div class="card flush">
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Company name</th>
+          <th>Address</th>
+          <th>Company role</th>
+          <th>Function</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of companies.all$(); track c.id) {
+          <tr>
+            <td style="font-weight:700;">{{ c.name }}</td>
+            <td style="font-size:12px; color:var(--text2);">{{ c.address || '—' }}</td>
+            <td>
+              <span style="display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border); color:var(--text2);">
+                {{ c.companyRole }}
+              </span>
+            </td>
+            <td>
+              @if (c.functionArea) {
+                <span style="display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--accent-soft); color:var(--accent);">
+                  {{ c.functionArea }}
+                </span>
+              } @else {
+                <span style="color:var(--text3); font-size:12px;">—</span>
+              }
+            </td>
+            <td style="text-align:right;">
+              <button style="width:30px; height:30px; border-radius:7px; border:1.5px solid rgba(239,68,68,.3); background:rgba(239,68,68,.05); color:#ef4444; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;"
+                      (click)="remove(c)">
+                <i class="ti ti-trash" style="font-size:13px;"></i>
+              </button>
+            </td>
+          </tr>
+        }
+        @if (companies.all.length === 0) {
+          <tr>
+            <td colspan="5" style="text-align:center; padding:32px; color:var(--text3); font-size:13px;">
+              No companies yet. Click <strong>Add Company</strong> to get started.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ Add Company modal ═════════════════════════════ -->
+@if (showAdd()) {
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"
+       (click)="showAdd.set(false)">
+    <div style="background:#fff; border-radius:14px; padding:28px; width:100%; max-width:440px; box-shadow:0 20px 60px rgba(0,0,0,.15);"
+         (click)="$event.stopPropagation()">
+
+      <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Add company</div>
+      <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">Company details will auto-fill when selected in the Add User form.</div>
+
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company name</label>
+      <input class="form-input" type="text" placeholder="e.g. Acme Solicitors" style="margin-bottom:14px;"
+             [value]="addName()" (input)="addName.set($any($event.target).value)" />
+
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company address</label>
+      <input class="form-input" type="text" placeholder="e.g. 12 Park Street, Bristol, BS1 5LJ" style="margin-bottom:14px;"
+             [value]="addAddress()" (input)="addAddress.set($any($event.target).value)" />
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company role</label>
+          <select class="form-input" style="padding:8px 10px;"
+                  [value]="addCompanyRole()" (change)="addCompanyRole.set($any($event.target).value)">
+            @for (r of companyRoleOptions; track r) {
+              <option [value]="r">{{ r }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Function <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+          <select class="form-input" style="padding:8px 10px;"
+                  [value]="addFunction()" (change)="addFunction.set($any($event.target).value)">
+            <option value="">— None —</option>
+            @for (f of functionOptions; track f) {
+              <option [value]="f">{{ f }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (addError()) {
+        <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">
+          {{ addError() }}
+        </div>
+      }
+
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn-ghost" style="font-size:13px;" (click)="showAdd.set(false)">Cancel</button>
+        <button class="btn-primary" style="font-size:13px;" (click)="submitAdd()">
+          <i class="ti ti-building" style="margin-right:5px;"></i>Add company
+        </button>
+      </div>
+    </div>
+  </div>
+}

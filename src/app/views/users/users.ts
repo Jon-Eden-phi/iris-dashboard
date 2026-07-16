@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService, IrisUser, UserRole } from '../../services/auth';
+import { CompaniesService } from '../../services/companies';
 
 @Component({
   selector: 'app-users',
@@ -8,7 +9,8 @@ import { AuthService, IrisUser, UserRole } from '../../services/auth';
   styleUrl: './users.scss',
 })
 export class UsersComponent {
-  auth = inject(AuthService);
+  auth      = inject(AuthService);
+  companies = inject(CompaniesService);
 
   roleFilter = signal('all');
   readonly roles = ['all', 'Internal', 'Transactions', 'Legal Provider', 'Client'];
@@ -19,9 +21,8 @@ export class UsersComponent {
     return r === 'all' ? this.auth.allUsers : this.auth.allUsers.filter(u => u.role === r);
   });
 
-  readonly companyOptions = ['SimplyPhi', 'Winkworth Sherwood', 'Bristol City Council'];
   readonly companyRoleOptions = ['Project Manager', 'Conveyancer', 'Purchaser', 'Recipient', 'Surveyor'];
-  readonly functionOptions = ['Sourcing', 'Buying', 'Refurb', 'Admin', 'Finance'];
+  readonly functionOptions    = ['Sourcing', 'Buying', 'Refurb', 'Admin', 'Finance'];
 
   // ── Invite modal ──────────────────────────────────
   showInvite          = signal(false);
@@ -39,11 +40,23 @@ export class UsersComponent {
 
   get inviteIsSimplyPhi(): boolean { return this.inviteOrg() === 'SimplyPhi'; }
 
+  onCompanyChange(name: string): void {
+    this.inviteOrg.set(name);
+    const company = this.companies.getByName(name);
+    if (company) {
+      this.inviteCompanyRole.set(company.companyRole);
+      if (company.functionArea) this.inviteFunctionArea.set(company.functionArea);
+    }
+  }
+
   openInvite(): void {
     this.inviteFirstName.set(''); this.inviteLastName.set('');
     this.inviteEmail.set(''); this.inviteMobile.set('');
-    this.inviteOrg.set('SimplyPhi'); this.inviteCompanyRole.set('Project Manager');
-    this.inviteFunctionArea.set('Sourcing'); this.inviteRole.set('Internal');
+    const firstCompany = this.companies.all[0];
+    this.inviteOrg.set(firstCompany?.name ?? '');
+    this.inviteCompanyRole.set(firstCompany?.companyRole ?? 'Project Manager');
+    this.inviteFunctionArea.set(firstCompany?.functionArea ?? 'Sourcing');
+    this.inviteRole.set('Internal');
     this.invitePass.set(''); this.inviteAdmin.set(false); this.inviteError.set('');
     this.showInvite.set(true);
   }

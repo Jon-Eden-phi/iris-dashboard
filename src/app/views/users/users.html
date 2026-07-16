@@ -112,9 +112,9 @@
         <div>
           <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company name</label>
           <select class="form-input" style="padding:8px 10px;"
-                  [value]="inviteOrg()" (change)="inviteOrg.set($any($event.target).value)">
-            @for (c of companyOptions; track c) {
-              <option [value]="c">{{ c }}</option>
+                  [value]="inviteOrg()" (change)="onCompanyChange($any($event.target).value)">
+            @for (c of companies.all$(); track c.id) {
+              <option [value]="c.name">{{ c.name }}</option>
             }
           </select>
         </div>
