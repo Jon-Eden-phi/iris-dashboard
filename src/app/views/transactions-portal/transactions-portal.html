@@ -960,15 +960,16 @@
                         <i class="ti ti-search" style="font-size:11px;"></i> Order searches
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'searches_received') {
-                      @if (txHasDocs(p.id, ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])) {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Search Results', ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches']); $event.stopPropagation()">
-                          <i class="ti ti-eye" style="font-size:11px;"></i> View searches
+                      <div style="display:flex; gap:6px; margin-left:auto;" (click)="$event.stopPropagation()">
+                        @if (txHasDocs(p.id, ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])) {
+                          <button class="btn-ghost" style="font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Search Results', ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])">
+                            <i class="ti ti-eye" style="font-size:11px;"></i> View
+                          </button>
+                        }
+                        <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Local Authority Search'); uploadDocTypeFilter.set(['Local Authority Search', 'Water & Drainage Search', 'Environmental Search']); showUploadModal.set(true)">
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload
                         </button>
-                      } @else {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Local Authority Search'); uploadDocTypeFilter.set(['Local Authority Search', 'Water & Drainage Search', 'Environmental Search']); showUploadModal.set(true); $event.stopPropagation()">
-                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload results
-                        </button>
-                      }
+                      </div>
                     } @else if (p.stage === 'Legals' && action.key === 'survey_report_received') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); uploadDocTypeFilter.set(['Survey Report', 'HomeBuyer Report', 'Structural Survey']); showUploadModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey report
