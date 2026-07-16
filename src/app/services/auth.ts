@@ -13,6 +13,7 @@ export interface IrisUser {
   companyRole?: string;
   functionArea?: string;
   notificationPrefs?: 'email' | 'inapp' | 'both';
+  projects?: string[];
   role: UserRole;
   isAdmin: boolean;
   password: string;

@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService, IrisUser, UserRole } from '../../services/auth';
 import { CompaniesService } from '../../services/companies';
 import { InvitesService } from '../../services/invites';
+import { ProjectsService } from '../../services/projects';
 
 @Component({
   selector: 'app-users',
@@ -13,6 +14,7 @@ export class UsersComponent {
   auth      = inject(AuthService);
   companies = inject(CompaniesService);
   invites   = inject(InvitesService);
+  projects  = inject(ProjectsService);
 
   roleFilter = signal('all');
   readonly roles = ['all', 'Internal', 'Transactions', 'Legal Provider', 'Client'];
@@ -32,6 +34,7 @@ export class UsersComponent {
   inviteFnSelect    = signal('');
   inviteFnCustom    = signal('');
   inviteAdmin       = signal(false);
+  inviteProjects    = signal<string[]>([]);
   inviteError       = signal('');
   showInviteLink    = signal(false);
   generatedLink     = signal('');
@@ -70,8 +73,15 @@ export class UsersComponent {
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
     this.inviteAdmin.set(false);
+    this.inviteProjects.set([]);
     this.inviteError.set('');
     this.showInvite.set(true);
+  }
+
+  toggleProject(id: string): void {
+    this.inviteProjects.update(list =>
+      list.includes(id) ? list.filter(p => p !== id) : [...list, id]
+    );
   }
 
   submitInvite(): void {
@@ -94,6 +104,7 @@ export class UsersComponent {
       organisation: this.inviteOrg(),
       companyRole,
       functionArea: this.effectiveFn() || undefined,
+      projects: this.inviteProjects().length ? this.inviteProjects() : undefined,
       isAdmin: this.inviteAdmin(),
       role,
       createdAt: Date.now(),

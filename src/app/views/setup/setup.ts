@@ -60,6 +60,7 @@ export class SetupComponent implements OnInit {
       organisation: inv.organisation,
       companyRole: inv.companyRole,
       functionArea: inv.functionArea,
+      projects: inv.projects,
       role: inv.role,
       isAdmin: inv.isAdmin,
       password: pass,

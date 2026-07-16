@@ -173,6 +173,30 @@
           }
         </div>
 
+        <!-- Projects -->
+        <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">
+          Projects <span style="font-weight:400; color:var(--text3);">(optional)</span>
+        </label>
+        @if (projects.all$().length === 0) {
+          <div style="padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--text3); margin-bottom:14px;">
+            No projects yet — add some in the Projects tab.
+          </div>
+        } @else {
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+            @for (p of projects.all$(); track p.id) {
+              @let selected = inviteProjects().includes(p.id);
+              <button (click)="toggleProject(p.id)"
+                      style="padding:5px 12px; border-radius:20px; border:1.5px solid; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:5px;"
+                      [style.border-color]="selected ? 'var(--accent)' : 'var(--border)'"
+                      [style.background]="selected ? 'var(--accent-soft)' : '#fff'"
+                      [style.color]="selected ? 'var(--accent)' : 'var(--text2)'">
+                @if (selected) { <i class="ti ti-check" style="font-size:11px;"></i> }
+                {{ p.name }}
+              </button>
+            }
+          </div>
+        }
+
         <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-bottom:18px;">
           <input type="checkbox" [checked]="inviteAdmin()" (change)="inviteAdmin.update(v => !v)" />
           Grant admin access

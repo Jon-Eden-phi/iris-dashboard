@@ -7,6 +7,7 @@ export interface PendingInvite {
   organisation: string;
   companyRole: string;
   functionArea?: string;
+  projects?: string[];
   isAdmin: boolean;
   role: UserRole;
   createdAt: number;
