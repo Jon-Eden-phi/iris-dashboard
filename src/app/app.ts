@@ -14,8 +14,9 @@ export class App {
   auth = inject(AuthService);
   toast = inject(ToastService);
   router = inject(Router);
-  sidebarOpen = signal(false);
-  pageTitle = signal('Pipeline');
+  sidebarOpen  = signal(false);
+  pageTitle    = signal('Pipeline');
+  currentUrl   = signal('');
 
   private titleMap: Record<string, string> = {
     '/pipeline': 'Pipeline',
@@ -34,6 +35,7 @@ export class App {
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
         const url = e.urlAfterRedirects;
+        this.currentUrl.set(url);
         for (const [path, title] of Object.entries(this.titleMap)) {
           if (url.startsWith(path)) { this.pageTitle.set(title); return; }
         }
