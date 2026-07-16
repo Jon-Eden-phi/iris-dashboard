@@ -110,6 +110,9 @@ const CHECKLIST_GROUPS = [
   },
 ];
 
+// Items that TX uploads — legal portal should only view these, not upload them
+const TX_UPLOADED_ITEMS: ReadonlySet<string> = new Set(['search_la_r', 'search_water', 'search_env', 'survey_report']);
+
 const LEGAL_DATA_KEY = 'iris_legal_data';
 const DR_KEY = 'iris_data_room';
 
@@ -140,8 +143,9 @@ export class LegalPortalComponent {
   selectedFile    = signal<File | null>(null);
 
 
-  readonly checklistGroups = CHECKLIST_GROUPS;
-  readonly itemDocTypes    = ITEM_DOC_TYPES;
+  readonly checklistGroups  = CHECKLIST_GROUPS;
+  readonly itemDocTypes     = ITEM_DOC_TYPES;
+  readonly txUploadedItems  = TX_UPLOADED_ITEMS;
 
   private legalData  = signal<Record<string, LegalMatterData>>(this._loadLegal());
   private txDataSig  = signal<Record<string, any>>(this._txRaw());

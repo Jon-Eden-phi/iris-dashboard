@@ -240,7 +240,7 @@
 
                   @for (item of group.items; track item.key) {
                     @let itemDocs = docsForItem(p.id, item.key);
-                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx') && itemDocs.length > 0;
+                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
                     @let _isChecked = _autoDoc || m.checklist[item.key];
                     <div class="lg-check-row" [class.checked]="_isChecked" style="margin-bottom:6px;">
                       <div class="lg-check-box" [class.checked]="_isChecked"
@@ -255,7 +255,7 @@
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
                           <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }} doc{{ itemDocs.length > 1 ? 's' : '' }}
                         </button>
-                      } @else if (itemDocTypes[item.key]?.length) {
+                      } @else if (itemDocTypes[item.key]?.length && !txUploadedItems.has(item.key)) {
                         <button class="lg-btn-outline" style="font-size:11px; padding:3px 9px; display:flex; align-items:center; gap:4px; flex-shrink:0;"
                                 (click)="uploadDocType.set(itemDocTypes[item.key][0]); showUploadModal.set(true)">
                           <i class="ti ti-upload" style="font-size:11px;"></i> Upload
@@ -415,9 +415,6 @@
                     (change)="uploadDocType.set($any($event.target).value)">
               <option value="">Select type…</option>
               <option>Memorandum of Sale</option>
-              <option>Local Authority Search</option>
-              <option>Water & Drainage Search</option>
-              <option>Environmental Search</option>
               <option>Draft Contract</option>
               <option>Contract Pack</option>
               <option>Enquiries</option>
