@@ -6,7 +6,7 @@ import { Agent } from '../models/agent.model';
 @Injectable({ providedIn: 'root' })
 export class MockDataService {
 
-  private readonly STORAGE_KEY = 'iris-props-v8';
+  private readonly STORAGE_KEY = 'iris-props-v9';
 
   private _props = signal<Property[]>([
     // ── ACQ pipeline (mock) ──────────────────────────────────────────────────
