@@ -20,6 +20,20 @@ const internalGuard = () => {
   return true;
 };
 
+// Blocks Buying-function users from sourcing routes → sends them to Purchasing portal
+const sourcingGuard = () => {
+  const fn = inject(AuthService).currentUser()?.functionArea;
+  if (fn === 'Buying') return inject(Router).createUrlTree(['/transactions-portal']);
+  return true;
+};
+
+// Blocks Sourcing-function users from the Purchasing portal → sends them to Pipeline
+const purchasingGuard = () => {
+  const fn = inject(AuthService).currentUser()?.functionArea;
+  if (fn === 'Sourcing') return inject(Router).createUrlTree(['/pipeline']);
+  return true;
+};
+
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./views/login/login').then(m => m.LoginComponent) },
   { path: 'setup/:token', loadComponent: () => import('./views/setup/setup').then(m => m.SetupComponent) },
@@ -27,15 +41,18 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'pipeline', pathMatch: 'full' },
+      { path: '', canActivate: [() => {
+          const fn = inject(AuthService).currentUser()?.functionArea;
+          return inject(Router).createUrlTree(fn === 'Buying' ? ['/transactions-portal'] : ['/pipeline']);
+        }], children: [] },
       { path: 'client-portal',       loadComponent: () => import('./views/client-portal/client-portal').then(m => m.ClientPortalComponent) },
-      { path: 'transactions-portal', loadComponent: () => import('./views/transactions-portal/transactions-portal').then(m => m.TransactionsPortalComponent) },
+      { path: 'transactions-portal', canActivate: [purchasingGuard], loadComponent: () => import('./views/transactions-portal/transactions-portal').then(m => m.TransactionsPortalComponent) },
       { path: 'legal-portal',        loadComponent: () => import('./views/legal-portal/legal-portal').then(m => m.LegalPortalComponent) },
-      { path: 'pipeline',      canActivate: [internalGuard], loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent) },
-      { path: 'map',           canActivate: [internalGuard], loadComponent: () => import('./views/map/map').then(m => m.MapComponent) },
-      { path: 'lost',          canActivate: [internalGuard], loadComponent: () => import('./views/lost/lost').then(m => m.LostComponent) },
-      { path: 'insights',      canActivate: [internalGuard], loadComponent: () => import('./views/insights/insights').then(m => m.InsightsComponent) },
-      { path: 'social-impact', canActivate: [internalGuard], loadComponent: () => import('./views/social-impact/social-impact').then(m => m.SocialImpactComponent) },
+      { path: 'pipeline',      canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent) },
+      { path: 'map',           canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/map/map').then(m => m.MapComponent) },
+      { path: 'lost',          canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/lost/lost').then(m => m.LostComponent) },
+      { path: 'insights',      canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/insights/insights').then(m => m.InsightsComponent) },
+      { path: 'social-impact', canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/social-impact/social-impact').then(m => m.SocialImpactComponent) },
       { path: 'agents',        canActivate: [internalGuard], loadComponent: () => import('./views/agents/agents').then(m => m.AgentsComponent) },
       { path: 'users',         canActivate: [internalGuard], loadComponent: () => import('./views/users/users').then(m => m.UsersComponent) },
       { path: 'companies',     canActivate: [internalGuard], loadComponent: () => import('./views/companies/companies').then(m => m.CompaniesComponent) },

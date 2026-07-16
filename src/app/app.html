@@ -13,26 +13,30 @@
           <span style="font-weight:800; font-size:15px; letter-spacing:-0.02em;">Iris 2.0</span>
         </div>
 
-        <a class="nav-item" routerLink="/pipeline" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="ti ti-layout-kanban"></i> Pipeline
-        </a>
-        <a class="nav-item" routerLink="/map" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="ti ti-map-pin"></i> Map
-        </a>
-        <a class="nav-item" routerLink="/lost" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="ti ti-file-x"></i> Lost Properties
-        </a>
-        <a class="nav-item" routerLink="/insights" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="ti ti-chart-bar"></i> Insights
-        </a>
-        <a class="nav-item" routerLink="/social-impact" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="ti ti-building-community"></i> Social Impact
-        </a>
+        @if (canSeeSourcing(user)) {
+          <a class="nav-item" routerLink="/pipeline" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-layout-kanban"></i> Pipeline
+          </a>
+          <a class="nav-item" routerLink="/map" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-map-pin"></i> Map
+          </a>
+          <a class="nav-item" routerLink="/lost" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-file-x"></i> Lost Properties
+          </a>
+          <a class="nav-item" routerLink="/insights" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-chart-bar"></i> Insights
+          </a>
+          <a class="nav-item" routerLink="/social-impact" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-building-community"></i> Social Impact
+          </a>
+        }
 
-        <div class="nav-section">Portals</div>
-        <a class="nav-item" routerLink="/transactions-portal" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="ti ti-file-invoice"></i> Purchasing
-        </a>
+        @if (canSeePurchasing(user)) {
+          <div class="nav-section">Portals</div>
+          <a class="nav-item" routerLink="/transactions-portal" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-file-invoice"></i> Purchasing
+          </a>
+        }
 
         @if (user.isAdmin) {
           <div class="nav-section">Admin</div>

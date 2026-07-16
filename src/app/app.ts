@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
-import { AuthService } from './services/auth';
+import { AuthService, IrisUser } from './services/auth';
 import { ToastService } from './services/toast';
 
 @Component({
@@ -78,6 +78,16 @@ export class App {
   saveNotifPref(pref: 'email' | 'inapp' | 'both'): void {
     const user = this.auth.currentUser();
     if (user) this.auth.updateUser(user.id, { notificationPrefs: pref });
+  }
+
+  canSeeSourcing(user: IrisUser): boolean {
+    const fn = user.functionArea;
+    return !fn || fn !== 'Buying';
+  }
+
+  canSeePurchasing(user: IrisUser): boolean {
+    const fn = user.functionArea;
+    return !fn || fn !== 'Sourcing';
   }
 
   logout(): void {
