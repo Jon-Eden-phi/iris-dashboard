@@ -37,7 +37,7 @@ interface DataRoomFile {
 // Only items where there is an actual document to review before signing off.
 // Action-only confirmations (ordered, raised, sent, sign-off, exchanged etc.) have no entry.
 const ITEM_DOC_TYPES: Record<string, string[]> = {
-  mos_received:  ['MoS', 'Memorandum of Sale'],
+  mos_received:  ['Memorandum of Sale', 'MoS'],
   search_la_r:   ['Local Authority Search', 'Searches'],
   search_water:  ['Water & Drainage Search', 'Water Search', 'Searches'],
   search_env:    ['Environmental Search', 'Searches'],
