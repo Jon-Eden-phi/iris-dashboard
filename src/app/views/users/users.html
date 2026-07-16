@@ -11,14 +11,13 @@
         {{ r === 'all' ? 'All' : r }}
       </button>
     }
-    <button class="btn-primary" style="margin-left:auto; font-size:12px; padding:6px 14px;"
-            (click)="openInvite()">
-      <i class="ti ti-plus" style="margin-right:4px;"></i>Add User
+    <button class="btn-primary" style="margin-left:auto; font-size:12px; padding:6px 14px;" (click)="openInvite()">
+      <i class="ti ti-user-plus" style="margin-right:4px;"></i>Invite user
     </button>
   </div>
 </div>
 
-<!-- Users table -->
+<!-- Active users table -->
 <div class="card flush">
   <div style="overflow-x:auto;">
     <table>
@@ -43,8 +42,7 @@
             <td style="font-size:12px; color:var(--text2);">{{ u.email }}</td>
             <td>
               <span style="display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;"
-                    [style.background]="roleBg(u.role)"
-                    [style.color]="roleColor(u.role)">
+                    [style.background]="roleBg(u.role)" [style.color]="roleColor(u.role)">
                 {{ u.role }}
               </span>
             </td>
@@ -57,8 +55,7 @@
             </td>
             <td style="text-align:right;">
               <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
-                <button class="btn-ghost" style="font-size:12px; padding:4px 11px; display:inline-flex; align-items:center; gap:5px;"
-                        (click)="openReset(u)">
+                <button class="btn-ghost" style="font-size:12px; padding:4px 11px; display:inline-flex; align-items:center; gap:5px;" (click)="openReset(u)">
                   <i class="ti ti-key"></i> Reset
                 </button>
                 @if (!isMe(u)) {
@@ -76,133 +73,176 @@
   </div>
 </div>
 
-<!-- ══ Invite / Add User modal ══════════════════════════ -->
+<!-- Pending invites -->
+@if (invites.all$().length > 0) {
+  <div style="margin-top:24px;">
+    <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; padding-left:2px;">Pending invites</div>
+    <div class="card flush">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Company</th>
+              <th>Company role</th>
+              <th>Function</th>
+              <th>Invited</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inv of invites.all$(); track inv.token) {
+              <tr>
+                <td style="font-size:12px;">{{ inv.email }}</td>
+                <td style="font-size:12px; color:var(--text2);">{{ inv.organisation }}</td>
+                <td>
+                  <span style="display:inline-flex; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border); color:var(--text2);">
+                    {{ inv.companyRole }}
+                  </span>
+                </td>
+                <td style="font-size:12px; color:var(--text2);">{{ inv.functionArea || '—' }}</td>
+                <td style="font-size:12px; color:var(--text3);">{{ formatDate(inv.createdAt) }}</td>
+                <td style="text-align:right;">
+                  <button style="font-size:12px; padding:4px 11px; border-radius:7px; border:1.5px solid rgba(239,68,68,.3); background:rgba(239,68,68,.05); color:#ef4444; cursor:pointer;"
+                          (click)="revokeInvite(inv.token)">
+                    Revoke
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ Invite modal ══════════════════════════════════ -->
 @if (showInvite()) {
   <div style="position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"
        (click)="showInvite.set(false)">
     <div style="background:#fff; border-radius:14px; padding:28px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,.15);"
          (click)="$event.stopPropagation()">
 
-      <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Add user</div>
-      <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">Create a new account. The user can log in immediately with the password you set.</div>
+      @if (!showInviteLink()) {
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">First name</label>
-          <input class="form-input" type="text" placeholder="Jane"
-                 [value]="inviteFirstName()" (input)="inviteFirstName.set($any($event.target).value)" />
-        </div>
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Last name</label>
-          <input class="form-input" type="text" placeholder="Smith"
-                 [value]="inviteLastName()" (input)="inviteLastName.set($any($event.target).value)" />
-        </div>
-      </div>
+        <!-- ── Form state ── -->
+        <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Invite user</div>
+        <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">Select their company and we'll generate a setup link to send to them.</div>
 
-      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Email address</label>
-      <input class="form-input" type="email" placeholder="e.g. jane@council.gov.uk" style="margin-bottom:14px;"
-             [value]="inviteEmail()" (input)="inviteEmail.set($any($event.target).value)" />
+        <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Email address</label>
+        <input class="form-input" type="email" placeholder="e.g. jane@council.gov.uk" style="margin-bottom:14px;"
+               [value]="inviteEmail()" (input)="inviteEmail.set($any($event.target).value)" />
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Mobile <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
-          <input class="form-input" type="tel" placeholder="e.g. 07700 900000"
-                 [value]="inviteMobile()" (input)="inviteMobile.set($any($event.target).value)" />
-        </div>
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company name</label>
-          <select class="form-input" style="padding:8px 10px;"
-                  [value]="inviteOrg()" (change)="onCompanyChange($any($event.target).value)">
-            @for (c of companies.all$(); track c.id) {
-              <option [value]="c.name">{{ c.name }}</option>
-            }
-          </select>
-        </div>
-      </div>
+        <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company</label>
+        <select class="form-input" style="padding:8px 10px; margin-bottom:14px;"
+                [value]="inviteOrg()" (change)="onCompanyChange($any($event.target).value)">
+          @for (c of companies.all$(); track c.id) {
+            <option [value]="c.name">{{ c.name }}</option>
+          }
+        </select>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company role</label>
-          <select class="form-input" style="padding:8px 10px;"
-                  [value]="inviteCompanyRole()" (change)="inviteCompanyRole.set($any($event.target).value)">
-            @for (r of companyRoleOptions; track r) {
-              <option [value]="r">{{ r }}</option>
-            }
-          </select>
-        </div>
-        <div>
-          @if (inviteIsSimplyPhi) {
-            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Function</label>
-            <select class="form-input" style="padding:8px 10px;"
-                    [value]="inviteFunctionArea()" (change)="inviteFunctionArea.set($any($event.target).value)">
-              @for (f of functionOptions; track f) {
+        @if (inviteCompanyRole()) {
+          <div style="display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text2); margin-bottom:14px;">
+            <i class="ti ti-lock" style="font-size:12px; color:var(--text3);"></i>
+            <span style="font-weight:600;">{{ inviteCompanyRole() }}</span>
+            <span style="font-size:11px; color:var(--text3); margin-left:auto;">Auto-filled from company</span>
+          </div>
+        }
+
+        <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Function <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
+        <div style="display:flex; gap:6px; margin-bottom:14px;">
+          @if (inviteFnMode() === 'select') {
+            <select class="form-input" style="padding:8px 10px; flex:1;"
+                    [value]="inviteFnSelect()" (change)="inviteFnSelect.set($any($event.target).value)">
+              <option value="">— None —</option>
+              @for (f of userFunctionsForRole; track f) {
                 <option [value]="f">{{ f }}</option>
               }
             </select>
+            <button title="Add new function"
+                    (click)="inviteFnMode.set('custom'); inviteFnCustom.set('')"
+                    style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px dashed var(--border); background:none; color:var(--text3); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:all .15s;"
+                    onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+                    onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">+</button>
           } @else {
-            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">System role</label>
-            <select class="form-input" style="padding:8px 10px;"
-                    [value]="inviteRole()" (change)="inviteRole.set($any($event.target).value)">
-              @for (r of roleOptions; track r) {
-                <option [value]="r">{{ r }}</option>
-              }
-            </select>
+            <input class="form-input" type="text" placeholder="Type function…" style="flex:1;"
+                   [value]="inviteFnCustom()" (input)="inviteFnCustom.set($any($event.target).value)" />
+            <button (click)="inviteFnMode.set('select')"
+                    style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px solid var(--border); background:none; color:var(--text3); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">&times;</button>
           }
         </div>
-      </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Password</label>
-          <input class="form-input" type="text" placeholder="Set a password"
-                 [value]="invitePass()" (input)="invitePass.set($any($event.target).value)" />
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-bottom:18px;">
+          <input type="checkbox" [checked]="inviteAdmin()" (change)="inviteAdmin.update(v => !v)" />
+          Grant admin access
+        </label>
+
+        @if (inviteError()) {
+          <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">
+            {{ inviteError() }}
+          </div>
+        }
+
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn-ghost" style="font-size:13px;" (click)="showInvite.set(false)">Cancel</button>
+          <button class="btn-primary" style="font-size:13px;" (click)="submitInvite()">
+            <i class="ti ti-link" style="margin-right:5px;"></i>Create setup link
+          </button>
         </div>
-      </div>
 
-      <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-bottom:18px;">
-        <input type="checkbox" [checked]="inviteAdmin()" (change)="inviteAdmin.update(v => !v)" />
-        Grant admin access
-      </label>
+      } @else {
 
-      @if (inviteError()) {
-        <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">
-          {{ inviteError() }}
+        <!-- ── Link generated state ── -->
+        <div style="text-align:center; margin-bottom:20px;">
+          <div style="width:52px; height:52px; border-radius:50%; background:rgba(22,163,74,.1); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+            <i class="ti ti-circle-check" style="font-size:26px; color:#16a34a;"></i>
+          </div>
+          <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Setup link ready</div>
+          <div style="font-size:13px; color:var(--text3);">Copy the link below and send it to <strong>{{ inviteEmail() }}</strong></div>
         </div>
+
+        <div style="display:flex; gap:6px; margin-bottom:20px;">
+          <div style="flex:1; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:11px; color:var(--text2); word-break:break-all; font-family:monospace;">
+            {{ generatedLink() }}
+          </div>
+          <button (click)="copyLink()"
+                  style="flex-shrink:0; padding:9px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; border:1.5px solid;"
+                  [style.background]="linkCopied() ? 'rgba(22,163,74,.1)' : 'var(--accent-soft)'"
+                  [style.color]="linkCopied() ? '#16a34a' : 'var(--accent)'"
+                  [style.border-color]="linkCopied() ? '#16a34a' : 'var(--accent)'">
+            <i class="ti {{ linkCopied() ? 'ti-check' : 'ti-copy' }}"></i>
+            {{ linkCopied() ? 'Copied!' : 'Copy' }}
+          </button>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn-primary" style="font-size:13px;" (click)="showInvite.set(false)">Done</button>
+        </div>
+
       }
-
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
-        <button class="btn-ghost" style="font-size:13px;" (click)="showInvite.set(false)">Cancel</button>
-        <button class="btn-primary" style="font-size:13px;" (click)="submitInvite()">
-          <i class="ti ti-user-plus" style="margin-right:5px;"></i>Create account
-        </button>
-      </div>
     </div>
   </div>
 }
 
-<!-- ══ Reset password modal ═════════════════════════════ -->
+<!-- ══ Reset password modal ═════════════════════════ -->
 @if (showReset()) {
   <div style="position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"
        (click)="showReset.set(false)">
     <div style="background:#fff; border-radius:14px; padding:28px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.15);"
          (click)="$event.stopPropagation()">
-
       <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Reset password</div>
       @if (resetTarget(); as t) {
-        <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">
-          Set a new password for <strong>{{ t.name }}</strong> ({{ t.email }}).
-        </div>
+        <div style="font-size:13px; color:var(--text3); margin-bottom:22px;">Set a new password for <strong>{{ t.name }}</strong> ({{ t.email }}).</div>
         <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">New password</label>
         <input class="form-input" type="text" placeholder="Enter new password" style="margin-bottom:6px;"
                [value]="resetPass()" (input)="resetPass.set($any($event.target).value)" />
       }
-
       @if (resetError()) {
         <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">
           {{ resetError() }}
         </div>
       }
-
       <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:18px;">
         <button class="btn-ghost" style="font-size:13px;" (click)="showReset.set(false)">Cancel</button>
         <button class="btn-primary" style="font-size:13px;" (click)="submitReset()">

@@ -1,6 +1,6 @@
 @if (auth.currentUser(); as user) {
 
-  @if (user.role === 'Client' || user.role === 'Transactions' || user.role === 'Legal Provider' || currentUrl().startsWith('/transactions-portal')) {
+  @if (user.role === 'Client' || user.role === 'Transactions' || user.role === 'Legal Provider' || currentUrl().startsWith('/transactions-portal') || currentUrl().startsWith('/setup')) {
     <!-- External portals + transactions portal for internal users — no Iris sidebar -->
     <router-outlet />
 

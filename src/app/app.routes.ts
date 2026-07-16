@@ -22,6 +22,7 @@ const internalGuard = () => {
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./views/login/login').then(m => m.LoginComponent) },
+  { path: 'setup/:token', loadComponent: () => import('./views/setup/setup').then(m => m.SetupComponent) },
   {
     path: '',
     canActivate: [authGuard],

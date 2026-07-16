@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService, IrisUser, UserRole } from '../../services/auth';
 import { CompaniesService } from '../../services/companies';
+import { InvitesService } from '../../services/invites';
 
 @Component({
   selector: 'app-users',
@@ -11,6 +12,7 @@ import { CompaniesService } from '../../services/companies';
 export class UsersComponent {
   auth      = inject(AuthService);
   companies = inject(CompaniesService);
+  invites   = inject(InvitesService);
 
   roleFilter = signal('all');
   readonly roles = ['all', 'Internal', 'Transactions', 'Legal Provider', 'Client'];
@@ -21,60 +23,98 @@ export class UsersComponent {
     return r === 'all' ? this.auth.allUsers : this.auth.allUsers.filter(u => u.role === r);
   });
 
-  get companyRoleOptions(): string[] { return this.companies.allRoles(); }
-  get functionOptions(): string[]    { return this.companies.functionsForRole(this.inviteOrg()); }
-
   // ── Invite modal ──────────────────────────────────
-  showInvite          = signal(false);
-  inviteFirstName     = signal('');
-  inviteLastName      = signal('');
-  inviteEmail         = signal('');
-  inviteMobile        = signal('');
-  inviteOrg           = signal('SimplyPhi');
-  inviteCompanyRole   = signal('Project Manager');
-  inviteFunctionArea  = signal('Sourcing');
-  inviteRole          = signal<UserRole>('Internal');
-  invitePass          = signal('');
-  inviteAdmin         = signal(false);
-  inviteError         = signal('');
+  showInvite        = signal(false);
+  inviteEmail       = signal('');
+  inviteOrg         = signal('');
+  inviteCompanyRole = signal('');
+  inviteFnMode      = signal<'select' | 'custom'>('select');
+  inviteFnSelect    = signal('');
+  inviteFnCustom    = signal('');
+  inviteAdmin       = signal(false);
+  inviteError       = signal('');
+  showInviteLink    = signal(false);
+  generatedLink     = signal('');
+  linkCopied        = signal(false);
 
-  get inviteIsSimplyPhi(): boolean { return this.inviteOrg() === 'SimplyPhi'; }
+  effectiveFn = computed(() =>
+    this.inviteFnMode() === 'custom' ? this.inviteFnCustom() : this.inviteFnSelect()
+  );
+
+  get userFunctionsForRole(): string[] {
+    const role = this.inviteCompanyRole();
+    return [...new Set([
+      ...this.auth.allUsers.filter(u => u.companyRole === role && u.functionArea).map(u => u.functionArea!),
+      ...this.invites.all.filter(i => i.companyRole === role && i.functionArea).map(i => i.functionArea!),
+    ])].sort();
+  }
 
   onCompanyChange(name: string): void {
     this.inviteOrg.set(name);
     const company = this.companies.getByName(name);
-    if (company) {
-      this.inviteCompanyRole.set(company.companyRole);
-      if (company.functionArea) this.inviteFunctionArea.set(company.functionArea);
-    }
+    if (company) this.inviteCompanyRole.set(company.companyRole);
+    this.inviteFnMode.set('select');
+    this.inviteFnSelect.set('');
+    this.inviteFnCustom.set('');
   }
 
   openInvite(): void {
-    this.inviteFirstName.set(''); this.inviteLastName.set('');
-    this.inviteEmail.set(''); this.inviteMobile.set('');
-    const firstCompany = this.companies.all[0];
-    this.inviteOrg.set(firstCompany?.name ?? '');
-    this.inviteCompanyRole.set(firstCompany?.companyRole ?? 'Project Manager');
-    this.inviteFunctionArea.set(firstCompany?.functionArea ?? 'Sourcing');
-    this.inviteRole.set('Internal');
-    this.invitePass.set(''); this.inviteAdmin.set(false); this.inviteError.set('');
+    this.showInviteLink.set(false);
+    this.generatedLink.set('');
+    this.linkCopied.set(false);
+    this.inviteEmail.set('');
+    const first = this.companies.all[0];
+    this.inviteOrg.set(first?.name ?? '');
+    this.inviteCompanyRole.set(first?.companyRole ?? '');
+    this.inviteFnMode.set('select');
+    this.inviteFnSelect.set('');
+    this.inviteFnCustom.set('');
+    this.inviteAdmin.set(false);
+    this.inviteError.set('');
     this.showInvite.set(true);
   }
 
   submitInvite(): void {
-    const firstName = this.inviteFirstName().trim();
-    const lastName  = this.inviteLastName().trim();
-    const email     = this.inviteEmail().trim().toLowerCase();
-    const pass      = this.invitePass().trim();
-    if (!firstName || !lastName || !email || !pass) { this.inviteError.set('First name, last name, email and password are required.'); return; }
-    if (this.auth.allUsers.some(u => u.email === email)) { this.inviteError.set('An account with that email already exists.'); return; }
-    const mobile       = this.inviteMobile().trim() || undefined;
-    const organisation = this.inviteOrg();
-    const companyRole  = this.inviteCompanyRole();
-    const functionArea = this.inviteIsSimplyPhi ? this.inviteFunctionArea() : undefined;
-    const role: UserRole = this.inviteIsSimplyPhi ? 'Internal' : this.inviteRole();
-    this.auth.addUser({ id: crypto.randomUUID(), name: `${firstName} ${lastName}`, firstName, lastName, mobile, organisation, companyRole, functionArea, email, role, isAdmin: this.inviteAdmin(), password: pass });
-    this.showInvite.set(false);
+    const email = this.inviteEmail().trim().toLowerCase();
+    if (!email)            { this.inviteError.set('Email address is required.'); return; }
+    if (!this.inviteOrg()) { this.inviteError.set('Please select a company.'); return; }
+    if (this.auth.allUsers.some(u => u.email === email)) {
+      this.inviteError.set('An account with that email already exists.'); return;
+    }
+    if (this.invites.all.some(i => i.email === email)) {
+      this.inviteError.set('An invitation has already been sent to that email.'); return;
+    }
+    const token       = crypto.randomUUID();
+    const companyRole = this.inviteCompanyRole();
+    const role: UserRole = companyRole === 'Conveyancer' ? 'Legal Provider'
+      : (companyRole === 'Purchaser' || companyRole === 'Recipient') ? 'Client'
+      : 'Internal';
+    this.invites.add({
+      token, email,
+      organisation: this.inviteOrg(),
+      companyRole,
+      functionArea: this.effectiveFn() || undefined,
+      isAdmin: this.inviteAdmin(),
+      role,
+      createdAt: Date.now(),
+    });
+    this.generatedLink.set(`${window.location.origin}/setup/${token}`);
+    this.showInviteLink.set(true);
+  }
+
+  copyLink(): void {
+    navigator.clipboard.writeText(this.generatedLink()).then(() => {
+      this.linkCopied.set(true);
+      setTimeout(() => this.linkCopied.set(false), 2000);
+    });
+  }
+
+  revokeInvite(token: string): void {
+    this.invites.remove(token);
+  }
+
+  formatDate(ts: number): string {
+    return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   // ── Reset password modal ──────────────────────────
@@ -84,10 +124,7 @@ export class UsersComponent {
   resetError  = signal('');
 
   openReset(u: IrisUser): void {
-    this.resetTarget.set(u);
-    this.resetPass.set('');
-    this.resetError.set('');
-    this.showReset.set(true);
+    this.resetTarget.set(u); this.resetPass.set(''); this.resetError.set(''); this.showReset.set(true);
   }
 
   submitReset(): void {
@@ -100,13 +137,8 @@ export class UsersComponent {
   }
 
   // ── Delete ────────────────────────────────────────
-  removeUser(u: IrisUser): void {
-    this.auth.removeUser(u.id);
-  }
-
-  isMe(u: IrisUser): boolean {
-    return u.id === this.auth.currentUser()?.id;
-  }
+  removeUser(u: IrisUser): void { this.auth.removeUser(u.id); }
+  isMe(u: IrisUser): boolean    { return u.id === this.auth.currentUser()?.id; }
 
   roleColor(role: string): string {
     if (role === 'Internal')       return 'var(--text2)';
