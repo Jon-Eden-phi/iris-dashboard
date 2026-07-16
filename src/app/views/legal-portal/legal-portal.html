@@ -240,12 +240,16 @@
 
                   @for (item of group.items; track item.key) {
                     @let itemDocs = docsForItem(p.id, item.key);
-                    <div class="lg-check-row" [class.checked]="m.checklist[item.key]" style="margin-bottom:6px;">
-                      <div class="lg-check-box" [class.checked]="m.checklist[item.key]"
-                           (click)="toggleCheck(p.id, item.key)" style="cursor:pointer;">
-                        @if (m.checklist[item.key]) { <i class="ti ti-check" style="font-size:11px;"></i> }
+                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx') && itemDocs.length > 0;
+                    @let _isChecked = _autoDoc || m.checklist[item.key];
+                    <div class="lg-check-row" [class.checked]="_isChecked" style="margin-bottom:6px;">
+                      <div class="lg-check-box" [class.checked]="_isChecked"
+                           (click)="!_autoDoc && toggleCheck(p.id, item.key)"
+                           [style.cursor]="_autoDoc ? 'default' : 'pointer'">
+                        @if (_isChecked) { <i class="ti ti-check" style="font-size:11px;"></i> }
                       </div>
-                      <span style="flex:1; cursor:pointer;" (click)="toggleCheck(p.id, item.key)">{{ item.label }}</span>
+                      <span [style.cursor]="_autoDoc ? 'default' : 'pointer'"
+                            (click)="!_autoDoc && toggleCheck(p.id, item.key)">{{ item.label }}</span>
                       @if (itemDocs.length > 0) {
                         <button class="lg-doc-chip" (click)="openReview(item.label, itemDocs)"
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
