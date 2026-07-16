@@ -26,6 +26,8 @@ export class ProjectsComponent {
   addPurchaserSelect  = signal('');
   addPurchaserCustom  = signal('');
   addError            = signal('');
+  editingId           = signal<string | null>(null);
+  get isEditing(): boolean { return this.editingId() !== null; }
 
   effectivePurchaser = computed(() =>
     this.addPurchaserMode() === 'custom'
@@ -34,9 +36,20 @@ export class ProjectsComponent {
   );
 
   openAdd(): void {
+    this.editingId.set(null);
     this.addName.set('');
     this.addPurchaserMode.set('select');
     this.addPurchaserSelect.set(this.availablePurchasers()[0] ?? '');
+    this.addPurchaserCustom.set('');
+    this.addError.set('');
+    this.showAdd.set(true);
+  }
+
+  openEdit(p: IrisProject): void {
+    this.editingId.set(p.id);
+    this.addName.set(p.name);
+    this.addPurchaserMode.set('select');
+    this.addPurchaserSelect.set(p.purchaser);
     this.addPurchaserCustom.set('');
     this.addError.set('');
     this.showAdd.set(true);
@@ -47,7 +60,12 @@ export class ProjectsComponent {
     const purchaser = this.effectivePurchaser().trim();
     if (!name)      { this.addError.set('Project name is required.'); return; }
     if (!purchaser) { this.addError.set('Purchaser is required.'); return; }
-    this.projects.add({ id: crypto.randomUUID(), name, purchaser });
+    const id = this.editingId();
+    if (id) {
+      this.projects.update(id, { name, purchaser });
+    } else {
+      this.projects.add({ id: crypto.randomUUID(), name, purchaser });
+    }
     this.showAdd.set(false);
   }
 

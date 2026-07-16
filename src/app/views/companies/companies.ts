@@ -42,6 +42,8 @@ export class CompaniesComponent {
   addFnCustom     = signal('');
 
   addError        = signal('');
+  editingId       = signal<string | null>(null);
+  get isEditing(): boolean { return this.editingId() !== null; }
 
   effectiveRole = computed(() =>
     this.addRoleMode() === 'custom' ? this.addRoleCustom() : this.addRoleSelect()
@@ -93,6 +95,7 @@ export class CompaniesComponent {
   }
 
   openAdd(): void {
+    this.editingId.set(null);
     this.addName.set(''); this.addAddress.set(''); this.addLogo.set('');
     this.addRoleMode.set('select'); this.addRoleSelect.set(''); this.addRoleCustom.set('');
     this.addFnMode.set('select'); this.addFnSelect.set(''); this.addFnCustom.set('');
@@ -100,24 +103,33 @@ export class CompaniesComponent {
     this.showAdd.set(true);
   }
 
+  openEdit(c: IrisCompany): void {
+    this.editingId.set(c.id);
+    this.addName.set(c.name);
+    this.addAddress.set(c.address || '');
+    this.addLogo.set(c.logo || '');
+    this.addRoleMode.set('select'); this.addRoleSelect.set(c.companyRole); this.addRoleCustom.set('');
+    this.addFnMode.set('select'); this.addFnSelect.set(c.functionArea || ''); this.addFnCustom.set('');
+    this.addError.set('');
+    this.showAdd.set(true);
+  }
+
   submitAdd(): void {
     const name = this.addName().trim();
     const role = this.effectiveRole().trim();
-    const fn = this.effectiveFn().trim();
+    const fn   = this.effectiveFn().trim();
     if (!name) { this.addError.set('Company name is required.'); return; }
     if (!role) { this.addError.set('Company role is required.'); return; }
     if (!fn)   { this.addError.set('Function is required.'); return; }
-    if (this.companies.all.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    const id = this.editingId();
+    if (this.companies.all.some(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== id)) {
       this.addError.set('A company with that name already exists.'); return;
     }
-    this.companies.add({
-      id: crypto.randomUUID(),
-      name,
-      address: this.addAddress().trim(),
-      companyRole: role,
-      functionArea: fn,
-      logo: this.addLogo() || undefined,
-    });
+    if (id) {
+      this.companies.update(id, { name, address: this.addAddress().trim(), companyRole: role, functionArea: fn, logo: this.addLogo() || undefined });
+    } else {
+      this.companies.add({ id: crypto.randomUUID(), name, address: this.addAddress().trim(), companyRole: role, functionArea: fn, logo: this.addLogo() || undefined });
+    }
     this.showAdd.set(false);
   }
 

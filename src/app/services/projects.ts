@@ -34,4 +34,8 @@ export class ProjectsService {
   remove(id: string): void {
     this._projects.update(list => { const n = list.filter(p => p.id !== id); this._save(n); return n; });
   }
+
+  update(id: string, changes: Partial<IrisProject>): void {
+    this._projects.update(list => { const n = list.map(p => p.id === id ? { ...p, ...changes } : p); this._save(n); return n; });
+  }
 }
