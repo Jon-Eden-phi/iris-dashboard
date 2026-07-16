@@ -241,16 +241,20 @@
                   @for (item of group.items; track item.key) {
                     @let itemDocs = docsForItem(p.id, item.key);
                     @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
-                    @let _isChecked = _autoDoc || m.checklist[item.key];
+                    @let _txAuto = (item.key === 'search_la' || item.key === 'survey_instructed') && txCheck(p.id, 'searches_ordered');
+                    @let _isChecked = _autoDoc || _txAuto || m.checklist[item.key];
+                    @let _isAuto = _autoDoc || _txAuto;
                     <div class="lg-check-row" [class.checked]="_isChecked" style="margin-bottom:6px;">
                       <div class="lg-check-box" [class.checked]="_isChecked"
-                           (click)="!_autoDoc && toggleCheck(p.id, item.key)"
-                           [style.cursor]="_autoDoc ? 'default' : 'pointer'">
+                           (click)="!_isAuto && toggleCheck(p.id, item.key)"
+                           [style.cursor]="_isAuto ? 'default' : 'pointer'">
                         @if (_isChecked) { <i class="ti ti-check" style="font-size:11px;"></i> }
                       </div>
-                      <span [style.cursor]="_autoDoc ? 'default' : 'pointer'"
-                            (click)="!_autoDoc && toggleCheck(p.id, item.key)">{{ item.label }}</span>
-                      @if (itemDocs.length > 0) {
+                      <span [style.cursor]="_isAuto ? 'default' : 'pointer'"
+                            (click)="!_isAuto && toggleCheck(p.id, item.key)">{{ item.label }}</span>
+                      @if (_txAuto && !itemDocs.length) {
+                        <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">Confirmed by TX team</span>
+                      } @else if (itemDocs.length > 0) {
                         <button class="lg-doc-chip" (click)="openReview(p.id, item.key, item.label, itemDocs)"
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
                           <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }} doc{{ itemDocs.length > 1 ? 's' : '' }}

@@ -222,10 +222,23 @@ export class LegalPortalComponent {
     });
   }
 
+  isItemDone(propId: string, itemKey: string): boolean {
+    if (this.getMatter(propId).checklist[itemKey]) return true;
+    // Auto-check from data room docs
+    const types = ITEM_DOC_TYPES[itemKey] ?? [];
+    if (types.length && (itemKey === 'mos_received' || itemKey === 'contract_rx' || TX_UPLOADED_ITEMS.has(itemKey))) {
+      if (this.dataRoom().some(f => f.propertyId === propId && types.some(t => f.docType.toLowerCase().includes(t.toLowerCase())))) return true;
+    }
+    // Auto-check from TX portal actions
+    if (itemKey === 'search_la' || itemKey === 'survey_instructed') {
+      return !!this.txDataSig()[propId]?.checklist?.['searches_ordered'];
+    }
+    return false;
+  }
+
   checkProgress(propId: string): { done: number; total: number } {
-    const m = this.getMatter(propId);
     const total = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.length, 0);
-    const done  = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.filter(i => m.checklist[i.key]).length, 0);
+    const done  = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.filter(i => this.isItemDone(propId, i.key)).length, 0);
     return { done, total };
   }
 
@@ -248,8 +261,7 @@ export class LegalPortalComponent {
   }
 
   groupProgress(propId: string, group: typeof CHECKLIST_GROUPS[0]): number {
-    const m = this.getMatter(propId);
-    return group.items.filter(i => m.checklist[i.key]).length;
+    return group.items.filter(i => this.isItemDone(propId, i.key)).length;
   }
 
   // ── Document room ──────────────────────────────────────
