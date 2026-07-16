@@ -75,8 +75,10 @@ export class CompaniesComponent {
   submitAdd(): void {
     const name = this.addName().trim();
     const role = this.effectiveRole().trim();
+    const fn = this.effectiveFn().trim();
     if (!name) { this.addError.set('Company name is required.'); return; }
     if (!role) { this.addError.set('Company role is required.'); return; }
+    if (!fn)   { this.addError.set('Function is required.'); return; }
     if (this.companies.all.some(c => c.name.toLowerCase() === name.toLowerCase())) {
       this.addError.set('A company with that name already exists.'); return;
     }
@@ -85,7 +87,7 @@ export class CompaniesComponent {
       name,
       address: this.addAddress().trim(),
       companyRole: role,
-      functionArea: this.effectiveFn().trim() || undefined,
+      functionArea: fn,
     });
     this.showAdd.set(false);
   }

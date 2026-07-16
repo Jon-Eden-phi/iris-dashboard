@@ -13,7 +13,10 @@ export class ProjectsComponent {
   companies = inject(CompaniesService);
 
   availablePurchasers = computed(() =>
-    this.companies.all$().map(c => c.name).sort()
+    this.companies.all$()
+      .filter(c => c.companyRole === 'Purchaser')
+      .map(c => c.name)
+      .sort()
   );
 
   // ── Add modal ──────────────────────────────────────
