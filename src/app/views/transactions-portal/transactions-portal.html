@@ -819,6 +819,15 @@
               </div>
 
               <!-- Outstanding action banners -->
+              @if (p.stage === 'MemorandumOfSale' && !getTxData(p.id).checklist['mos_sent_sols']) {
+                <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.25); border-radius:7px; margin-bottom:14px;">
+                  <i class="ti ti-scale" style="font-size:14px; color:#2472a8; flex-shrink:0;"></i>
+                  <span style="font-size:12.5px; color:#1e4f78; font-weight:500;">Solicitor not yet instructed — instruct to open this matter in the legal portal</span>
+                  <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSolicitorModal.set(true)">
+                    <i class="ti ti-scale" style="font-size:11px;"></i> Instruct solicitor
+                  </button>
+                </div>
+              }
               @if (!getTxData(p.id).checklist['fee_earner_added'] || !getTxData(p.id).checklist['contract_pack_received']) {
                 <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
                   @if (!getTxData(p.id).checklist['fee_earner_added']) {
@@ -925,10 +934,6 @@
                           <i class="ti ti-upload" style="font-size:11px;"></i> Upload if needed
                         </button>
                       }
-                    } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_sent_sols') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSolicitorModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-scale" style="font-size:11px;"></i> Instruct solicitor
-                      </button>
                     } @else if (action.key === 'fee_earner_added') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showFeeEarnerModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-user-plus" style="font-size:11px;"></i> Add fee earner
