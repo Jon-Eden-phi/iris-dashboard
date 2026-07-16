@@ -30,6 +30,7 @@ export class App {
     '/companies': 'Companies',
     '/projects': 'Projects',
     '/record': 'Property Detail',
+    '/transactions-portal': 'Purchasing',
     '/login': 'Sign In',
   };
 

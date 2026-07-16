@@ -24,7 +24,7 @@
       <i class="ti ti-archive"></i> Aborted transactions
     </a>
 
-    <div class="nav-section">Acquisitions</div>
+    <div class="nav-section">Sourcing</div>
     <a class="nav-item" [class.active]="view() === 'acquisitions' || view() === 'acq-record'" (click)="navTo('acquisitions'); acqSelectedId.set(null)">
       <i class="ti ti-chart-bar"></i> Pipeline view
       <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ acqProperties().length }}</span>
@@ -61,7 +61,7 @@
     @if (auth.currentUser()?.role === 'Internal') {
       <a class="nav-item" style="font-size:12.5px; margin:0 8px 8px; padding:8px 12px; border-radius:7px; display:flex; align-items:center; gap:8px; color:var(--text3); text-decoration:none; cursor:pointer; border:1px solid var(--border);"
          [routerLink]="['/pipeline']">
-        <i class="ti ti-arrow-left" style="font-size:13px;"></i> Acquisitions
+        <i class="ti ti-arrow-left" style="font-size:13px;"></i> Sourcing
       </a>
     }
     <div class="tx-sidebar-footer">
@@ -592,7 +592,7 @@
               }
             </div>
             <div style="display:flex; gap:16px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:10px; font-weight:600;">
-              <span style="color:#7c3aed;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#7c3aed; margin-right:4px;"></span>Stages 1–4 Acquisitions</span>
+              <span style="color:#7c3aed;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#7c3aed; margin-right:4px;"></span>Stages 1–4 Sourcing</span>
               <span style="color:var(--accent);"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent); margin-right:4px;"></span>Stages 5–8 Transactions</span>
               <span style="margin-left:auto; color:var(--text3); font-weight:400;">Click any completed stage to view details</span>
             </div>
@@ -712,7 +712,7 @@
 
               <!-- Draft — no persisted data -->
               @if (sv === 'Draft') {
-                <div style="font-size:13px; color:var(--text3); padding:16px 0;">Draft details are not persisted — check the Acquisitions portal for property-level notes.</div>
+                <div style="font-size:13px; color:var(--text3); padding:16px 0;">Draft details are not persisted — check the Sourcing portal for property-level notes.</div>
               }
 
             </div>
@@ -1502,7 +1502,7 @@
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
           <div style="background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.2); border-radius:7px; padding:9px 14px; font-size:12px; color:#7c3aed; display:flex; align-items:center; gap:7px;">
             <i class="ti ti-eye" style="font-size:13px;"></i>
-            <span>This is a <strong>read-only</strong> view. To edit property data, use the Acquisitions portal.</span>
+            <span>This is a <strong>read-only</strong> view. To edit property data, use the Sourcing portal.</span>
           </div>
         </div>
 
