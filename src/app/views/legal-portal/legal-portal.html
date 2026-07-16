@@ -410,7 +410,7 @@
           <button class="lg-btn-primary" style="flex:2;"
                   [disabled]="!uploadDocType() || !selectedFile()"
                   [style.opacity]="(!uploadDocType() || !selectedFile()) ? '0.5' : '1'"
-                  (click)="uploadDoc(p.id)">
+                  (click)="uploadDoc(p.id, p.stage)">
             <i class="ti ti-upload" style="font-size:13px;"></i> Upload
           </button>
         </div>

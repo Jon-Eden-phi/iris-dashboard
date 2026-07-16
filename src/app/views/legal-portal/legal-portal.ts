@@ -255,14 +255,14 @@ export class LegalPortalComponent {
     if (f && !this.uploadFileName()) this.uploadFileName.set(f.name);
   }
 
-  uploadDoc(propId: string): void {
+  uploadDoc(propId: string, stage: string = 'Legals'): void {
     const docType = this.uploadDocType().trim();
     if (!docType || !this.selectedFile()) return;
     const fileName = this.uploadFileName().trim() || this.selectedFile()!.name;
     const entry: DataRoomFile = {
       id: 'dr_' + Date.now(),
       propertyId: propId,
-      stage: 'Legals',
+      stage,
       fileName,
       docType,
       uploadedBy: this.auth.currentUser()?.name ?? 'Solicitor',
