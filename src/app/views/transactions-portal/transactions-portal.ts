@@ -122,6 +122,17 @@ export class TransactionsPortalComponent {
         }
       });
     }
+
+    // Auto-advance stage when all checklist items are complete
+    const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
+    effect(() => {
+      for (const p of this.data.properties) {
+        if (p.status !== 'active' || !TX_STAGES.has(p.stage)) continue;
+        if (this.stageStatus(p.id, p.stage).done) {
+          this.data.advanceStage(p.id);
+        }
+      }
+    });
   }
 
   filesForProperty(propId: string): DataRoomFile[] {
@@ -574,12 +585,23 @@ export class TransactionsPortalComponent {
     this.txData.update(d => ({ ...d, [id]: { ...this.getTxData(id), ...patch } }));
   }
 
+  private _itemDone(propId: string, key: string): boolean {
+    if (this.getTxData(propId).checklist[key]) return true;
+    if (key === 'mos_received' || key === 'sols_confirmed')
+      return this.txHasDocs(propId, ['Memorandum of Sale', 'MoS']);
+    if (key === 'contract_pack_received')
+      return this.txHasDocs(propId, ['Contract Pack', 'Draft Contract']);
+    return false;
+  }
+
   stageStatus(propId: string, stage: string): { label: string; done: boolean } {
-    const cl = this.getTxData(propId).checklist;
+    const cl   = this.getTxData(propId).checklist;
+    const done = (key: string) => this._itemDone(propId, key);
     if (stage === 'MemorandumOfSale') {
-      if (!cl['mos_received'])     return { label: 'MoS Pending', done: false };
-      if (!cl['fee_earner_added']) return { label: 'Fee Earner Required', done: false };
-      if (!cl['sols_confirmed'])   return { label: 'Solicitor Confirmation Pending', done: false };
+      if (!done('mos_received'))           return { label: 'MoS Pending', done: false };
+      if (!done('fee_earner_added'))        return { label: 'Fee Earner Required', done: false };
+      if (!done('sols_confirmed'))          return { label: 'Solicitor Confirmation Pending', done: false };
+      if (!done('contract_pack_received'))  return { label: 'Contract Pack Pending', done: false };
       return { label: 'MoS Complete', done: true };
     }
     if (stage === 'Legals') {
