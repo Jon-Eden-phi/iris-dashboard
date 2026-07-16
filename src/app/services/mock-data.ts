@@ -30,6 +30,9 @@ export class MockDataService {
     { id: 'p007', address: '148 Malvern Way',         postcode: 'TN34 3QG', phase: 'Hastings ESPH', stage: 'Refurbishment',    beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 65 }, financial: { ap: 225000, capex: 72000, tc: 12874, yield: 5.2 }, agreedPrice: 210000, status: 'active' },
     { id: 'p008', address: '26 Dunster Road',         postcode: 'BS4 1BU',  phase: 'Bristol P3',    stage: 'Refurbishment',    beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 70 }, financial: { ap: 290000, capex: 32000, tc: 5200, yield: 5.0 }, agreedPrice: 270000, status: 'active' },
 
+    // ── Demo: full end-to-end TX property ────────────────────────────────────
+    { id: 'p011', address: '41 Ferndale Road', postcode: 'LS6 1AH', phase: 'Leeds P1', stage: 'Legals', beds: 3, type: 'Semi-Detached', epcBefore: { r: 'D', s: 62 }, financial: { ap: 235000, capex: 45000, tc: 8500, yield: 5.8 }, agreedPrice: 225000, status: 'active', tenure: 'Freehold', floodRisk: 'Low', daysOnMarket: 38, description: 'Three-bedroom semi-detached in Hyde Park, Leeds. Solid Victorian bay-fronted terrace. EPC D — target C via insulation and boiler upgrade. Strong rental demand from professionals and post-grads.' },
+
     // ── Lettings / Exchange & Completion (real) ──────────────────────────────
     { id: 'p009', address: '26 Norton Farm Road',     postcode: 'BS10 7ER', phase: 'Bristol P3',    stage: 'Lettings',         beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 75 }, epcAfter: { r: 'B', s: 84 }, financial: { ap: 335000, capex: 18000, tc: 4800, sp: 850, yield: 5.8 }, agreedPrice: 330000, status: 'active', isInvestorDeal: true, tenure: 'Freehold', lha: 12480, marketRent: 18000, floodRisk: 'Low', leaseRemaining: 'N/A', daysOnMarket: 62, description: 'Three-bedroom semi-detached property in Brentry, Bristol. Benefits from driveway parking, south-facing rear garden and recently upgraded kitchen. EPC C — target B post-refurb.', viewing: { agentName: 'Rachel Ford', agentCompany: 'Fox & Sons', agentEmail: 'r.ford@foxandsons.co.uk', agentPhone: '0117 902 5000', reportCondition: 'good' } },
     { id: 'p010', address: '44 Brendon Rise',         postcode: 'TN34 3QD', phase: 'Hastings ESPH', stage: 'Lettings',         beds: 3, type: 'House',         epcBefore: { r: 'F', s: 36 }, epcAfter: { r: 'C', s: 76 }, financial: { ap: 150000, capex: 48000, tc: 12584, sp: 680, yield: 4.8 }, agreedPrice: 150000, status: 'active', tenure: 'Leasehold', lha: 8736, marketRent: 10800, floodRisk: 'Very Low', leaseRemaining: '85 yrs', daysOnMarket: 91, description: 'Three-bedroom terraced house in Ore, Hastings. Requires significant improvement works to bring to EPC C — scope includes full insulation, new boiler and double glazing throughout.', viewing: { agentName: 'James Harlow', agentCompany: 'Jacobs', agentEmail: 'j.harlow@jacobs-ea.co.uk', agentPhone: '01424 421 200', reportCondition: 'fair' } },
@@ -234,6 +237,67 @@ export class MockDataService {
         { id: 'np010a', text: 'Refurb completed. EPC C achieved. Tenant found.',  author: 'Aryan', timestamp: '2026-07-05T09:00:00Z', label: 'success' as NoteLabel },
       ],
     }));
+
+    // ── p011 — 41 Ferndale Road (Legals) — full end-to-end demo ──────────────
+    this._mutate('p011', p => ({ ...p,
+      viewing: {
+        agentName: 'Priya Nair', agentCompany: 'Manning Stainton · Leeds', agentEmail: 'p.nair@manningstainton.co.uk', agentPhone: '0113 239 0808',
+        date: '2026-04-22', time: '11:00', attendee: 'Jiya Chowdhury',
+        reportCondition: 'good',
+        reportNotes: 'Well-maintained Victorian semi. Kitchen updated 2021, boiler 2020. Roof in good order — surveyor satisfied. Small rear yard, on-street parking. EPC D likely to improve easily to C with standard insulation package. Lease: Freehold.',
+      },
+      clientApprovedBy: 'Sarah Okafor', clientMaxPrice: 235000,
+      offers: [
+        { id: 'op011a', amount: 210000, status: 'rejected',  date: '2026-04-29T10:00:00Z', submittedBy: 'Jiya Chowdhury', notes: 'Vendor has set floor at £220k' },
+        { id: 'op011b', amount: 220000, status: 'countered', date: '2026-05-06T14:30:00Z', submittedBy: 'Jiya Chowdhury', notes: 'Vendor countered at £228k — citing recent comparables' },
+        { id: 'op011c', amount: 225000, status: 'accepted',  date: '2026-05-12T09:00:00Z', submittedBy: 'Jiya Chowdhury' },
+      ],
+      activityLog: [
+        { id: 'np011a', text: 'Offer of £225k accepted. MoS received from vendor agent.',             author: 'Jiya Chowdhury', timestamp: '2026-05-22T14:00:00Z', label: 'success' as NoteLabel },
+        { id: 'np011b', text: 'Solicitor instructed — Winkworth Sherwood (ref WS/2026/0498).',       author: 'Jiya Chowdhury', timestamp: '2026-05-28T09:30:00Z', label: 'action'  as NoteLabel },
+        { id: 'np011c', text: 'Winkworth Sherwood confirmed receipt. Matter opened.',                  author: 'Hayley Briggs',  timestamp: '2026-05-29T11:00:00Z', label: 'info'    as NoteLabel },
+        { id: 'np011d', text: 'Searches ordered — LA, water & drainage, environmental.',              author: 'Hayley Briggs',  timestamp: '2026-06-02T10:00:00Z', label: 'action'  as NoteLabel },
+        { id: 'np011e', text: 'Draft contract pack received from vendor\'s solicitors.',              author: 'Hayley Briggs',  timestamp: '2026-06-18T15:30:00Z', label: 'info'    as NoteLabel },
+      ],
+    }));
+    // Seed TX data, legal data, and data room for p011
+    // (safe to merge — p011 is a brand-new id)
+    try {
+      const txRaw  = JSON.parse(localStorage.getItem('iris_tx_data')    ?? '{}');
+      const lgRaw  = JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}');
+      const drRaw: any[] = JSON.parse(localStorage.getItem('iris_data_room') ?? '[]');
+      txRaw['p011'] = {
+        exchangeDate: '', completionDate: '', solicitorInstructed: true,
+        checklist: { mos_received: true, mos_sent_sols: true, fee_earner_added: true, searches_ordered: true },
+        txLog: [
+          { text: 'Searches ordered — LA, water & drainage, environmental.', ts: '02 Jun 26, 10:00', author: 'Jiya Chowdhury' },
+          { text: 'Solicitor instructed — Winkworth Sherwood, ref WS/2026/0498.', ts: '28 May 26, 09:30', author: 'Jiya Chowdhury' },
+          { text: 'MoS received from vendor\'s agent and logged.', ts: '22 May 26, 14:00', author: 'Jiya Chowdhury' },
+        ],
+        notes: [
+          { id: 'tn011a', text: 'Vendor has confirmed vacant possession on completion. No chain above.', category: 'general', author: 'Jiya Chowdhury', ts: '2026-05-28T10:00:00Z' },
+        ],
+        fees: [],
+      };
+      lgRaw['p011'] = {
+        solicitorRef: 'WS/2026/0498',
+        targetExchange: '2026-08-15',
+        targetCompletion: '2026-08-29',
+        checklist: { mos_received: true, sols_confirmed: true, search_la: true },
+        notes: [
+          { id: 'ln011a', text: 'Matter opened. Vendor\'s solicitors: Carter & Webb, ref CW/5201. Local authority search instructed — ETA 10 working days. Draft contract pack received and under review.', author: 'Hayley Briggs', ts: '29 May 2026' },
+        ],
+      };
+      const existingDrIds = new Set(drRaw.map((f: any) => f.id));
+      const p011Docs = [
+        { id: 'dr_p011_mos',  propertyId: 'p011', stage: 'MemorandumOfSale', fileName: 'MoS_41_Ferndale_Road.pdf',       docType: 'MoS',          uploadedBy: 'Jiya Chowdhury', uploadedAt: '22 May 2026', note: 'Signed MoS received from vendor\'s agent — Manning Stainton' },
+        { id: 'dr_p011_dc',   propertyId: 'p011', stage: 'Legals',           fileName: 'Draft_Contract_Ferndale.pdf',    docType: 'Contract Pack', uploadedBy: 'Hayley Briggs',  uploadedAt: '18 Jun 2026', note: 'Draft contract pack received from Carter & Webb' },
+      ];
+      p011Docs.forEach(d => { if (!existingDrIds.has(d.id)) drRaw.push(d); });
+      localStorage.setItem('iris_tx_data',    JSON.stringify(txRaw));
+      localStorage.setItem('iris_legal_data', JSON.stringify(lgRaw));
+      localStorage.setItem('iris_data_room',  JSON.stringify(drRaw));
+    } catch { /* ignore */ }
   }
 
   private _mutate(id: string, fn: (p: Property) => Property): void {
