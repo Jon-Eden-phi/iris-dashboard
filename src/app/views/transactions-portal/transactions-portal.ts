@@ -468,10 +468,11 @@ export class TransactionsPortalComponent {
       { key: 'contract_pack_received', label: 'Contract pack received' },
     ],
     Legals: [
-      { key: 'red_flag_cleared',       label: 'Red flag review cleared' },
       { key: 'contract_pack_received', label: 'Contract pack received' },
-      { key: 'searches_ordered',       label: 'Searches ordered' },
-      { key: 'searches_received',      label: 'Searches received' },
+      { key: 'red_flag_cleared',       label: 'Red flag review cleared' },
+      { key: 'searches_ordered',       label: 'Searches & survey instructed' },
+      { key: 'survey_report_received', label: 'Survey report received' },
+      { key: 'searches_received',      label: 'Search results received' },
       { key: 'draft_rot_received',     label: 'Draft RoT received' },
       { key: 'enquiries_raised',       label: 'Enquiries raised' },
       { key: 'final_rot_received',     label: 'Final RoT received' },
@@ -591,6 +592,10 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Memorandum of Sale', 'MoS']);
     if (key === 'contract_pack_received')
       return this.txHasDocs(propId, ['Contract Pack', 'Draft Contract']);
+    if (key === 'red_flag_cleared')
+      return this.legalCheck(propId, 'contract_rev');
+    if (key === 'survey_report_received')
+      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
     return false;
   }
 
@@ -605,13 +610,15 @@ export class TransactionsPortalComponent {
       return { label: 'MoS Complete', done: true };
     }
     if (stage === 'Legals') {
-      if (!cl['contract_pack_received']) return { label: 'Contract Pack Pending', done: false };
-      if (!cl['searches_ordered'])       return { label: 'Searches to Order', done: false };
-      if (!cl['searches_received'])      return { label: 'Searches in Progress', done: false };
-      if (!cl['draft_rot_received'])     return { label: 'Draft RoT Pending', done: false };
-      if (!cl['enquiries_raised'])       return { label: 'Enquiries Required', done: false };
-      if (!cl['final_rot_received'])     return { label: 'Final RoT Pending', done: false };
-      if (!cl['final_rot_approved'])     return { label: 'Final RoT – Pending Approval', done: false };
+      if (!done('contract_pack_received'))  return { label: 'Contract Pack Pending', done: false };
+      if (!cl['red_flag_cleared'])          return { label: 'Red Flag Review Pending', done: false };
+      if (!cl['searches_ordered'])          return { label: 'Searches & Survey to Instruct', done: false };
+      if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
+      if (!cl['searches_received'])         return { label: 'Searches in Progress', done: false };
+      if (!cl['draft_rot_received'])        return { label: 'Draft RoT Pending', done: false };
+      if (!cl['enquiries_raised'])          return { label: 'Enquiries Required', done: false };
+      if (!cl['final_rot_received'])        return { label: 'Final RoT Pending', done: false };
+      if (!cl['final_rot_approved'])        return { label: 'Final RoT – Pending Approval', done: false };
       return { label: 'Conveyancing Complete', done: true };
     }
     if (stage === 'Refurbishment') {

@@ -859,6 +859,12 @@
                       <span><strong>Solicitor has given exchange sign-off</strong> — request client authority to proceed to exchange.</span>
                     </div>
                   }
+                  @if (action.key === 'red_flag_cleared' && !getTxData(p.id).checklist['red_flag_cleared'] && legalCheck(p.id, 'contract_rev')) {
+                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has completed the red flag review</strong> — contract pack has been reviewed and cleared.</span>
+                    </div>
+                  }
                   @if (action.key === 'searches_received' && !getTxData(p.id).checklist['searches_received'] && txHasDocs(p.id, ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])) {
                     <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
                       <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>

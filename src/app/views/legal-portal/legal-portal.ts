@@ -37,14 +37,15 @@ interface DataRoomFile {
 // Only items where there is an actual document to review before signing off.
 // Action-only confirmations (ordered, raised, sent, sign-off, exchanged etc.) have no entry.
 const ITEM_DOC_TYPES: Record<string, string[]> = {
-  mos_received:  ['Memorandum of Sale', 'MoS'],
-  search_la_r:   ['Local Authority Search', 'Searches'],
-  search_water:  ['Water & Drainage Search', 'Water Search', 'Searches'],
-  search_env:    ['Environmental Search', 'Searches'],
-  contract_rx:   ['Draft Contract', 'Contract Pack'],
-  contract_rev:  ['Draft Contract', 'Contract Pack'],
-  enquiries_in:  ['Enquiries', 'Replies to Enquiries'],
-  title_report:  ['Report on Title', 'Draft Report on Title'],
+  mos_received:    ['Memorandum of Sale', 'MoS'],
+  search_la_r:     ['Local Authority Search', 'Searches'],
+  search_water:    ['Water & Drainage Search', 'Water Search', 'Searches'],
+  search_env:      ['Environmental Search', 'Searches'],
+  survey_report:   ['Survey Report', 'HomeBuyer Report', 'Structural Survey'],
+  contract_rx:     ['Draft Contract', 'Contract Pack'],
+  contract_rev:    ['Draft Contract', 'Contract Pack'],
+  enquiries_in:    ['Enquiries', 'Replies to Enquiries'],
+  title_report:    ['Report on Title', 'Draft Report on Title'],
 };
 
 const CHECKLIST_GROUPS = [
@@ -60,17 +61,19 @@ const CHECKLIST_GROUPS = [
     icon: 'ti-files',
     items: [
       { key: 'contract_rx',  label: 'Contract pack received' },
-      { key: 'contract_rev', label: 'Contract reviewed' },
+      { key: 'contract_rev', label: 'Red flag review completed' },
     ],
   },
   {
-    label: 'Searches',
+    label: 'Searches & Survey',
     icon: 'ti-search',
     items: [
-      { key: 'search_la',    label: 'Local authority search ordered' },
-      { key: 'search_la_r',  label: 'Local authority search received' },
-      { key: 'search_water', label: 'Water & drainage search received' },
-      { key: 'search_env',   label: 'Environmental search received' },
+      { key: 'search_la',        label: 'Searches ordered' },
+      { key: 'survey_instructed', label: 'Survey instructed' },
+      { key: 'search_la_r',      label: 'Local authority search received' },
+      { key: 'search_water',     label: 'Water & drainage search received' },
+      { key: 'search_env',       label: 'Environmental search received' },
+      { key: 'survey_report',    label: 'Survey report received' },
     ],
   },
   {
@@ -236,7 +239,7 @@ export class LegalPortalComponent {
 
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
-    return ['search_la_r','search_water','search_env','contract_rev','enquiries_in','title_sent','funds']
+    return ['search_la_r','search_water','search_env','survey_report','contract_rev','enquiries_in','title_sent','funds']
       .every(k => m.checklist[k]);
   }
 
