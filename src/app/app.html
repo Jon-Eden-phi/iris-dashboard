@@ -36,17 +36,14 @@
 
         @if (user.isAdmin) {
           <div class="nav-section">Admin</div>
-          <a class="nav-item" routerLink="/agents" routerLinkActive="active" (click)="closeSidebar()">
-            <i class="ti ti-users-group"></i> Agents
-          </a>
-          <a class="nav-item" routerLink="/users" routerLinkActive="active" (click)="closeSidebar()">
-            <i class="ti ti-user-cog"></i> Users
-          </a>
           <a class="nav-item" routerLink="/companies" routerLinkActive="active" (click)="closeSidebar()">
             <i class="ti ti-building"></i> Companies
           </a>
           <a class="nav-item" routerLink="/projects" routerLinkActive="active" (click)="closeSidebar()">
             <i class="ti ti-folder"></i> Projects
+          </a>
+          <a class="nav-item" routerLink="/users" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-user-cog"></i> Users
           </a>
         }
 
