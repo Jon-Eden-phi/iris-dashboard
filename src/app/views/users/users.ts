@@ -21,8 +21,8 @@ export class UsersComponent {
     return r === 'all' ? this.auth.allUsers : this.auth.allUsers.filter(u => u.role === r);
   });
 
-  readonly companyRoleOptions = ['Project Manager', 'Conveyancer', 'Purchaser', 'Recipient', 'Surveyor'];
-  readonly functionOptions    = ['Sourcing', 'Buying', 'Refurb', 'Admin', 'Finance'];
+  get companyRoleOptions(): string[] { return this.companies.allRoles(); }
+  get functionOptions(): string[]    { return this.companies.functionsForRole(this.inviteOrg()); }
 
   // ── Invite modal ──────────────────────────────────
   showInvite          = signal(false);

@@ -40,6 +40,18 @@ export class CompaniesService {
     return this._companies().find(c => c.name === name);
   }
 
+  allRoles(): string[] {
+    return [...new Set(this._companies().map(c => c.companyRole).filter(Boolean))].sort();
+  }
+
+  functionsForRole(role: string): string[] {
+    return [...new Set(
+      this._companies()
+        .filter(c => c.companyRole === role && c.functionArea)
+        .map(c => c.functionArea!)
+    )].sort();
+  }
+
   add(company: IrisCompany): void {
     this._companies.update(list => { const n = [...list, company]; this._save(n); return n; });
   }

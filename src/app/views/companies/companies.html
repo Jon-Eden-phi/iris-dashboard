@@ -78,26 +78,56 @@
       <input class="form-input" type="text" placeholder="e.g. 12 Park Street, Bristol, BS1 5LJ" style="margin-bottom:14px;"
              [value]="addAddress()" (input)="addAddress.set($any($event.target).value)" />
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company role</label>
-          <select class="form-input" style="padding:8px 10px;"
-                  [value]="addCompanyRole()" (change)="addCompanyRole.set($any($event.target).value)">
-            @for (r of companyRoleOptions; track r) {
+      <!-- Company Role -->
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company role</label>
+      <div style="display:flex; gap:6px; margin-bottom:14px;">
+        @if (addRoleMode() === 'select') {
+          <select class="form-input" style="padding:8px 10px; flex:1;"
+                  [value]="addRoleSelect()" (change)="onRoleSelectChange($any($event.target).value)">
+            <option value="" disabled>Select a role…</option>
+            @for (r of uniqueRoles; track r) {
               <option [value]="r">{{ r }}</option>
             }
           </select>
-        </div>
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Function <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
-          <select class="form-input" style="padding:8px 10px;"
-                  [value]="addFunction()" (change)="addFunction.set($any($event.target).value)">
+          <button title="Add new role"
+                  (click)="switchToCustomRole()"
+                  style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px dashed var(--border); background:none; color:var(--text3); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:all .15s;"
+                  onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+                  onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">+</button>
+        } @else {
+          <input class="form-input" type="text" placeholder="Type new role…" style="flex:1;"
+                 [value]="addRoleCustom()" (input)="addRoleCustom.set($any($event.target).value)" />
+          <button title="Choose from existing"
+                  (click)="addRoleMode.set('select')"
+                  style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px solid var(--border); background:none; color:var(--text3); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">&times;</button>
+        }
+      </div>
+
+      <!-- Function -->
+      <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">
+        Function <span style="font-weight:400; color:var(--text3);">(optional)</span>
+      </label>
+      <div style="display:flex; gap:6px; margin-bottom:14px;">
+        @if (addFnMode() === 'select') {
+          <select class="form-input" style="padding:8px 10px; flex:1;"
+                  [value]="addFnSelect()" (change)="addFnSelect.set($any($event.target).value)">
             <option value="">— None —</option>
-            @for (f of functionOptions; track f) {
+            @for (f of uniqueFunctions; track f) {
               <option [value]="f">{{ f }}</option>
             }
           </select>
-        </div>
+          <button title="Add new function"
+                  (click)="addFnMode.set('custom'); addFnCustom.set('')"
+                  style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px dashed var(--border); background:none; color:var(--text3); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:all .15s;"
+                  onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+                  onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">+</button>
+        } @else {
+          <input class="form-input" type="text" placeholder="Type new function…" style="flex:1;"
+                 [value]="addFnCustom()" (input)="addFnCustom.set($any($event.target).value)" />
+          <button title="Choose from existing"
+                  (click)="addFnMode.set('select')"
+                  style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px solid var(--border); background:none; color:var(--text3); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">&times;</button>
+        }
       </div>
 
       @if (addError()) {
