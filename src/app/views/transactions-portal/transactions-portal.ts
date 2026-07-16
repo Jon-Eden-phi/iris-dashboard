@@ -452,9 +452,8 @@ export class TransactionsPortalComponent {
 
   readonly stageActions: Record<string, { key: string; label: string }[]> = {
     MemorandumOfSale: [
-      { key: 'mos_received',       label: 'MoS received from vendor' },
-      { key: 'mos_sent_sols',      label: 'MoS sent to solicitor' },
-      { key: 'sols_confirmed',     label: 'Solicitor confirmed receipt' },
+      { key: 'mos_received',   label: 'MoS received from vendor' },
+      { key: 'sols_confirmed', label: 'Solicitor confirmed receipt' },
     ],
     Legals: [
       { key: 'red_flag_cleared',       label: 'Red flag review cleared' },
@@ -578,7 +577,6 @@ export class TransactionsPortalComponent {
     const cl = this.getTxData(propId).checklist;
     if (stage === 'MemorandumOfSale') {
       if (!cl['mos_received'])     return { label: 'MoS Pending', done: false };
-      if (!cl['mos_sent_sols'])    return { label: 'Awaiting Solicitor Instruction', done: false };
       if (!cl['fee_earner_added']) return { label: 'Fee Earner Required', done: false };
       if (!cl['sols_confirmed'])   return { label: 'Solicitor Confirmation Pending', done: false };
       return { label: 'MoS Complete', done: true };
@@ -895,9 +893,6 @@ export class TransactionsPortalComponent {
   }
 
   instructSolicitor(p: Property): void {
-    if (!this.getTxData(p.id).checklist['mos_sent_sols']) {
-      this.toggleChecklist(p.id, 'mos_sent_sols', 'MoS sent to solicitor');
-    }
     this.setTxData(p.id, { solicitorInstructed: true });
     this.showInstructSolicitorModal.set(false);
     this.showToast('Solicitor instructed — matter opened in legal portal', 'ti-scale');

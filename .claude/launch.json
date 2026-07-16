@@ -6,7 +6,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
       "port": 4200,
-      "cwd": "../iris-dashboard"
+      "cwd": "."
     }
   ]
 }
