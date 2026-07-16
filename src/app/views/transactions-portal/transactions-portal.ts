@@ -452,8 +452,9 @@ export class TransactionsPortalComponent {
 
   readonly stageActions: Record<string, { key: string; label: string }[]> = {
     MemorandumOfSale: [
-      { key: 'mos_received',   label: 'MoS received from vendor' },
-      { key: 'sols_confirmed', label: 'Solicitor confirmed receipt' },
+      { key: 'mos_received',          label: 'MoS received' },
+      { key: 'sols_confirmed',        label: 'Solicitor confirmed receipt' },
+      { key: 'contract_pack_received', label: 'Contract pack received' },
     ],
     Legals: [
       { key: 'red_flag_cleared',       label: 'Red flag review cleared' },

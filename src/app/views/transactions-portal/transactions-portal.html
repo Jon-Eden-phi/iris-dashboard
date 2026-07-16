@@ -865,12 +865,6 @@
                       <span><strong>Search results are in the data room</strong> — review and confirm receipt.</span>
                     </div>
                   }
-                  @if (p.stage === 'Legals' && action.key === 'contract_pack_received' && !getTxData(p.id).checklist['contract_pack_received'] && legalCheck(p.id, 'contract_rx')) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor has received the draft contract</strong> — confirm receipt of the contract pack.</span>
-                    </div>
-                  }
                   @if (action.key === 'draft_rot_received' && !getTxData(p.id).checklist['draft_rot_received'] && txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
                     <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
                       <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
@@ -925,9 +919,16 @@
                       {{ action.label }}
                     </span>
                     @if (_checked) {
-                      <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">
-                        @if (_autoChecked) { Confirmed by solicitor } @else { Done }
-                      </span>
+                      @if (_autoChecked && (action.key === 'mos_received' || action.key === 'contract_pack_received')) {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
+                                (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
+                          <i class="ti ti-eye" style="font-size:11px;"></i> View doc
+                        </button>
+                      } @else {
+                        <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">
+                          @if (_autoChecked) { Confirmed by solicitor } @else { Done }
+                        </span>
+                      }
                     } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_received') {
                       @if (legalCheck(p.id, 'mos_received')) {
                         <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Received by legal</span>
