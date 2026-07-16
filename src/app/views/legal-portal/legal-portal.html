@@ -251,7 +251,7 @@
                       <span [style.cursor]="_autoDoc ? 'default' : 'pointer'"
                             (click)="!_autoDoc && toggleCheck(p.id, item.key)">{{ item.label }}</span>
                       @if (itemDocs.length > 0) {
-                        <button class="lg-doc-chip" (click)="openReview(item.label, itemDocs)"
+                        <button class="lg-doc-chip" (click)="openReview(p.id, item.key, item.label, itemDocs)"
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
                           <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }} doc{{ itemDocs.length > 1 ? 's' : '' }}
                         </button>
@@ -378,7 +378,7 @@
           }
         </div>
         <div style="padding:0 20px 20px;">
-          <button class="lg-btn-primary" style="width:100%;" (click)="reviewModal.set(null)">Done reviewing</button>
+          <button class="lg-btn-primary" style="width:100%;" (click)="doneReviewing()">Done reviewing</button>
         </div>
       </div>
     </div>

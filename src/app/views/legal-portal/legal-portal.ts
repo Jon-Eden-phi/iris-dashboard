@@ -130,7 +130,7 @@ export class LegalPortalComponent {
   noteText   = signal('');
 
   // Document review modal
-  reviewModal = signal<{ title: string; files: DataRoomFile[] } | null>(null);
+  reviewModal = signal<{ title: string; files: DataRoomFile[]; propId: string; itemKey: string } | null>(null);
 
   // Upload modal
   showUploadModal = signal(false);
@@ -261,8 +261,17 @@ export class LegalPortalComponent {
     );
   }
 
-  openReview(itemLabel: string, files: DataRoomFile[]): void {
-    this.reviewModal.set({ title: itemLabel, files });
+  openReview(propId: string, itemKey: string, itemLabel: string, files: DataRoomFile[]): void {
+    this.reviewModal.set({ title: itemLabel, files, propId, itemKey });
+  }
+
+  doneReviewing(): void {
+    const modal = this.reviewModal();
+    if (!modal) return;
+    if (!this.getMatter(modal.propId).checklist[modal.itemKey]) {
+      this.toggleCheck(modal.propId, modal.itemKey);
+    }
+    this.reviewModal.set(null);
   }
 
   triggerFileInput(): void {
