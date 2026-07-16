@@ -10,6 +10,8 @@ export interface IrisUser {
   lastName?: string;
   mobile?: string;
   organisation?: string;
+  companyRole?: string;
+  functionArea?: string;
   notificationPrefs?: 'email' | 'inapp' | 'both';
   role: UserRole;
   isAdmin: boolean;

@@ -110,22 +110,48 @@
                  [value]="inviteMobile()" (input)="inviteMobile.set($any($event.target).value)" />
         </div>
         <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Organisation <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
-          <input class="form-input" type="text" placeholder="e.g. Bristol Council"
-                 [value]="inviteOrg()" (input)="inviteOrg.set($any($event.target).value)" />
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company name</label>
+          <select class="form-input" style="padding:8px 10px;"
+                  [value]="inviteOrg()" (change)="inviteOrg.set($any($event.target).value)">
+            @for (c of companyOptions; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
         </div>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
         <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Role</label>
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Company role</label>
           <select class="form-input" style="padding:8px 10px;"
-                  [value]="inviteRole()" (change)="inviteRole.set($any($event.target).value)">
-            @for (r of roleOptions; track r) {
+                  [value]="inviteCompanyRole()" (change)="inviteCompanyRole.set($any($event.target).value)">
+            @for (r of companyRoleOptions; track r) {
               <option [value]="r">{{ r }}</option>
             }
           </select>
         </div>
+        <div>
+          @if (inviteIsSimplyPhi) {
+            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Function</label>
+            <select class="form-input" style="padding:8px 10px;"
+                    [value]="inviteFunctionArea()" (change)="inviteFunctionArea.set($any($event.target).value)">
+              @for (f of functionOptions; track f) {
+                <option [value]="f">{{ f }}</option>
+              }
+            </select>
+          } @else {
+            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">System role</label>
+            <select class="form-input" style="padding:8px 10px;"
+                    [value]="inviteRole()" (change)="inviteRole.set($any($event.target).value)">
+              @for (r of roleOptions; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+          }
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
         <div>
           <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Password</label>
           <input class="form-input" type="text" placeholder="Set a password"

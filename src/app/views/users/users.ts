@@ -19,23 +19,32 @@ export class UsersComponent {
     return r === 'all' ? this.auth.allUsers : this.auth.allUsers.filter(u => u.role === r);
   });
 
+  readonly companyOptions = ['SimplyPhi', 'Winkworth Sherwood', 'Bristol City Council'];
+  readonly companyRoleOptions = ['Project Manager', 'Conveyancer', 'Purchaser', 'Recipient', 'Surveyor'];
+  readonly functionOptions = ['Sourcing', 'Buying', 'Refurb', 'Admin', 'Finance'];
+
   // ── Invite modal ──────────────────────────────────
-  showInvite      = signal(false);
-  inviteFirstName = signal('');
-  inviteLastName  = signal('');
-  inviteEmail     = signal('');
-  inviteMobile    = signal('');
-  inviteOrg       = signal('');
-  inviteRole      = signal<UserRole>('Internal');
-  invitePass      = signal('');
-  inviteAdmin     = signal(false);
-  inviteError     = signal('');
+  showInvite          = signal(false);
+  inviteFirstName     = signal('');
+  inviteLastName      = signal('');
+  inviteEmail         = signal('');
+  inviteMobile        = signal('');
+  inviteOrg           = signal('SimplyPhi');
+  inviteCompanyRole   = signal('Project Manager');
+  inviteFunctionArea  = signal('Sourcing');
+  inviteRole          = signal<UserRole>('Internal');
+  invitePass          = signal('');
+  inviteAdmin         = signal(false);
+  inviteError         = signal('');
+
+  get inviteIsSimplyPhi(): boolean { return this.inviteOrg() === 'SimplyPhi'; }
 
   openInvite(): void {
     this.inviteFirstName.set(''); this.inviteLastName.set('');
-    this.inviteEmail.set(''); this.inviteMobile.set(''); this.inviteOrg.set('');
-    this.inviteRole.set('Internal'); this.invitePass.set('');
-    this.inviteAdmin.set(false); this.inviteError.set('');
+    this.inviteEmail.set(''); this.inviteMobile.set('');
+    this.inviteOrg.set('SimplyPhi'); this.inviteCompanyRole.set('Project Manager');
+    this.inviteFunctionArea.set('Sourcing'); this.inviteRole.set('Internal');
+    this.invitePass.set(''); this.inviteAdmin.set(false); this.inviteError.set('');
     this.showInvite.set(true);
   }
 
@@ -46,9 +55,12 @@ export class UsersComponent {
     const pass      = this.invitePass().trim();
     if (!firstName || !lastName || !email || !pass) { this.inviteError.set('First name, last name, email and password are required.'); return; }
     if (this.auth.allUsers.some(u => u.email === email)) { this.inviteError.set('An account with that email already exists.'); return; }
-    const mobile = this.inviteMobile().trim() || undefined;
-    const org    = this.inviteOrg().trim() || undefined;
-    this.auth.addUser({ id: crypto.randomUUID(), name: `${firstName} ${lastName}`, firstName, lastName, mobile, organisation: org, email, role: this.inviteRole(), isAdmin: this.inviteAdmin(), password: pass });
+    const mobile       = this.inviteMobile().trim() || undefined;
+    const organisation = this.inviteOrg();
+    const companyRole  = this.inviteCompanyRole();
+    const functionArea = this.inviteIsSimplyPhi ? this.inviteFunctionArea() : undefined;
+    const role: UserRole = this.inviteIsSimplyPhi ? 'Internal' : this.inviteRole();
+    this.auth.addUser({ id: crypto.randomUUID(), name: `${firstName} ${lastName}`, firstName, lastName, mobile, organisation, companyRole, functionArea, email, role, isAdmin: this.inviteAdmin(), password: pass });
     this.showInvite.set(false);
   }
 
