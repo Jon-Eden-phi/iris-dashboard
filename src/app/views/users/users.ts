@@ -33,7 +33,6 @@ export class UsersComponent {
   inviteFnMode      = signal<'select' | 'custom'>('select');
   inviteFnSelect    = signal('');
   inviteFnCustom    = signal('');
-  inviteAdmin       = signal(false);
   inviteProjects    = signal<string[]>([]);
   inviteError       = signal('');
   showInviteLink    = signal(false);
@@ -72,7 +71,6 @@ export class UsersComponent {
     this.inviteFnMode.set('select');
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
-    this.inviteAdmin.set(false);
     this.inviteProjects.set([]);
     this.inviteError.set('');
     this.showInvite.set(true);
@@ -86,8 +84,10 @@ export class UsersComponent {
 
   submitInvite(): void {
     const email = this.inviteEmail().trim().toLowerCase();
-    if (!email)            { this.inviteError.set('Email address is required.'); return; }
-    if (!this.inviteOrg()) { this.inviteError.set('Please select a company.'); return; }
+    if (!email)                         { this.inviteError.set('Email address is required.'); return; }
+    if (!this.inviteOrg())              { this.inviteError.set('Please select a company.'); return; }
+    if (!this.effectiveFn())            { this.inviteError.set('Please select or enter a function.'); return; }
+    if (!this.inviteProjects().length)  { this.inviteError.set('Please assign at least one project.'); return; }
     if (this.auth.allUsers.some(u => u.email === email)) {
       this.inviteError.set('An account with that email already exists.'); return;
     }
@@ -105,7 +105,7 @@ export class UsersComponent {
       companyRole,
       functionArea: this.effectiveFn() || undefined,
       projects: this.inviteProjects().length ? this.inviteProjects() : undefined,
-      isAdmin: this.inviteAdmin(),
+      isAdmin: false,
       role,
       createdAt: Date.now(),
     });
