@@ -20,28 +20,35 @@ export class UsersComponent {
   });
 
   // ── Invite modal ──────────────────────────────────
-  showInvite   = signal(false);
-  inviteName   = signal('');
-  inviteEmail  = signal('');
-  inviteRole   = signal<UserRole>('Internal');
-  invitePass   = signal('');
-  inviteAdmin  = signal(false);
-  inviteError  = signal('');
+  showInvite      = signal(false);
+  inviteFirstName = signal('');
+  inviteLastName  = signal('');
+  inviteEmail     = signal('');
+  inviteMobile    = signal('');
+  inviteOrg       = signal('');
+  inviteRole      = signal<UserRole>('Internal');
+  invitePass      = signal('');
+  inviteAdmin     = signal(false);
+  inviteError     = signal('');
 
   openInvite(): void {
-    this.inviteName.set(''); this.inviteEmail.set('');
+    this.inviteFirstName.set(''); this.inviteLastName.set('');
+    this.inviteEmail.set(''); this.inviteMobile.set(''); this.inviteOrg.set('');
     this.inviteRole.set('Internal'); this.invitePass.set('');
     this.inviteAdmin.set(false); this.inviteError.set('');
     this.showInvite.set(true);
   }
 
   submitInvite(): void {
-    const name  = this.inviteName().trim();
-    const email = this.inviteEmail().trim().toLowerCase();
-    const pass  = this.invitePass().trim();
-    if (!name || !email || !pass) { this.inviteError.set('All fields are required.'); return; }
+    const firstName = this.inviteFirstName().trim();
+    const lastName  = this.inviteLastName().trim();
+    const email     = this.inviteEmail().trim().toLowerCase();
+    const pass      = this.invitePass().trim();
+    if (!firstName || !lastName || !email || !pass) { this.inviteError.set('First name, last name, email and password are required.'); return; }
     if (this.auth.allUsers.some(u => u.email === email)) { this.inviteError.set('An account with that email already exists.'); return; }
-    this.auth.addUser({ id: crypto.randomUUID(), name, email, role: this.inviteRole(), isAdmin: this.inviteAdmin(), password: pass });
+    const mobile = this.inviteMobile().trim() || undefined;
+    const org    = this.inviteOrg().trim() || undefined;
+    this.auth.addUser({ id: crypto.randomUUID(), name: `${firstName} ${lastName}`, firstName, lastName, mobile, organisation: org, email, role: this.inviteRole(), isAdmin: this.inviteAdmin(), password: pass });
     this.showInvite.set(false);
   }
 

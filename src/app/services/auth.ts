@@ -6,6 +6,11 @@ export interface IrisUser {
   id: string;
   email: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  mobile?: string;
+  organisation?: string;
+  notificationPrefs?: 'email' | 'inapp' | 'both';
   role: UserRole;
   isAdmin: boolean;
   password: string;
@@ -67,6 +72,9 @@ export class AuthService {
 
   updateUser(id: string, changes: Partial<IrisUser>): void {
     this._users.update(list => { const n = list.map(u => u.id === id ? { ...u, ...changes } : u); this._saveUsers(n); return n; });
+    if (this.currentUser()?.id === id) {
+      this.currentUser.update(u => u ? { ...u, ...changes } : u);
+    }
   }
 
   removeUser(id: string): void {
