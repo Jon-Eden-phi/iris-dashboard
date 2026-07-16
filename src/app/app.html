@@ -29,6 +29,11 @@
           <i class="ti ti-building-community"></i> Social Impact
         </a>
 
+        <div class="nav-section">Portals</div>
+        <a class="nav-item" routerLink="/transactions-portal" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="ti ti-file-invoice"></i> Transactions
+        </a>
+
         @if (user.isAdmin) {
           <div class="nav-section">Admin</div>
           <a class="nav-item" routerLink="/agents" routerLinkActive="active" (click)="closeSidebar()">

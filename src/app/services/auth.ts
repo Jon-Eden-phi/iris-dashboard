@@ -13,7 +13,7 @@ export interface IrisUser {
 
 const INITIAL_USERS: IrisUser[] = [
   { id: 'u1',  email: 'aryan@simplyphi.co.uk',     name: 'Aryan',         role: 'Internal',       isAdmin: true,  password: 'simplyphi24' },
-  { id: 'u2',  email: 'athesan@simplyphi.co.uk',   name: 'Athesan Guna',  role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
+  { id: 'u2',  email: 'athesan@simplyphi.co.uk',   name: 'Athesan Guna',  role: 'Internal',       isAdmin: false, password: 'AG@12345'    },
   { id: 'u3',  email: 'carol@simplyphi.co.uk',     name: 'Carol Quinton', role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
   { id: 'u4',  email: 'demo@simplyphi.co.uk',      name: 'Demo User',     role: 'Internal',       isAdmin: false, password: 'demo1234'    },
   { id: 'u5',  email: 'hayley@winksherwood.co.uk', name: 'Hayley Briggs', role: 'Legal Provider', isAdmin: false, password: 'legal24'     },

@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { DatePipe, TitleCasePipe, DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -97,7 +98,7 @@ interface DataRoomFile {
 
 @Component({
   selector: 'app-transactions-portal',
-  imports: [DatePipe, TitleCasePipe],
+  imports: [DatePipe, TitleCasePipe, RouterLink],
   templateUrl: './transactions-portal.html',
   styleUrl: './transactions-portal.scss',
 })
