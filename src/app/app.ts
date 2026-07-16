@@ -27,6 +27,8 @@ export class App {
     '/social-impact': 'Social Impact',
     '/agents': 'Agents',
     '/users': 'Users',
+    '/companies': 'Companies',
+    '/projects': 'Projects',
     '/record': 'Property Detail',
     '/login': 'Sign In',
   };

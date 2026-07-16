@@ -37,6 +37,8 @@ export const routes: Routes = [
       { path: 'social-impact', canActivate: [internalGuard], loadComponent: () => import('./views/social-impact/social-impact').then(m => m.SocialImpactComponent) },
       { path: 'agents',        canActivate: [internalGuard], loadComponent: () => import('./views/agents/agents').then(m => m.AgentsComponent) },
       { path: 'users',         canActivate: [internalGuard], loadComponent: () => import('./views/users/users').then(m => m.UsersComponent) },
+      { path: 'companies',     canActivate: [internalGuard], loadComponent: () => import('./views/companies/companies').then(m => m.CompaniesComponent) },
+      { path: 'projects',      canActivate: [internalGuard], loadComponent: () => import('./views/projects/projects').then(m => m.ProjectsComponent) },
       { path: 'record/:id',    canActivate: [internalGuard], loadComponent: () => import('./views/record/record').then(m => m.RecordComponent) },
     ]
   },
