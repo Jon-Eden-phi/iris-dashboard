@@ -187,33 +187,60 @@
 
           <!-- Checklist -->
           <div class="lg-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
-              <div class="lg-section-title"><i class="ti ti-checklist"></i> Conveyancing checklist</div>
-              <span style="font-size:12px; color:var(--text3);">Click a document badge to review before signing off</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:8px;">
+              <div class="lg-section-title"><i class="ti ti-route"></i> Conveyancing workflow</div>
+              @let wfProg = checkProgress(p.id);
+              <span style="font-size:12px; color:var(--text3);">{{ wfProg.done }}/{{ wfProg.total }} complete</span>
             </div>
-            <div class="lg-checklist-grid">
-              @for (group of checklistGroups; track group.label) {
-                @let gp = groupProgress(p.id, group);
-                <div class="lg-checklist-group">
-                  <div class="lg-checklist-group-header">
-                    <span>{{ group.label }}</span>
-                    <span class="lg-group-count" [class.complete]="gp === group.items.length">{{ gp }}/{{ group.items.length }}</span>
+
+            @for (group of checklistGroups; track group.label) {
+              @let gp = groupProgress(p.id, group);
+              @let isComplete = gp === group.items.length;
+              @let isLast = $last;
+              <div style="display:flex; gap:14px;">
+
+                <!-- Step indicator column -->
+                <div style="display:flex; flex-direction:column; align-items:center; width:28px; flex-shrink:0;">
+                  <div style="width:28px; height:28px; border-radius:50%; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; transition:.15s;"
+                       [style.border-color]="isComplete ? '#22c55e' : 'var(--border)'"
+                       [style.color]="isComplete ? '#fff' : 'var(--text3)'"
+                       [style.background]="isComplete ? '#22c55e' : 'var(--surface)'">
+                    @if (isComplete) { <i class="ti ti-check" style="font-size:12px;"></i> }
+                    @else { {{ $index + 1 }} }
                   </div>
+                  @if (!isLast) {
+                    <div style="width:2px; flex:1; min-height:14px; background:var(--border); margin:3px 0;"></div>
+                  }
+                </div>
+
+                <!-- Step body -->
+                <div style="flex:1; min-width:0; padding-bottom:20px;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; margin-top:4px;">
+                    <i class="ti {{ group.icon }}" style="font-size:13px; color:var(--text3);"></i>
+                    <span style="font-size:13px; font-weight:600; color:var(--text1);">{{ group.label }}</span>
+                    @if (isComplete) {
+                      <span style="font-size:10.5px; background:#dcfce7; color:#16a34a; padding:1.5px 7px; border-radius:99px; font-weight:600; flex-shrink:0;">Complete</span>
+                    } @else if (gp > 0) {
+                      <span style="font-size:10.5px; background:rgba(234,179,8,0.12); color:#a16207; padding:1.5px 7px; border-radius:99px; font-weight:600; flex-shrink:0;">{{ gp }}/{{ group.items.length }}</span>
+                    }
+                  </div>
+
                   @if (group.label === 'Searches' && txCheck(p.id, 'searches_ordered') && !getMatter(p.id).checklist['search_la']) {
-                    <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:6px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
+                    <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
                       <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
                       <span><strong>TX team has instructed searches</strong> — please order local authority, water &amp; drainage, and environmental searches.</span>
                     </div>
                   }
-                  @if (group.label === 'Exchange' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {
-                    <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:6px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
+                  @if (group.label === 'Exchange & Completion' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {
+                    <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
                       <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
                       <span><strong>Authority to exchange received</strong> — TX team has confirmed. You may now proceed to exchange.</span>
                     </div>
                   }
+
                   @for (item of group.items; track item.key) {
                     @let itemDocs = docsForItem(p.id, item.key);
-                    <div class="lg-check-row" [class.checked]="m.checklist[item.key]">
+                    <div class="lg-check-row" [class.checked]="m.checklist[item.key]" style="margin-bottom:6px;">
                       <div class="lg-check-box" [class.checked]="m.checklist[item.key]"
                            (click)="toggleCheck(p.id, item.key)" style="cursor:pointer;">
                         @if (m.checklist[item.key]) { <i class="ti ti-check" style="font-size:11px;"></i> }
@@ -222,19 +249,20 @@
                       @if (itemDocs.length > 0) {
                         <button class="lg-doc-chip" (click)="openReview(item.label, itemDocs)"
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
-                          <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }}
+                          <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }} doc{{ itemDocs.length > 1 ? 's' : '' }}
                         </button>
                       } @else if (itemDocTypes[item.key]?.length) {
-                        <button class="lg-doc-chip lg-doc-chip-empty" title="No documents — click to upload"
+                        <button class="lg-btn-outline" style="font-size:11px; padding:3px 9px; display:flex; align-items:center; gap:4px; flex-shrink:0;"
                                 (click)="uploadDocType.set(itemDocTypes[item.key][0]); showUploadModal.set(true)">
-                          <i class="ti ti-file-plus" style="font-size:10px;"></i>
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload
                         </button>
                       }
                     </div>
                   }
                 </div>
-              }
-            </div>
+
+              </div>
+            }
           </div>
 
           <!-- Documents -->

@@ -50,12 +50,22 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
 const CHECKLIST_GROUPS = [
   {
     label: 'MoS',
+    icon: 'ti-file-text',
     items: [
       { key: 'mos_received', label: 'MoS received' },
     ],
   },
   {
+    label: 'Contract Pack',
+    icon: 'ti-files',
+    items: [
+      { key: 'contract_rx',  label: 'Contract pack received' },
+      { key: 'contract_rev', label: 'Contract reviewed' },
+    ],
+  },
+  {
     label: 'Searches',
+    icon: 'ti-search',
     items: [
       { key: 'search_la',    label: 'Local authority search ordered' },
       { key: 'search_la_r',  label: 'Local authority search received' },
@@ -64,24 +74,31 @@ const CHECKLIST_GROUPS = [
     ],
   },
   {
-    label: 'Contract & Enquiries',
+    label: 'Enquiries',
+    icon: 'ti-message-question',
     items: [
-      { key: 'contract_rx',   label: 'Draft contract received' },
-      { key: 'contract_rev',  label: 'Contract reviewed' },
       { key: 'enquiries_out', label: 'Enquiries raised' },
       { key: 'enquiries_in',  label: 'Enquiries answered' },
     ],
   },
   {
-    label: 'Title & Finance',
+    label: 'Report on Title',
+    icon: 'ti-certificate',
     items: [
-      { key: 'title_report',  label: 'Report on title prepared' },
-      { key: 'title_sent',    label: 'Report sent to client' },
-      { key: 'funds',         label: 'Funds confirmed' },
+      { key: 'title_report', label: 'Report on title prepared' },
+      { key: 'title_sent',   label: 'Report sent to client' },
     ],
   },
   {
-    label: 'Exchange',
+    label: 'Finance',
+    icon: 'ti-coin',
+    items: [
+      { key: 'funds', label: 'Funds confirmed' },
+    ],
+  },
+  {
+    label: 'Exchange & Completion',
+    icon: 'ti-home-check',
     items: [
       { key: 'exchange_ready', label: 'Exchange sign-off given' },
       { key: 'exchanged',      label: 'Exchanged' },
