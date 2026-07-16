@@ -959,12 +959,12 @@
                           <i class="ti ti-eye" style="font-size:11px;"></i> View searches
                         </button>
                       } @else {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Searches'); showUploadModal.set(true); $event.stopPropagation()">
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Local Authority Search'); uploadDocTypeFilter.set(['Local Authority Search', 'Water & Drainage Search', 'Environmental Search']); showUploadModal.set(true); $event.stopPropagation()">
                           <i class="ti ti-upload" style="font-size:11px;"></i> Upload results
                         </button>
                       }
                     } @else if (p.stage === 'Legals' && action.key === 'survey_report_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); showUploadModal.set(true); $event.stopPropagation()">
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); uploadDocTypeFilter.set(['Survey Report', 'HomeBuyer Report', 'Structural Survey']); showUploadModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey report
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'draft_rot_received') {
@@ -1929,18 +1929,18 @@
 }
 
 @if (showUploadModal()) {
-  <div class="tx-modal-backdrop" (click)="showUploadModal.set(false)"></div>
+  <div class="tx-modal-backdrop" (click)="showUploadModal.set(false); uploadDocTypeFilter.set(null)"></div>
   <div class="tx-modal" (click)="$event.stopPropagation()">
     <div class="tx-modal-header">
       <span class="tx-modal-title"><i class="ti ti-upload" style="font-size:14px; margin-right:6px;"></i>Upload document</span>
-      <button class="tx-modal-close" (click)="showUploadModal.set(false)"><i class="ti ti-x"></i></button>
+      <button class="tx-modal-close" (click)="showUploadModal.set(false); uploadDocTypeFilter.set(null)"><i class="ti ti-x"></i></button>
     </div>
     <div class="tx-modal-body">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
         <div>
           <label class="form-label">Document type</label>
           <select class="form-select" [value]="uploadDocType()" (change)="uploadDocType.set($any($event.target).value)">
-            @for (dt of docTypesForStage(selectedProperty()?.stage ?? ''); track dt) {
+            @for (dt of (uploadDocTypeFilter() ?? docTypesForStage(selectedProperty()?.stage ?? '')); track dt) {
               <option>{{ dt }}</option>
             }
           </select>
@@ -1969,7 +1969,7 @@
       </div>
     </div>
     <div class="tx-modal-footer">
-      <button class="btn-ghost" (click)="showUploadModal.set(false)">Cancel</button>
+      <button class="btn-ghost" (click)="showUploadModal.set(false); uploadDocTypeFilter.set(null)">Cancel</button>
       <button class="btn-primary" (click)="uploadDocument()"><i class="ti ti-upload" style="font-size:13px;"></i> Save</button>
     </div>
   </div>

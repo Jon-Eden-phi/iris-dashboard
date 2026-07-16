@@ -193,14 +193,15 @@ export class TransactionsPortalComponent {
   showAbortModal     = signal(false);
   showSurveyModal    = signal(false);
   showResponseModal  = signal(false);
-  showUploadModal    = signal(false);
-  showRevertModal    = signal(false);
-  respondingQueryId  = signal<string | null>(null);
-  responseText       = signal('');
-  uploadDocType      = signal('MoS');
-  uploadNote         = signal('');
-  uploadFileName     = signal('');
-  selectedFile       = signal<File | null>(null);
+  showUploadModal      = signal(false);
+  showRevertModal      = signal(false);
+  respondingQueryId    = signal<string | null>(null);
+  responseText         = signal('');
+  uploadDocType        = signal('MoS');
+  uploadDocTypeFilter  = signal<string[] | null>(null);
+  uploadNote           = signal('');
+  uploadFileName       = signal('');
+  selectedFile         = signal<File | null>(null);
 
   triggerTxFileInput(): void {
     this.doc.getElementById('tx-file-input')?.click();
@@ -731,6 +732,7 @@ export class TransactionsPortalComponent {
       this.toggleChecklist(p.id, key, docType + ' received');
     }
     this.showUploadModal.set(false);
+    this.uploadDocTypeFilter.set(null);
     this.uploadNote.set('');
     this.uploadFileName.set('');
     this.selectedFile.set(null);
