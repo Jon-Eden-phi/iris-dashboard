@@ -559,102 +559,184 @@
     <!-- ── Home tab ── -->
     @if (recordTab() === 'home') {
       @if (property(); as p) {
-        <div style="padding:20px 24px;">
+        <div>
 
-          <!-- EPC -->
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">EPC Ratings</div>
-          <div style="display:flex; gap:12px; align-items:stretch; margin-bottom:24px;">
+          <!-- ── Quick stats strip ─────────────────────────────────── -->
+          <div style="display:flex; flex-wrap:wrap; border-bottom:1px solid var(--border);">
+            @if (p.financial?.ap) {
+              <div style="padding:10px 16px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3);">AP</div>
+                <div style="font-size:13px; font-weight:700; color:var(--text1);">{{ p.financial!.ap | money }}</div>
+              </div>
+            }
+            <div style="padding:10px 16px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+              <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3);">LTSC</div>
+              <div style="font-size:13px; font-weight:700; color:var(--text1);">{{ p.financial?.ltsc ? (p.financial!.ltsc | money) : 'N/A' }}</div>
+            </div>
+            @if (p.financial) {
+              <div style="padding:10px 16px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3);">AIC</div>
+                <div style="font-size:13px; font-weight:700; color:var(--accent);">{{ totalCost() | money }}</div>
+              </div>
+            }
+            @if (p.financial?.sp || p.lha) {
+              <div style="padding:10px 16px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3);">Rent (p.a)</div>
+                <div style="font-size:13px; font-weight:700; color:var(--text1);">{{ (p.financial?.sp || p.lha) | money }}</div>
+              </div>
+            }
+            @if (p.financial?.yield) {
+              <div style="padding:10px 16px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3);">Yield</div>
+                <div style="font-size:13px; font-weight:700; color:var(--teal);">{{ p.financial!.yield!.toFixed(2) }}%</div>
+              </div>
+            }
             @if (p.epcBefore) {
-              <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcBefore.r) + '22'">
-                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Before</div>
-                <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
-                     [style.background]="epcColor(p.epcBefore.r)" [style.color]="epcTextColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
-                <div style="font-size:20px; font-weight:800;">{{ p.epcBefore.s }}</div>
-                <div style="font-size:11px; color:var(--text3);">SAP score</div>
+              <div style="padding:10px 16px; display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3);">EPC</div>
+                <div style="font-size:13px; font-weight:700; display:flex; align-items:center; gap:5px;">
+                  <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:4px; font-size:11px; font-weight:800; color:#fff;"
+                        [style.background]="epcColor(p.epcBefore.r)">{{ p.epcBefore.r }}</span>
+                  <span style="color:var(--text2);">({{ p.epcBefore.s }})</span>
+                  @if (p.epcAfter) {
+                    <i class="ti ti-arrow-right" style="font-size:11px; color:var(--text3);"></i>
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:4px; font-size:11px; font-weight:800; color:#fff;"
+                          [style.background]="epcColor(p.epcAfter.r)">{{ p.epcAfter.r }}</span>
+                    <span style="color:var(--text2);">({{ p.epcAfter.s }})</span>
+                  }
+                </div>
               </div>
-            }
-            @if (p.epcAfter) {
-              <div style="display:flex; align-items:center; color:var(--teal); font-size:18px;"><i class="ti ti-arrow-right"></i></div>
-              <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcAfter.r) + '22'">
-                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">After</div>
-                <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
-                     [style.background]="epcColor(p.epcAfter.r)" [style.color]="epcTextColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
-                <div style="font-size:20px; font-weight:800;">{{ p.epcAfter.s }}</div>
-                <div style="font-size:11px; color:var(--text3);">SAP score</div>
-              </div>
-            }
-            @if (p.epcBefore && p.epcAfter) {
-              <div style="flex:1; border-radius:8px; padding:16px; text-align:center; background:rgba(15,124,107,0.08);">
-                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Uplift</div>
-                <div style="font-size:32px; font-weight:800; color:var(--teal); line-height:1; margin-top:8px;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
-                <div style="font-size:11px; color:var(--text3); margin-top:4px;">SAP points</div>
-              </div>
-            }
-            @if (!p.epcBefore && !p.epcAfter) {
-              <div style="color:var(--text3); font-size:13px; padding:8px 0;">No EPC data available</div>
             }
           </div>
 
-          <!-- Property details grid -->
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Property Details</div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px;">
+          <!-- ── Property chips ────────────────────────────────────── -->
+          <div style="padding:14px 20px; display:flex; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--border);">
             @if (p.type) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Type</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.type }}</div>
+              <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg); border-radius:20px; font-size:13px; font-weight:600;">
+                <i class="ti ti-home" style="font-size:14px; color:var(--text3);"></i>{{ p.type }}
               </div>
             }
             @if (p.beds) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Bedrooms</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.beds }}</div>
+              <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg); border-radius:20px; font-size:13px; font-weight:600;">
+                <i class="ti ti-bed" style="font-size:14px; color:var(--text3);"></i>{{ p.beds }} Bed{{ p.beds !== 1 ? 's' : '' }}
               </div>
             }
-            @if (p.tenure) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Tenure</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.tenure }}</div>
+            @if (p.bathrooms) {
+              <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg); border-radius:20px; font-size:13px; font-weight:600;">
+                <i class="ti ti-bath" style="font-size:14px; color:var(--text3);"></i>{{ p.bathrooms }} Bathroom{{ p.bathrooms !== 1 ? 's' : '' }}
               </div>
             }
-            @if (p.leaseRemaining) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Lease Remaining</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.leaseRemaining }}</div>
-              </div>
-            }
-            @if (p.floodRisk) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Flood Risk</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.floodRisk }}</div>
+            @if (p.size) {
+              <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg); border-radius:20px; font-size:13px; font-weight:600;">
+                <i class="ti ti-ruler-2" style="font-size:14px; color:var(--text3);"></i>{{ p.size }} sq.m
               </div>
             }
             @if (p.daysOnMarket) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Days on Market</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.daysOnMarket }}</div>
+              <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg); border-radius:20px; font-size:13px; font-weight:600;">
+                <i class="ti ti-clock" style="font-size:14px; color:var(--text3);"></i>{{ p.daysOnMarket }} Days on Market
               </div>
             }
-            @if (p.exCouncil) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Ex-Council</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">Yes</div>
-              </div>
-            }
-            @if (p.exCare) {
-              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
-                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Ex-Care</div>
-                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.exCare }}</div>
+            @if (p.tenure) {
+              <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg); border-radius:20px; font-size:13px; font-weight:600;">
+                <i class="ti ti-certificate" style="font-size:14px; color:var(--text3);"></i>{{ p.tenure }}
               </div>
             }
           </div>
 
-          @if (p.description) {
-            <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
-              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Description</div>
-              <p style="font-size:13px; color:var(--text2); line-height:1.7; margin:0;">{{ p.description }}</p>
-            </div>
-          }
+          <div style="padding:20px 24px;">
 
+            <!-- ── Description ───────────────────────────────────── -->
+            @if (p.description) {
+              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Property Description</div>
+              <p style="font-size:13px; color:var(--text2); line-height:1.7; margin:0 0 24px;">{{ p.description }}</p>
+            }
+
+            <!-- ── Property Details table ────────────────────────── -->
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Property Details</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; font-size:13px; margin-bottom:24px;">
+
+              <!-- Left column -->
+              <div style="border-right:1px solid var(--border);">
+                @for (row of [
+                  {label:'Size',                  val: p.size ? (p.size + ' sq.m') : null},
+                  {label:'Tenure',                val: p.tenure ?? null},
+                  {label:'Type',                  val: p.type ?? null},
+                  {label:'Ex Local Authority',    val: p.exLocalAuthority != null ? (p.exLocalAuthority ? 'Yes' : 'No') : null},
+                  {label:'Age of Property',       val: p.ageOfProperty ?? null},
+                  {label:'Main Heat Description', val: p.mainHeatDescription ?? null},
+                  {label:'Gas Safe Register',     val: p.gasSafeRegister ? formatViewingDate(p.gasSafeRegister) : null},
+                  {label:'Walls Description',     val: p.wallsDescription ?? null},
+                  {label:'Local Authority',       val: p.localAuthority ?? null},
+                  {label:'BRMA',                  val: p.brma ?? null},
+                  {label:'Ward',                  val: p.ward ?? null},
+                  {label:'CCG',                   val: p.ccg ?? null}
+                ]; track row.label; let odd = $odd) {
+                  <div style="display:flex; padding:9px 14px; border-bottom:1px solid var(--border);" [style.background]="odd ? 'var(--bg)' : 'transparent'">
+                    <span style="color:var(--text3); min-width:160px; flex-shrink:0;">{{ row.label }}</span>
+                    <span style="font-weight:600; color:{{ row.val ? 'var(--text1)' : 'var(--text3)' }};">{{ row.val ?? 'N/A' }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Right column -->
+              <div>
+                @for (row of [
+                  {label:'NDSS (No. of people)',      val: p.ndss != null ? (p.ndss ? 'Yes' : 'No') : null},
+                  {label:'LHA (p.a)',                 val: p.lha ? (p.lha | money) : null},
+                  {label:'Market Rent (p.a)',         val: p.marketRent ? (p.marketRent | money) : null},
+                  {label:'CapEx',                     val: p.financial?.capex ? (p.financial!.capex | money) : null},
+                  {label:'Flood Risk',                val: p.floodRisk ?? null},
+                  {label:'Auction',                   val: p.auction != null ? (p.auction ? 'Yes' : 'No') : null},
+                  {label:'New Home',                  val: p.newHome != null ? (p.newHome ? 'Yes' : 'No') : null},
+                  {label:'Built Year',                val: p.builtYear ?? null},
+                  {label:'Estate Mgmt. Charges',      val: p.estateManagementCharges != null ? ($any(p.estateManagementCharges) > 0 ? ('£' + (+p.estateManagementCharges).toLocaleString('en-GB')) : $any(p.estateManagementCharges) + '') : null},
+                  {label:'Stamp Duty',                val: p.financial?.stampDuty ? (p.financial!.stampDuty | money) : null},
+                  {label:'Lease Remaining',           val: p.leaseRemaining ?? null},
+                  {label:'Ex-Council',                val: p.exCouncil != null ? (p.exCouncil ? 'Yes' : 'No') : null}
+                ]; track row.label; let odd = $odd) {
+                  <div style="display:flex; padding:9px 14px; border-bottom:1px solid var(--border);" [style.background]="odd ? 'var(--bg)' : 'transparent'">
+                    <span style="color:var(--text3); min-width:160px; flex-shrink:0;">{{ row.label }}</span>
+                    <span style="font-weight:600; color:{{ row.val ? 'var(--text1)' : 'var(--text3)' }};">{{ row.val ?? 'N/A' }}</span>
+                  </div>
+                }
+              </div>
+
+            </div>
+
+            <!-- ── EPC section ───────────────────────────────────── -->
+            @if (p.epcBefore || p.epcAfter) {
+              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">EPC Ratings</div>
+              <div style="display:flex; gap:12px; align-items:stretch;">
+                @if (p.epcBefore) {
+                  <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcBefore.r) + '22'">
+                    <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Before</div>
+                    <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
+                         [style.background]="epcColor(p.epcBefore.r)" [style.color]="epcTextColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
+                    <div style="font-size:20px; font-weight:800;">{{ p.epcBefore.s }}</div>
+                    <div style="font-size:11px; color:var(--text3);">SAP score</div>
+                  </div>
+                }
+                @if (p.epcAfter) {
+                  <div style="display:flex; align-items:center; color:var(--teal); font-size:18px;"><i class="ti ti-arrow-right"></i></div>
+                  <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcAfter.r) + '22'">
+                    <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">After</div>
+                    <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
+                         [style.background]="epcColor(p.epcAfter.r)" [style.color]="epcTextColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
+                    <div style="font-size:20px; font-weight:800;">{{ p.epcAfter.s }}</div>
+                    <div style="font-size:11px; color:var(--text3);">SAP score</div>
+                  </div>
+                }
+                @if (p.epcBefore && p.epcAfter) {
+                  <div style="flex:1; border-radius:8px; padding:16px; text-align:center; background:rgba(15,124,107,0.08);">
+                    <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Uplift</div>
+                    <div style="font-size:32px; font-weight:800; color:var(--teal); line-height:1; margin-top:8px;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
+                    <div style="font-size:11px; color:var(--text3); margin-top:4px;">SAP points</div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
         </div>
       }
     }

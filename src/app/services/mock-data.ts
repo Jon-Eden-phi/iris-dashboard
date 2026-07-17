@@ -6,7 +6,7 @@ import { Agent } from '../models/agent.model';
 @Injectable({ providedIn: 'root' })
 export class MockDataService {
 
-  private readonly STORAGE_KEY = 'iris-props-v9';
+  private readonly STORAGE_KEY = 'iris-props-v10';
 
   private _props = signal<Property[]>([
     // ── ACQ pipeline (mock) ──────────────────────────────────────────────────
@@ -24,7 +24,7 @@ export class MockDataService {
     { id: 'p003', address: '32 Orchard Avenue',       postcode: 'BS13 0FH', phase: 'Bristol P3',    stage: 'MemorandumOfSale', beds: 2, type: 'End-Terrace',   epcBefore: { r: 'B', s: 85 }, financial: { ap: 300000, capex: 28000, tc: 4800, yield: 5.1 }, agreedPrice: 297500, status: 'active' },
 
     // ── Legals (real) ────────────────────────────────────────────────────────
-    { id: 'p004', address: '94 Middleton Road',       postcode: 'SM4 6RR',  phase: 'Merton LAHF',   stage: 'Legals',           beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 64 }, financial: { ap: 475000, capex: 11000, tc: 5865, yield: 3.75 }, agreedPrice: 461500, status: 'active' },
+    { id: 'p004', address: '94 Middleton Road',       postcode: 'SM4 6RR',  phase: 'Merton LAHF',   stage: 'Legals',           beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 64 }, financial: { ap: 475000, capex: 11000, tc: 5865, yield: 3.65, sp: 17951 }, agreedPrice: 461500, status: 'active', tenure: 'Freehold', bathrooms: 1, size: 87, daysOnMarket: 8, lha: 17951, marketRent: undefined, floodRisk: 'None', description: 'Three bedroom terraced house with lounge, dining room, kitchen, three bedrooms, bathroom, rear garden and driveway.', exLocalAuthority: false, ageOfProperty: '1950-1966', mainHeatDescription: 'Boiler and radiators, mains gas', gasSafeRegister: '2023-08-16', wallsDescription: 'Solid brick, as built, no insulation (assumed)', localAuthority: 'Merton', brma: 'Outer South London BRMA', ward: 'Pollards Hill', ccg: 'NHS South West London CCG', ndss: false, auction: false, newHome: false, builtYear: 'N/A', estateManagementCharges: 'N/A' },
     { id: 'p005', address: '120 Rye Road',            postcode: 'TN35 5DB', phase: 'Hastings ESPH', stage: 'Legals',           beds: 2, type: 'Flat',          epcBefore: { r: 'D', s: 67 }, financial: { ap: 210000, capex: 42000, tc: 13080, yield: 6.37 }, agreedPrice: 185000, status: 'active' },
 
     // ── Refurbishment (real) ─────────────────────────────────────────────────

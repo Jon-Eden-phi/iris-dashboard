@@ -49,6 +49,8 @@ export interface Financial {
   capex?: number;
   tc?: number;
   sc?: number;
+  ltsc?: number;
+  stampDuty?: number;
   yield?: number;
   epcRating?: string;
 }
@@ -86,5 +88,21 @@ export interface Property {
   daysOnMarket?: number;
   exCouncil?: boolean;
   exCare?: string;
+  bathrooms?: number;
+  size?: number;
+  exLocalAuthority?: boolean;
+  ageOfProperty?: string;
+  mainHeatDescription?: string;
+  gasSafeRegister?: string;
+  wallsDescription?: string;
+  localAuthority?: string;
+  brma?: string;
+  ward?: string;
+  ccg?: string;
+  ndss?: boolean;
+  auction?: boolean;
+  newHome?: boolean;
+  builtYear?: string;
+  estateManagementCharges?: number | string;
   documents?: PropertyDocument[];
 }
