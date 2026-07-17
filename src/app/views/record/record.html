@@ -990,62 +990,55 @@
       @if (property(); as p) {
         <div style="padding:20px 24px;">
 
-          <!-- Toolbar -->
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap;">
-            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Documents</div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <select class="form-input" style="font-size:12px; padding:5px 10px; width:auto;"
-                      [value]="docUploadCategory()"
-                      (change)="docUploadCategory.set($any($event.target).value)">
-                <option value="Legal">Legal</option>
-                <option value="Financial">Financial</option>
-                <option value="Survey">Survey</option>
-                <option value="Other">Other</option>
-              </select>
-              <button class="btn-primary" style="font-size:12px; display:inline-flex; align-items:center; gap:6px;"
-                      (click)="triggerDocUpload()">
-                <i class="ti ti-upload"></i> Upload
-              </button>
+          <!-- Toolbar: search + upload -->
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+            <div style="flex:1; position:relative;">
+              <i class="ti ti-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:14px; color:var(--text3); pointer-events:none;"></i>
+              <input type="text" placeholder="Search documents…" class="form-input"
+                     style="padding-left:32px;"
+                     [value]="docSearch()"
+                     (input)="docSearch.set($any($event.target).value)" />
             </div>
+            <button class="btn-primary" style="font-size:12px; display:inline-flex; align-items:center; gap:6px; flex-shrink:0;"
+                    (click)="triggerDocUpload()">
+              <i class="ti ti-upload"></i> Upload
+            </button>
           </div>
 
+          @let visibleDocs = (p.documents ?? []).filter(d => !docSearch() || d.name.toLowerCase().includes(docSearch().toLowerCase()));
+
           @if ((p.documents?.length ?? 0) > 0) {
-            <!-- Group by category -->
-            @for (cat of ['Legal','Financial','Survey','Other']; track cat) {
-              @let catDocs = (p.documents ?? []).filter(d => d.category === cat);
-              @if (catDocs.length > 0) {
-                <div style="margin-bottom:20px;">
-                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                    <i class="ti ti-folder" style="font-size:12px;"></i>{{ cat }}
-                    <span style="background:var(--border); border-radius:20px; padding:1px 7px; font-size:10px;">{{ catDocs.length }}</span>
-                  </div>
-                  <div style="display:flex; flex-direction:column; gap:4px;">
-                    @for (doc of catDocs; track doc.id) {
-                      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--bg); border-radius:8px;">
-                        <i class="ti ti-file-description" style="font-size:18px; color:var(--text3); flex-shrink:0;"></i>
-                        <div style="flex:1; min-width:0;">
-                          <div style="font-size:13px; font-weight:600; color:var(--text1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ doc.name }}</div>
-                          <div style="font-size:11px; color:var(--text3); margin-top:2px;">
-                            Uploaded by {{ doc.uploadedBy }} · {{ fmtTimestamp(doc.uploadedAt) }}
-                            @if (doc.size) { · {{ doc.size }} }
-                          </div>
-                        </div>
-                        <button (click)="removeDocument(doc.id)"
-                                style="width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text3); flex-shrink:0;"
-                                title="Remove">
-                          <i class="ti ti-trash" style="font-size:13px;"></i>
-                        </button>
+            @if (visibleDocs.length > 0) {
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                @for (doc of visibleDocs; track doc.id) {
+                  <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--bg); border-radius:8px;">
+                    <i class="ti ti-file-description" style="font-size:18px; color:var(--text3); flex-shrink:0;"></i>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:600; color:var(--text1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ doc.name }}</div>
+                      <div style="font-size:11px; color:var(--text3); margin-top:2px;">
+                        Uploaded by {{ doc.uploadedBy }} · {{ fmtTimestamp(doc.uploadedAt) }}
+                        @if (doc.size) { · {{ doc.size }} }
                       </div>
-                    }
+                    </div>
+                    <button (click)="removeDocument(doc.id)"
+                            style="width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text3); flex-shrink:0;"
+                            title="Remove">
+                      <i class="ti ti-trash" style="font-size:13px;"></i>
+                    </button>
                   </div>
-                </div>
-              }
+                }
+              </div>
+            } @else {
+              <div style="text-align:center; padding:32px 20px; color:var(--text3); font-size:13px;">
+                <i class="ti ti-search-off" style="display:block; font-size:28px; margin-bottom:8px; opacity:.5;"></i>
+                No documents match "{{ docSearch() }}"
+              </div>
             }
           } @else {
             <div style="text-align:center; padding:40px 20px; color:var(--text3); font-size:13px;">
               <i class="ti ti-folder-open" style="display:block; font-size:32px; margin-bottom:10px; opacity:.5;"></i>
               <div style="font-weight:600; color:var(--text2); margin-bottom:6px;">No documents yet</div>
-              <div style="font-size:12px;">Select a category and click Upload to add documents.</div>
+              <div style="font-size:12px;">Click Upload to add documents.</div>
             </div>
           }
 

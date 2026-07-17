@@ -262,7 +262,7 @@ export class RecordComponent {
     this.data.updateProperty(id, { documents: docs });
   }
 
-  docUploadCategory = signal<PropertyDocument['category']>('Legal');
+  docSearch = signal('');
 
   triggerDocUpload(): void {
     const input = document.createElement('input');
@@ -274,7 +274,7 @@ export class RecordComponent {
         const doc: PropertyDocument = {
           id: crypto.randomUUID(),
           name: file.name,
-          category: this.docUploadCategory(),
+          category: 'Other',
           uploadedBy: this.auth.currentUser()?.name ?? 'Unknown',
           uploadedAt: new Date().toISOString(),
           size: file.size > 1_048_576
