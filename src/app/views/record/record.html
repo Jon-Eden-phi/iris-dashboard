@@ -101,444 +101,24 @@
     </div>
   }
 
-  <!-- ── Client Approval stage card ───────────────────────────────── -->
-  @if (p.stage === 'ClientApproval') {
-    <div class="card">
-      <!-- Banner -->
-      <div style="background:var(--accent-soft); border:1px solid rgba(232,96,28,0.25); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
-        <i class="ti ti-clock" style="color:var(--accent); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
-        <span><strong>Awaiting {{ councilName() }} approval.</strong> This property has been sent to the client for review. Only the client can approve or reject it — acquisitions cannot advance this stage.</span>
-      </div>
 
-      <!-- Status boxes -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
-        <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
-          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Sent to client</div>
-          <div style="font-size:14px; font-weight:700; color:var(--text2);">{{ councilName() }}</div>
-        </div>
-        <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
-          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Decision</div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; flex-shrink:0;"></span>
-            <span style="font-size:14px; font-weight:700; color:var(--accent);">Pending</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Lock notice -->
-      <div style="background:var(--bg); border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text3); line-height:1.6;">
-        <i class="ti ti-lock" style="flex-shrink:0; margin-top:1px; color:var(--text3);"></i>
-        <span>This stage is <strong>client-controlled</strong>. When the client approves, the property will automatically move to <strong>Viewing</strong>. If they reject it, the property will be marked as <strong>Lost</strong>. No action is available to acquisitions at this stage.</span>
-      </div>
-    </div>
-  }
 
-  <!-- ── Draft stage card ───────────────────────────────────────── -->
-  @if (p.stage === 'Draft') {
-    <div class="card">
-      <!-- Info banner -->
-      <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.18); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
-        <i class="ti ti-info-circle" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
-        <span>This property is in <strong>Draft</strong>. Complete the listing details, confirm pre-offer capex, and mark the draft complete to send it for client approval.</span>
-      </div>
-
-      <!-- Form grid -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-        <!-- Left -->
-        <div>
-          <div style="font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px;">Vacant / Chain-free / Probate</div>
-          <div style="display:flex; gap:18px; flex-wrap:wrap;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-              <input type="checkbox" [checked]="draftVacant()" (change)="draftVacant.update(v => !v)" />
-              Vacant possession
-            </label>
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-              <input type="checkbox" [checked]="draftChainFree()" (change)="draftChainFree.update(v => !v)" />
-              Chain-free
-            </label>
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-              <input type="checkbox" [checked]="draftProbate()" (change)="draftProbate.update(v => !v)" />
-              Probate
-            </label>
-          </div>
-          <div style="margin-top:16px;">
-            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Pre-offer capex estimate</label>
-            <input type="text" class="form-input" [value]="draftCapex()" (input)="draftCapex.set($any($event.target).value)" />
-          </div>
-        </div>
-        <!-- Right -->
-        <div>
-          <div style="margin-bottom:16px;">
-            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Agent contact (branch-level)</label>
-            <input type="text" class="form-input" placeholder="e.g. Mark Ellison — Hardwick & Pace" [value]="draftAgent()" (input)="draftAgent.set($any($event.target).value)" />
-          </div>
-          <div>
-            <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Listing link</label>
-            <input type="text" class="form-input" placeholder="e.g. rightmove.co.uk/properties/…" [value]="draftLink()" (input)="draftLink.set($any($event.target).value)" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Draft action buttons -->
-      <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
-        <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #ef4444; background:transparent; color:#ef4444; font-size:12px; font-weight:600; cursor:pointer;">
-          <i class="ti ti-x"></i> Reject property
-        </button>
-        <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; font-size:13px;" (click)="advance()">
-          <i class="ti ti-arrow-right"></i> Mark draft complete → send for client approval
-        </button>
-      </div>
-    </div>
-  }
-
-  <!-- ── Viewing stage card ────────────────────────────────────────── -->
-  @if (p.stage === 'Viewing') {
-    <div class="card">
-
-      <!-- Confirmation banner -->
-      @if (p.viewing?.date) {
-        <div style="background:rgba(36,114,168,.07); border:1px solid rgba(36,114,168,.2); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
-          <i class="ti ti-calendar-check" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
-          <span>Viewing confirmed for <strong>{{ formatViewingDate(p.viewing?.date) }}, {{ p.viewing?.time }}</strong>
-            @if (p.viewing?.agentName) { with <strong>{{ p.viewing!.agentName }}</strong> ({{ p.viewing!.agentCompany }}). }
-            @if (p.viewing?.attendee) { <strong>{{ p.viewing!.attendee }}</strong> attending from Operations. }
-          </span>
-        </div>
-      }
-
-      <!-- Agent + Attendee row -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
-
-        <!-- Estate agent -->
-        <div style="background:var(--bg); border-radius:10px; padding:16px;">
-          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Estate Agent — Meeting on site</div>
-          <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:12px;">
-            <div style="width:38px; height:38px; border-radius:50%; background:var(--accent-soft); border:1px solid rgba(232,96,28,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-              <i class="ti ti-user" style="color:var(--accent); font-size:16px;"></i>
-            </div>
-            <div>
-              <div style="font-weight:700; font-size:14px;">{{ p.viewing?.agentName ?? 'Not assigned' }}</div>
-              <div style="font-size:12px; color:var(--text3);">{{ p.viewing?.agentCompany }}</div>
-            </div>
-          </div>
-          @if (p.viewing?.agentEmail) {
-            <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--blue); margin-bottom:6px;">
-              <i class="ti ti-mail" style="flex-shrink:0;"></i>
-              <span>{{ p.viewing!.agentEmail }}</span>
-            </div>
-          }
-          @if (p.viewing?.agentPhone) {
-            <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text2); margin-bottom:12px;">
-              <i class="ti ti-phone" style="flex-shrink:0;"></i>
-              <span>{{ p.viewing!.agentPhone }}</span>
-            </div>
-          }
-          <div style="display:flex; gap:7px;">
-            <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;">
-              <i class="ti ti-mail"></i> Email agent
-            </button>
-            <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;">
-              <i class="ti ti-phone"></i> Call
-            </button>
-          </div>
-        </div>
-
-        <!-- Viewing attendee -->
-        <div style="background:var(--bg); border-radius:10px; padding:16px;">
-          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Viewing Attendee — Operations or Viewber</div>
-          @if (p.viewing?.attendee) {
-            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
-              <div style="width:38px; height:38px; border-radius:50%; background:rgba(15,124,107,.12); color:var(--teal); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0;">
-                {{ attendeeInitials(p.viewing!.attendee) }}
-              </div>
-              <div style="flex:1;">
-                <div style="font-weight:700; font-size:14px;">{{ p.viewing!.attendee }}</div>
-                <div style="font-size:12px; color:var(--text3);">Operations coordinator</div>
-              </div>
-              <span class="badge badge-green" style="font-size:10px; white-space:nowrap;">SimplyPhi · Operations</span>
-            </div>
-          }
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Who is attending?</label>
-          <select class="form-input" style="padding:8px 10px; border-color:rgba(232,96,28,.3);"
-                  [value]="p.viewing?.attendee ?? ''"
-                  (change)="setViewingAttendee($any($event.target).value)">
-            @for (group of viewingAttendeeGroups; track group.label) {
-              <optgroup [label]="group.label">
-                @for (opt of group.options; track opt) {
-                  <option [value]="opt">{{ opt }}</option>
-                }
-              </optgroup>
-            }
-          </select>
-          <div style="display:flex; align-items:flex-start; gap:5px; font-size:11px; color:var(--text3); margin-top:8px; line-height:1.5;">
-            <i class="ti ti-info-circle" style="flex-shrink:0; margin-top:1px;"></i>
-            Acquisitions don't attend — viewings are covered by Operations or an external Viewber agent.
-          </div>
-        </div>
-      </div>
-
-      <!-- Date / time -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Viewing date</label>
-          <input type="date" class="form-input" style="border-color:rgba(232,96,28,.3);"
-                 [value]="p.viewing?.date ?? ''"
-                 (change)="setViewingDate($any($event.target).value)" />
-        </div>
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Viewing time</label>
-          <input type="time" class="form-input" style="border-color:rgba(232,96,28,.3);"
-                 [value]="p.viewing?.time ?? ''"
-                 (change)="setViewingTime($any($event.target).value)" />
-        </div>
-      </div>
-
-      <!-- Pre-offer capex -->
-      <div style="margin-bottom:18px;">
-        <div style="font-size:13px; font-weight:600; color:var(--text2); margin-bottom:4px;">Pre-offer capex review</div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:20px; font-weight:800;">{{ p.financial?.capex | money }}</span>
-          <span style="font-size:12px; color:var(--text3);">Confirm or revise after viewing</span>
-        </div>
-      </div>
-
-      <!-- Viewing report -->
-      <div style="border:1.5px solid rgba(232,96,28,.25); border-radius:10px; padding:16px; margin-bottom:18px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i class="ti ti-report" style="color:var(--accent); font-size:16px;"></i>
-          <span style="font-size:13px; font-weight:700; color:var(--text1);">Viewing Report</span>
-          @if (p.viewing?.reportNotes || p.viewing?.reportCondition) {
-            <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(15,124,107,.1); color:var(--teal); margin-left:auto;">Saved</span>
-          }
-        </div>
-
-        <!-- Condition rating -->
-        <div style="margin-bottom:14px;">
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Property condition</label>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            @for (cond of [
-              { val: 'excellent', label: 'Excellent', color: '#16a34a' },
-              { val: 'good',      label: 'Good',      color: '#2472a8' },
-              { val: 'fair',      label: 'Fair',       color: '#f59e0b' },
-              { val: 'poor',      label: 'Poor',       color: '#ef4444' }
-            ]; track cond.val) {
-              <button (click)="setViewingCondition(cond.val)"
-                      [disabled]="p.viewing?.clientReview === 'pending'"
-                      style="padding:6px 16px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid; transition:.15s;"
-                      [style.background]="p.viewing?.reportCondition === cond.val ? cond.color : 'transparent'"
-                      [style.color]="p.viewing?.reportCondition === cond.val ? '#fff' : cond.color"
-                      [style.border-color]="cond.color">
-                {{ cond.label }}
-              </button>
-            }
-          </div>
-        </div>
-
-        <!-- Photos placeholder -->
-        <div style="margin-bottom:14px;">
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Photos</label>
-          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
-            @for (slot of [1,2,3,4,5,6,7,8]; track slot) {
-              <div style="aspect-ratio:4/3; border-radius:7px; border:1.5px dashed var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer; background:var(--bg); font-size:10px; color:var(--text3);"
-                   [style.opacity]="p.viewing?.clientReview === 'pending' ? '0.5' : '1'">
-                <i class="ti ti-camera" style="font-size:18px;"></i>
-                Add photo
-              </div>
-            }
-          </div>
-          <div style="font-size:11px; color:var(--text3); margin-top:6px;">
-            <i class="ti ti-info-circle" style="margin-right:3px;"></i>Photo upload coming soon — attach viewing photos before sending to client.
-          </div>
-        </div>
-
-        <!-- Report notes -->
-        <div>
-          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Observations & notes</label>
-          <textarea class="form-input"
-                    rows="4"
-                    placeholder="Describe the property condition, any issues observed, access notes, or anything the client should know before approving to offer…"
-                    style="resize:vertical; border-color:rgba(232,96,28,.3);"
-                    [disabled]="p.viewing?.clientReview === 'pending'"
-                    [value]="p.viewing?.reportNotes ?? ''"
-                    (input)="setViewingReportNotes($any($event.target).value)"></textarea>
-        </div>
-      </div>
-
-      <!-- Action area: locked if sent for review, otherwise show submit button -->
-      @if (p.viewing?.clientReview === 'pending') {
-        <div style="background:var(--accent-soft); border:1px solid rgba(232,96,28,.25); border-radius:8px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
-          <i class="ti ti-clock" style="color:var(--accent); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
-          <span><strong>Viewing report sent to {{ councilName() }}.</strong> Awaiting their decision. The client will approve or reject via their portal.</span>
-        </div>
-        <div style="background:var(--bg); border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text3); line-height:1.6;">
-          <i class="ti ti-lock" style="flex-shrink:0; margin-top:1px;"></i>
-          <span>This stage is <strong>client-controlled</strong>. When the client approves, the property will automatically move to <strong>Negotiations</strong>. If they reject, it will be marked as <strong>Lost</strong>.</span>
-        </div>
-      } @else {
-        <div style="display:flex; justify-content:flex-end; align-items:center; padding-top:14px; border-top:1px solid var(--border);">
-          <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; font-size:13px;"
-                  (click)="submitViewingForReview()">
-            <i class="ti ti-send"></i> Send viewing report to client for review
-          </button>
-        </div>
-      }
-
-    </div>
-  }
-
-  <!-- ── Negotiations / Offer Tracker ────────────────────────────── -->
-  @if (p.status === 'active' && (p.stage === 'Negotiations' || p.stage === 'MemorandumOfSale' || p.stage === 'Legals' || p.stage === 'Refurbishment' || p.stage === 'Lettings')) {
-    <div class="card">
-
-      <!-- Banner -->
-      @if (currentOffer(); as co) {
-        <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.2); border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:13px;">
-          <i class="ti ti-currency-pound" style="color:var(--blue); font-size:16px; flex-shrink:0;"></i>
-          <span><strong>Offer in progress.</strong> {{ (p.offers ?? []).length }} offer{{ (p.offers ?? []).length !== 1 ? 's' : '' }} submitted. Current offer: <strong>{{ co.amount | money }}</strong></span>
-        </div>
-      }
-
-      <!-- Current offer vs asking price vs client max price boxes -->
-      @if (p.stage === 'Negotiations') {
-        <div style="display:grid; grid-template-columns:1fr 1fr{{ p.clientMaxPrice ? ' 1fr' : '' }}; gap:10px; margin-bottom:16px;">
-          <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
-            <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:6px;">Current Offer</div>
-            @if (currentOffer(); as co) {
-              <div style="font-size:22px; font-weight:800; color:var(--accent);">{{ co.amount | money }}</div>
-            } @else {
-              <div style="font-size:14px; color:var(--text3);">No offer yet</div>
-            }
-          </div>
-          <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
-            <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:6px;">Asking Price</div>
-            <div style="font-size:22px; font-weight:800;">{{ p.financial?.ap | money }}</div>
-          </div>
-          @if (p.clientMaxPrice) {
-            <div style="background:rgba(15,124,107,.07); border:1px solid rgba(15,124,107,.2); border-radius:8px; padding:14px 16px;">
-              <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--teal); margin-bottom:6px;">Client Max Price</div>
-              <div style="font-size:22px; font-weight:800; color:var(--teal);">{{ p.clientMaxPrice | money }}</div>
-              <div style="font-size:10px; color:var(--teal); margin-top:4px; opacity:.7;">Authorised by {{ p.clientApprovedBy }}</div>
-            </div>
-          }
-        </div>
-
-        <!-- Action buttons — always visible; reject/accept operate on latest pending offer -->
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
-          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #ef4444; background:transparent; font-size:12px; font-weight:600; cursor:pointer; transition:.15s;"
-                  [style.color]="currentOffer()?.status === 'pending' ? '#ef4444' : 'var(--text3)'"
-                  [style.border-color]="currentOffer()?.status === 'pending' ? '#ef4444' : 'var(--border)'"
-                  [disabled]="currentOffer()?.status !== 'pending'"
-                  (click)="resolveOffer(currentOffer()!.id, 'rejected')">
-            <i class="ti ti-x"></i> Offer rejected — withdraw
-          </button>
-          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid var(--border); background:transparent; color:var(--text2); font-size:12px; font-weight:600; cursor:pointer;"
-                  (click)="showOfferForm.update(v => !v)">
-            <i class="ti ti-trending-up"></i> Submit offer
-          </button>
-          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:7px; border:none; font-size:12px; font-weight:700; cursor:pointer; transition:.15s;"
-                  [style.background]="currentOffer()?.status === 'pending' ? 'var(--accent)' : 'var(--border)'"
-                  [style.color]="currentOffer()?.status === 'pending' ? '#fff' : 'var(--text3)'"
-                  [disabled]="currentOffer()?.status !== 'pending'"
-                  (click)="resolveOffer(currentOffer()!.id, 'accepted')">
-            <i class="ti ti-file-description"></i> Offer accepted → MoS
-          </button>
-          <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #E8601C; background:transparent; color:#E8601C; font-size:12px; font-weight:600; cursor:pointer; transition:.15s;"
-                  (click)="generateOfferLetter()">
-            <i class="ti ti-file-text"></i> Generate Offer Letter
-          </button>
-        </div>
-      }
-
-      <!-- Submit offer inline form -->
-      @if (showOfferForm()) {
-        <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:16px; border:1px dashed var(--border);">
-          <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">Log New Offer</div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-            <div>
-              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Amount (£)</label>
-              <input type="number" placeholder="e.g. 310000" class="form-input"
-                     [value]="offerAmount() ?? ''"
-                     (input)="offerAmount.set(+$any($event.target).value || null)" />
-            </div>
-            <div>
-              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Submitted by</label>
-              <input type="text" class="form-input"
-                     [value]="offerBy()"
-                     (input)="offerBy.set($any($event.target).value)" />
-            </div>
-          </div>
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Notes / conditions (optional)</label>
-            <input type="text" placeholder='e.g. "Subject to satisfactory survey"' class="form-input"
-                   [value]="offerNotes()"
-                   (input)="offerNotes.set($any($event.target).value)" />
-          </div>
-          <div style="display:flex; gap:8px; justify-content:flex-end;">
-            <button class="btn-ghost" style="font-size:12px;" (click)="showOfferForm.set(false)">Cancel</button>
-            <button class="btn-primary" style="font-size:12px;" (click)="submitOffer()">Submit Offer</button>
-          </div>
-        </div>
-      }
-
-      <!-- Offer history -->
-      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">
-        Offer History ({{ (p.offers ?? []).length }})
-      </div>
-
-      @if ((p.offers?.length ?? 0) > 0) {
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          @for (offer of (p.offers ?? []).slice().reverse(); track offer.id; let offerFirst = $first) {
-            <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:var(--bg);">
-              <div style="width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0;"
-                   [style.background]="offerStatusColor(offer.status)"></div>
-              <div style="flex:1; min-width:0;">
-                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                  <span style="font-size:16px; font-weight:800;">{{ offer.amount | money }}</span>
-                  @if (pctVsAsking(offer.amount)) {
-                    <span style="font-size:12px; color:var(--text3);">({{ pctVsAsking(offer.amount) }})</span>
-                  }
-                  <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; color:#fff;"
-                        [style.background]="offerStatusColor(offer.status)">
-                    {{ offer.status | titlecase }}
-                  </span>
-                  @if (offerFirst) {
-                    <span style="font-size:11px; font-weight:700; color:var(--accent);">Latest</span>
-                  }
-                </div>
-                <div style="font-size:11px; color:var(--text3); margin-top:3px;">
-                  {{ fmtTimestamp(offer.date) }} · {{ offer.submittedBy }}
-                </div>
-                @if (offer.notes) {
-                  <div style="font-size:12px; color:var(--text2); margin-top:5px; font-style:italic;">
-                    "{{ offer.notes }}"
-                  </div>
-                }
-              </div>
-              @if (offer.status === 'pending' && p.stage === 'Negotiations') {
-                <div style="display:flex; gap:5px; flex-shrink:0;">
-                  <button style="padding:4px 9px; border-radius:5px; background:#0f7c6b; color:#fff; border:none; font-size:11px; font-weight:600; cursor:pointer;"
-                          (click)="resolveOffer(offer.id, 'accepted')">Accept</button>
-                  <button style="padding:4px 9px; border-radius:5px; background:#ef4444; color:#fff; border:none; font-size:11px; font-weight:600; cursor:pointer;"
-                          (click)="resolveOffer(offer.id, 'rejected')">Reject</button>
-                </div>
-              }
-            </div>
-          }
-        </div>
-      } @else {
-        <div style="text-align:center; padding:18px; color:var(--text3); font-size:13px;">
-          <i class="ti ti-receipt-off" style="display:block; font-size:22px; margin-bottom:5px;"></i>
-          No offers logged yet
-        </div>
-      }
-    </div>
-  }
 
   <!-- ── Tabbed info card ────────────────────────────────────────── -->
   <div class="card" style="padding:0; overflow:visible;">
 
     <!-- Tab bar -->
     <div style="display:flex; border-bottom:1px solid var(--border); padding:0 20px; overflow-x:auto;">
+      @if (['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale'].includes(p.stage)) {
+        @let flowActive = recordTab() === 'flow';
+        <button (click)="recordTab.set('flow')"
+                style="padding:13px 16px; border:none; background:none; cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; border-bottom:2px solid; margin-bottom:-1px; transition:color .15s; white-space:nowrap; flex-shrink:0;"
+                [style.border-color]="flowActive ? 'var(--accent)' : 'transparent'"
+                [style.color]="flowActive ? 'var(--accent)' : 'var(--text3)'">
+          <i class="ti ti-arrow-right" style="font-size:14px;"></i>Flow
+        </button>
+      }
       @for (tab of [
         {key:'home',       label:'Home',      icon:'ti-home-2'},
         {key:'financials', label:'Financials', icon:'ti-coin'},
@@ -555,6 +135,446 @@
         </button>
       }
     </div>
+
+    <!-- ── Flow tab ── -->
+    @if (recordTab() === 'flow') {
+      <div style="padding:20px;">
+
+        <!-- ── Client Approval stage card ───────────────────────────────── -->
+        @if (p.stage === 'ClientApproval') {
+          <div class="card">
+            <!-- Banner -->
+            <div style="background:var(--accent-soft); border:1px solid rgba(232,96,28,0.25); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+              <i class="ti ti-clock" style="color:var(--accent); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+              <span><strong>Awaiting {{ councilName() }} approval.</strong> This property has been sent to the client for review. Only the client can approve or reject it — acquisitions cannot advance this stage.</span>
+            </div>
+
+            <!-- Status boxes -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+              <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Sent to client</div>
+                <div style="font-size:14px; font-weight:700; color:var(--text2);">{{ councilName() }}</div>
+              </div>
+              <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Decision</div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; flex-shrink:0;"></span>
+                  <span style="font-size:14px; font-weight:700; color:var(--accent);">Pending</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lock notice -->
+            <div style="background:var(--bg); border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text3); line-height:1.6;">
+              <i class="ti ti-lock" style="flex-shrink:0; margin-top:1px; color:var(--text3);"></i>
+              <span>This stage is <strong>client-controlled</strong>. When the client approves, the property will automatically move to <strong>Viewing</strong>. If they reject it, the property will be marked as <strong>Lost</strong>. No action is available to acquisitions at this stage.</span>
+            </div>
+          </div>
+        }
+
+        <!-- ── Draft stage card ───────────────────────────────────────── -->
+        @if (p.stage === 'Draft') {
+          <div class="card">
+            <!-- Info banner -->
+            <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.18); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+              <i class="ti ti-info-circle" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+              <span>This property is in <strong>Draft</strong>. Complete the listing details, confirm pre-offer capex, and mark the draft complete to send it for client approval.</span>
+            </div>
+
+            <!-- Form grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+              <!-- Left -->
+              <div>
+                <div style="font-size:12px; font-weight:600; color:var(--text2); margin-bottom:8px;">Vacant / Chain-free / Probate</div>
+                <div style="display:flex; gap:18px; flex-wrap:wrap;">
+                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" [checked]="draftVacant()" (change)="draftVacant.update(v => !v)" />
+                    Vacant possession
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" [checked]="draftChainFree()" (change)="draftChainFree.update(v => !v)" />
+                    Chain-free
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" [checked]="draftProbate()" (change)="draftProbate.update(v => !v)" />
+                    Probate
+                  </label>
+                </div>
+                <div style="margin-top:16px;">
+                  <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Pre-offer capex estimate</label>
+                  <input type="text" class="form-input" [value]="draftCapex()" (input)="draftCapex.set($any($event.target).value)" />
+                </div>
+              </div>
+              <!-- Right -->
+              <div>
+                <div style="margin-bottom:16px;">
+                  <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Agent contact (branch-level)</label>
+                  <input type="text" class="form-input" placeholder="e.g. Mark Ellison — Hardwick & Pace" [value]="draftAgent()" (input)="draftAgent.set($any($event.target).value)" />
+                </div>
+                <div>
+                  <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Listing link</label>
+                  <input type="text" class="form-input" placeholder="e.g. rightmove.co.uk/properties/…" [value]="draftLink()" (input)="draftLink.set($any($event.target).value)" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Draft action buttons -->
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+              <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #ef4444; background:transparent; color:#ef4444; font-size:12px; font-weight:600; cursor:pointer;">
+                <i class="ti ti-x"></i> Reject property
+              </button>
+              <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; font-size:13px;" (click)="advance()">
+                <i class="ti ti-arrow-right"></i> Mark draft complete → send for client approval
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Viewing stage card ────────────────────────────────────────── -->
+        @if (p.stage === 'Viewing') {
+          <div class="card">
+
+            <!-- Confirmation banner -->
+            @if (p.viewing?.date) {
+              <div style="background:rgba(36,114,168,.07); border:1px solid rgba(36,114,168,.2); border-radius:8px; padding:10px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+                <i class="ti ti-calendar-check" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+                <span>Viewing confirmed for <strong>{{ formatViewingDate(p.viewing?.date) }}, {{ p.viewing?.time }}</strong>
+                  @if (p.viewing?.agentName) { with <strong>{{ p.viewing!.agentName }}</strong> ({{ p.viewing!.agentCompany }}). }
+                  @if (p.viewing?.attendee) { <strong>{{ p.viewing!.attendee }}</strong> attending from Operations. }
+                </span>
+              </div>
+            }
+
+            <!-- Agent + Attendee row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+
+              <!-- Estate agent -->
+              <div style="background:var(--bg); border-radius:10px; padding:16px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Estate Agent — Meeting on site</div>
+                <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:12px;">
+                  <div style="width:38px; height:38px; border-radius:50%; background:var(--accent-soft); border:1px solid rgba(232,96,28,.2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="ti ti-user" style="color:var(--accent); font-size:16px;"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight:700; font-size:14px;">{{ p.viewing?.agentName ?? 'Not assigned' }}</div>
+                    <div style="font-size:12px; color:var(--text3);">{{ p.viewing?.agentCompany }}</div>
+                  </div>
+                </div>
+                @if (p.viewing?.agentEmail) {
+                  <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--blue); margin-bottom:6px;">
+                    <i class="ti ti-mail" style="flex-shrink:0;"></i>
+                    <span>{{ p.viewing!.agentEmail }}</span>
+                  </div>
+                }
+                @if (p.viewing?.agentPhone) {
+                  <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text2); margin-bottom:12px;">
+                    <i class="ti ti-phone" style="flex-shrink:0;"></i>
+                    <span>{{ p.viewing!.agentPhone }}</span>
+                  </div>
+                }
+                <div style="display:flex; gap:7px;">
+                  <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;">
+                    <i class="ti ti-mail"></i> Email agent
+                  </button>
+                  <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;">
+                    <i class="ti ti-phone"></i> Call
+                  </button>
+                </div>
+              </div>
+
+              <!-- Viewing attendee -->
+              <div style="background:var(--bg); border-radius:10px; padding:16px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Viewing Attendee — Operations or Viewber</div>
+                @if (p.viewing?.attendee) {
+                  <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                    <div style="width:38px; height:38px; border-radius:50%; background:rgba(15,124,107,.12); color:var(--teal); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0;">
+                      {{ attendeeInitials(p.viewing!.attendee) }}
+                    </div>
+                    <div style="flex:1;">
+                      <div style="font-weight:700; font-size:14px;">{{ p.viewing!.attendee }}</div>
+                      <div style="font-size:12px; color:var(--text3);">Operations coordinator</div>
+                    </div>
+                    <span class="badge badge-green" style="font-size:10px; white-space:nowrap;">SimplyPhi · Operations</span>
+                  </div>
+                }
+                <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Who is attending?</label>
+                <select class="form-input" style="padding:8px 10px; border-color:rgba(232,96,28,.3);"
+                        [value]="p.viewing?.attendee ?? ''"
+                        (change)="setViewingAttendee($any($event.target).value)">
+                  @for (group of viewingAttendeeGroups; track group.label) {
+                    <optgroup [label]="group.label">
+                      @for (opt of group.options; track opt) {
+                        <option [value]="opt">{{ opt }}</option>
+                      }
+                    </optgroup>
+                  }
+                </select>
+                <div style="display:flex; align-items:flex-start; gap:5px; font-size:11px; color:var(--text3); margin-top:8px; line-height:1.5;">
+                  <i class="ti ti-info-circle" style="flex-shrink:0; margin-top:1px;"></i>
+                  Acquisitions don't attend — viewings are covered by Operations or an external Viewber agent.
+                </div>
+              </div>
+            </div>
+
+            <!-- Date / time -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+              <div>
+                <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Viewing date</label>
+                <input type="date" class="form-input" style="border-color:rgba(232,96,28,.3);"
+                       [value]="p.viewing?.date ?? ''"
+                       (change)="setViewingDate($any($event.target).value)" />
+              </div>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Viewing time</label>
+                <input type="time" class="form-input" style="border-color:rgba(232,96,28,.3);"
+                       [value]="p.viewing?.time ?? ''"
+                       (change)="setViewingTime($any($event.target).value)" />
+              </div>
+            </div>
+
+            <!-- Pre-offer capex -->
+            <div style="margin-bottom:18px;">
+              <div style="font-size:13px; font-weight:600; color:var(--text2); margin-bottom:4px;">Pre-offer capex review</div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:20px; font-weight:800;">{{ p.financial?.capex | money }}</span>
+                <span style="font-size:12px; color:var(--text3);">Confirm or revise after viewing</span>
+              </div>
+            </div>
+
+            <!-- Viewing report -->
+            <div style="border:1.5px solid rgba(232,96,28,.25); border-radius:10px; padding:16px; margin-bottom:18px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                <i class="ti ti-report" style="color:var(--accent); font-size:16px;"></i>
+                <span style="font-size:13px; font-weight:700; color:var(--text1);">Viewing Report</span>
+                @if (p.viewing?.reportNotes || p.viewing?.reportCondition) {
+                  <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(15,124,107,.1); color:var(--teal); margin-left:auto;">Saved</span>
+                }
+              </div>
+
+              <!-- Condition rating -->
+              <div style="margin-bottom:14px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Property condition</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  @for (cond of [
+                    { val: 'excellent', label: 'Excellent', color: '#16a34a' },
+                    { val: 'good',      label: 'Good',      color: '#2472a8' },
+                    { val: 'fair',      label: 'Fair',       color: '#f59e0b' },
+                    { val: 'poor',      label: 'Poor',       color: '#ef4444' }
+                  ]; track cond.val) {
+                    <button (click)="setViewingCondition(cond.val)"
+                            [disabled]="p.viewing?.clientReview === 'pending'"
+                            style="padding:6px 16px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid; transition:.15s;"
+                            [style.background]="p.viewing?.reportCondition === cond.val ? cond.color : 'transparent'"
+                            [style.color]="p.viewing?.reportCondition === cond.val ? '#fff' : cond.color"
+                            [style.border-color]="cond.color">
+                      {{ cond.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Photos placeholder -->
+              <div style="margin-bottom:14px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Photos</label>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                  @for (slot of [1,2,3,4,5,6,7,8]; track slot) {
+                    <div style="aspect-ratio:4/3; border-radius:7px; border:1.5px dashed var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer; background:var(--bg); font-size:10px; color:var(--text3);"
+                         [style.opacity]="p.viewing?.clientReview === 'pending' ? '0.5' : '1'">
+                      <i class="ti ti-camera" style="font-size:18px;"></i>
+                      Add photo
+                    </div>
+                  }
+                </div>
+                <div style="font-size:11px; color:var(--text3); margin-top:6px;">
+                  <i class="ti ti-info-circle" style="margin-right:3px;"></i>Photo upload coming soon — attach viewing photos before sending to client.
+                </div>
+              </div>
+
+              <!-- Report notes -->
+              <div>
+                <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Observations & notes</label>
+                <textarea class="form-input"
+                          rows="4"
+                          placeholder="Describe the property condition, any issues observed, access notes, or anything the client should know before approving to offer…"
+                          style="resize:vertical; border-color:rgba(232,96,28,.3);"
+                          [disabled]="p.viewing?.clientReview === 'pending'"
+                          [value]="p.viewing?.reportNotes ?? ''"
+                          (input)="setViewingReportNotes($any($event.target).value)"></textarea>
+              </div>
+            </div>
+
+            <!-- Action area: locked if sent for review, otherwise show submit button -->
+            @if (p.viewing?.clientReview === 'pending') {
+              <div style="background:var(--accent-soft); border:1px solid rgba(232,96,28,.25); border-radius:8px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+                <i class="ti ti-clock" style="color:var(--accent); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+                <span><strong>Viewing report sent to {{ councilName() }}.</strong> Awaiting their decision. The client will approve or reject via their portal.</span>
+              </div>
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text3); line-height:1.6;">
+                <i class="ti ti-lock" style="flex-shrink:0; margin-top:1px;"></i>
+                <span>This stage is <strong>client-controlled</strong>. When the client approves, the property will automatically move to <strong>Negotiations</strong>. If they reject, it will be marked as <strong>Lost</strong>.</span>
+              </div>
+            } @else {
+              <div style="display:flex; justify-content:flex-end; align-items:center; padding-top:14px; border-top:1px solid var(--border);">
+                <button class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; font-size:13px;"
+                        (click)="submitViewingForReview()">
+                  <i class="ti ti-send"></i> Send viewing report to client for review
+                </button>
+              </div>
+            }
+
+          </div>
+        }
+
+        <!-- ── Negotiations / Offer Tracker ────────────────────────────── -->
+        @if (p.status === 'active' && (p.stage === 'Negotiations' || p.stage === 'MemorandumOfSale')) {
+          <div class="card">
+
+            <!-- Banner -->
+            @if (currentOffer(); as co) {
+              <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.2); border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:13px;">
+                <i class="ti ti-currency-pound" style="color:var(--blue); font-size:16px; flex-shrink:0;"></i>
+                <span><strong>Offer in progress.</strong> {{ (p.offers ?? []).length }} offer{{ (p.offers ?? []).length !== 1 ? 's' : '' }} submitted. Current offer: <strong>{{ co.amount | money }}</strong></span>
+              </div>
+            }
+
+            <!-- Current offer vs asking price vs client max price boxes -->
+            @if (p.stage === 'Negotiations') {
+              <div style="display:grid; grid-template-columns:1fr 1fr{{ p.clientMaxPrice ? ' 1fr' : '' }}; gap:10px; margin-bottom:16px;">
+                <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:6px;">Current Offer</div>
+                  @if (currentOffer(); as co) {
+                    <div style="font-size:22px; font-weight:800; color:var(--accent);">{{ co.amount | money }}</div>
+                  } @else {
+                    <div style="font-size:14px; color:var(--text3);">No offer yet</div>
+                  }
+                </div>
+                <div style="background:var(--bg); border-radius:8px; padding:14px 16px;">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:6px;">Asking Price</div>
+                  <div style="font-size:22px; font-weight:800;">{{ p.financial?.ap | money }}</div>
+                </div>
+                @if (p.clientMaxPrice) {
+                  <div style="background:rgba(15,124,107,.07); border:1px solid rgba(15,124,107,.2); border-radius:8px; padding:14px 16px;">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--teal); margin-bottom:6px;">Client Max Price</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--teal);">{{ p.clientMaxPrice | money }}</div>
+                    <div style="font-size:10px; color:var(--teal); margin-top:4px; opacity:.7;">Authorised by {{ p.clientApprovedBy }}</div>
+                  </div>
+                }
+              </div>
+
+              <!-- Action buttons — always visible; reject/accept operate on latest pending offer -->
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
+                <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #ef4444; background:transparent; font-size:12px; font-weight:600; cursor:pointer; transition:.15s;"
+                        [style.color]="currentOffer()?.status === 'pending' ? '#ef4444' : 'var(--text3)'"
+                        [style.border-color]="currentOffer()?.status === 'pending' ? '#ef4444' : 'var(--border)'"
+                        [disabled]="currentOffer()?.status !== 'pending'"
+                        (click)="resolveOffer(currentOffer()!.id, 'rejected')">
+                  <i class="ti ti-x"></i> Offer rejected — withdraw
+                </button>
+                <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid var(--border); background:transparent; color:var(--text2); font-size:12px; font-weight:600; cursor:pointer;"
+                        (click)="showOfferForm.update(v => !v)">
+                  <i class="ti ti-trending-up"></i> Submit offer
+                </button>
+                <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:7px; border:none; font-size:12px; font-weight:700; cursor:pointer; transition:.15s;"
+                        [style.background]="currentOffer()?.status === 'pending' ? 'var(--accent)' : 'var(--border)'"
+                        [style.color]="currentOffer()?.status === 'pending' ? '#fff' : 'var(--text3)'"
+                        [disabled]="currentOffer()?.status !== 'pending'"
+                        (click)="resolveOffer(currentOffer()!.id, 'accepted')">
+                  <i class="ti ti-file-description"></i> Offer accepted → MoS
+                </button>
+                <button style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; border:1.5px solid #E8601C; background:transparent; color:#E8601C; font-size:12px; font-weight:600; cursor:pointer; transition:.15s;"
+                        (click)="generateOfferLetter()">
+                  <i class="ti ti-file-text"></i> Generate Offer Letter
+                </button>
+              </div>
+            }
+
+            <!-- Submit offer inline form -->
+            @if (showOfferForm()) {
+              <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:16px; border:1px dashed var(--border);">
+                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">Log New Offer</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                  <div>
+                    <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Amount (£)</label>
+                    <input type="number" placeholder="e.g. 310000" class="form-input"
+                           [value]="offerAmount() ?? ''"
+                           (input)="offerAmount.set(+$any($event.target).value || null)" />
+                  </div>
+                  <div>
+                    <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Submitted by</label>
+                    <input type="text" class="form-input"
+                           [value]="offerBy()"
+                           (input)="offerBy.set($any($event.target).value)" />
+                  </div>
+                </div>
+                <div style="margin-bottom:10px;">
+                  <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Notes / conditions (optional)</label>
+                  <input type="text" placeholder='e.g. "Subject to satisfactory survey"' class="form-input"
+                         [value]="offerNotes()"
+                         (input)="offerNotes.set($any($event.target).value)" />
+                </div>
+                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                  <button class="btn-ghost" style="font-size:12px;" (click)="showOfferForm.set(false)">Cancel</button>
+                  <button class="btn-primary" style="font-size:12px;" (click)="submitOffer()">Submit Offer</button>
+                </div>
+              </div>
+            }
+
+            <!-- Offer history -->
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">
+              Offer History ({{ (p.offers ?? []).length }})
+            </div>
+
+            @if ((p.offers?.length ?? 0) > 0) {
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                @for (offer of (p.offers ?? []).slice().reverse(); track offer.id; let offerFirst = $first) {
+                  <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:var(--bg);">
+                    <div style="width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0;"
+                         [style.background]="offerStatusColor(offer.status)"></div>
+                    <div style="flex:1; min-width:0;">
+                      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span style="font-size:16px; font-weight:800;">{{ offer.amount | money }}</span>
+                        @if (pctVsAsking(offer.amount)) {
+                          <span style="font-size:12px; color:var(--text3);">({{ pctVsAsking(offer.amount) }})</span>
+                        }
+                        <span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; color:#fff;"
+                              [style.background]="offerStatusColor(offer.status)">
+                          {{ offer.status | titlecase }}
+                        </span>
+                        @if (offerFirst) {
+                          <span style="font-size:11px; font-weight:700; color:var(--accent);">Latest</span>
+                        }
+                      </div>
+                      <div style="font-size:11px; color:var(--text3); margin-top:3px;">
+                        {{ fmtTimestamp(offer.date) }} · {{ offer.submittedBy }}
+                      </div>
+                      @if (offer.notes) {
+                        <div style="font-size:12px; color:var(--text2); margin-top:5px; font-style:italic;">
+                          "{{ offer.notes }}"
+                        </div>
+                      }
+                    </div>
+                    @if (offer.status === 'pending' && p.stage === 'Negotiations') {
+                      <div style="display:flex; gap:5px; flex-shrink:0;">
+                        <button style="padding:4px 9px; border-radius:5px; background:#0f7c6b; color:#fff; border:none; font-size:11px; font-weight:600; cursor:pointer;"
+                                (click)="resolveOffer(offer.id, 'accepted')">Accept</button>
+                        <button style="padding:4px 9px; border-radius:5px; background:#ef4444; color:#fff; border:none; font-size:11px; font-weight:600; cursor:pointer;"
+                                (click)="resolveOffer(offer.id, 'rejected')">Reject</button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div style="text-align:center; padding:18px; color:var(--text3); font-size:13px;">
+                <i class="ti ti-receipt-off" style="display:block; font-size:22px; margin-bottom:5px;"></i>
+                No offers logged yet
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    }
 
     <!-- ── Home tab ── -->
     @if (recordTab() === 'home') {

@@ -238,7 +238,12 @@ export class RecordComponent {
   epcTextColor(r: string): string { return ['C','D'].includes(r) ? '#111' : '#fff'; }
 
   showAicPopover = signal(false);
-  recordTab = signal<'home' | 'financials' | 'contacts' | 'activity' | 'dataroom'>('home');
+
+  private readonly flowStages = new Set(['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale']);
+
+  recordTab = signal<'flow' | 'home' | 'financials' | 'contacts' | 'activity' | 'dataroom'>(
+    this.flowStages.has(this.property()?.stage ?? '') ? 'flow' : 'home'
+  );
 
   // Users allocated to this property's project
   propertyContacts = computed(() => {
