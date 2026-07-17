@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, TitleCasePipe, DOCUMENT } from '@angular/common';
+import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
@@ -98,7 +99,7 @@ interface DataRoomFile {
 
 @Component({
   selector: 'app-transactions-portal',
-  imports: [DatePipe, TitleCasePipe, RouterLink],
+  imports: [DatePipe, TitleCasePipe, RouterLink, MoneyPipe],
   templateUrl: './transactions-portal.html',
   styleUrl: './transactions-portal.scss',
 })
@@ -382,16 +383,26 @@ export class TransactionsPortalComponent {
     this.data.properties.filter(p => p.status === 'active' && TX_STAGES.has(p.stage))
   );
 
+  txBedsFilter = signal('all');
+  txEpcFilter  = signal('all');
+
   filteredProperties = computed(() => {
     const q     = this.searchQuery().toLowerCase();
     const stage = this.stageFilter();
     const phase = this.selectedPhase();
     const sort  = this.sortOrder();
+    const beds  = this.txBedsFilter();
+    const epc   = this.txEpcFilter();
 
     let list = this.txProperties().filter(p => {
       if (phase !== 'all' && p.phase !== phase) return false;
       if (stage !== 'all' && p.stage !== stage) return false;
       if (q && !p.address.toLowerCase().includes(q) && !(p.postcode ?? '').toLowerCase().includes(q)) return false;
+      if (beds !== 'all') {
+        if (beds === '5+') { if ((p.beds ?? 0) < 5) return false; }
+        else               { if (p.beds !== +beds) return false; }
+      }
+      if (epc !== 'all' && p.epcBefore?.r !== epc) return false;
       return true;
     });
 
@@ -404,6 +415,32 @@ export class TransactionsPortalComponent {
 
     return list;
   });
+
+  txTotalBudget = computed(() =>
+    this.filteredProperties().reduce((a, p) => a + (p.financial?.ap ?? 0), 0)
+  );
+
+  txAvgYield = computed(() => {
+    const ps = this.filteredProperties().filter(p => p.financial?.yield);
+    return ps.length ? ps.reduce((a, p) => a + p.financial!.yield!, 0) / ps.length : 0;
+  });
+
+  txEpcCPlus = computed(() =>
+    this.filteredProperties().filter(p => p.epcAfter && ['A','B','C'].includes(p.epcAfter.r)).length
+  );
+
+  txHasFilters = computed(() =>
+    this.searchQuery() !== '' || this.stageFilter() !== 'all' ||
+    this.txBedsFilter() !== 'all' || this.txEpcFilter() !== 'all' || this.sortOrder() !== 'modified'
+  );
+
+  txResetFilters(): void {
+    this.searchQuery.set('');
+    this.stageFilter.set('all');
+    this.txBedsFilter.set('all');
+    this.txEpcFilter.set('all');
+    this.sortOrder.set('modified');
+  }
 
   phaseCount(phaseId: string): number {
     if (phaseId === 'all') return this.txProperties().length;

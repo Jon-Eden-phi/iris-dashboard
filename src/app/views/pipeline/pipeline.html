@@ -1,20 +1,4 @@
-<!-- Top tab bar -->
-<div style="display:flex; gap:4px; margin-bottom:4px;">
-  <button class="btn-ghost" [style.background]="pipelineTab()==='dashboard' ? 'var(--accent-soft)' : ''"
-          [style.color]="pipelineTab()==='dashboard' ? 'var(--accent)' : ''"
-          [style.fontWeight]="pipelineTab()==='dashboard' ? '700' : ''"
-          (click)="pipelineTab.set('dashboard')">
-    <i class="ti ti-layout-kanban" style="margin-right:6px; font-size:13px;"></i>Dashboard
-  </button>
-  <button class="btn-ghost" [style.background]="pipelineTab()==='pipeline' ? 'var(--accent-soft)' : ''"
-          [style.color]="pipelineTab()==='pipeline' ? 'var(--accent)' : ''"
-          [style.fontWeight]="pipelineTab()==='pipeline' ? '700' : ''"
-          (click)="pipelineTab.set('pipeline')">
-    <i class="ti ti-list" style="margin-right:6px; font-size:13px;"></i>Pipeline
-  </button>
-</div>
-
-@if (pipelineTab() === 'dashboard') {
+@if (isDashboard) {
 <!-- Phase selector cards + Create Draft -->
 <div style="display:flex; align-items:center; gap:12px;">
   <div class="phase-grid" style="flex:1; grid-template-columns:repeat(5,1fr);">
@@ -86,7 +70,7 @@
     </select>
     <select class="form-select" style="width:auto;" [value]="stageFilter()" (change)="stageFilter.set($any($event.target).value)">
       <option value="all">All stages</option>
-      @for (s of stages.slice(1); track s) {
+      @for (s of displayStages.slice(1); track s) {
         <option [value]="s">{{ stageLabel(s) }}</option>
       }
     </select>
@@ -153,10 +137,7 @@
   </div>
 </div>
 
-} <!-- end dashboard tab -->
-
-<!-- Pipeline tab: all active properties across all stages -->
-@if (pipelineTab() === 'pipeline') {
+} @else {
 
 <div class="card" style="padding:10px 16px;">
   <div style="display:flex; align-items:center; gap:10px;">
@@ -197,7 +178,7 @@
             </td>
             <td><span class="badge badge-blue">{{ p.phase }}</span></td>
             <td>
-              @if (sourcingStages.has(p.stage)) {
+              @if (sourcingStageSet.has(p.stage)) {
                 <span class="badge badge-purple" style="font-size:10px;">Sourcing</span>
               } @else {
                 <span class="badge badge-teal" style="font-size:10px;">Purchasing</span>
@@ -227,7 +208,7 @@
   </div>
 </div>
 
-} <!-- end pipeline tab -->
+}
 
 <!-- Create Draft Modal -->
 @if (showCreateModal()) {

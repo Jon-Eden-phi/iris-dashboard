@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { Property } from '../../models/property.model';
@@ -11,8 +11,11 @@ import { Property } from '../../models/property.model';
   styleUrl: './pipeline.scss',
 })
 export class PipelineComponent {
-  data = inject(MockDataService);
+  data   = inject(MockDataService);
   router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  readonly isDashboard = this.route.snapshot.data['mode'] === 'dashboard';
 
   readonly phases = [
     { id: 'all', label: 'All Phases', color: '#888' },
@@ -23,6 +26,10 @@ export class PipelineComponent {
   ];
 
   readonly stages = ['all', 'Draft', 'ClientApproval', 'Viewing', 'Negotiations', 'MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings'];
+  readonly sourcingStageSet = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
+  readonly displayStages = this.isDashboard
+    ? ['all', 'Draft', 'ClientApproval', 'Viewing', 'Negotiations']
+    : this.stages;
 
   selectedPhase = signal('all');
   stageFilter   = signal('all');
@@ -40,6 +47,7 @@ export class PipelineComponent {
     const sort  = this.sortOrder();
 
     let list = this.data.properties.filter(p => {
+      if (this.isDashboard && !this.sourcingStageSet.has(p.stage)) return false;
       if (phase !== 'all' && p.phase !== phase) return false;
       if (stage !== 'all' && p.stage !== stage) return false;
       if (q && !p.address.toLowerCase().includes(q) && !(p.postcode || '').toLowerCase().includes(q)) return false;
@@ -85,8 +93,11 @@ export class PipelineComponent {
   );
 
   phaseCount(phaseId: string): number {
-    if (phaseId === 'all') return this.data.properties.length;
-    return this.data.properties.filter(p => p.phase === phaseId).length;
+    const base = this.isDashboard
+      ? this.data.properties.filter(p => this.sourcingStageSet.has(p.stage))
+      : this.data.properties;
+    if (phaseId === 'all') return base.length;
+    return base.filter(p => p.phase === phaseId).length;
   }
 
   stageLabel(s: string): string {
@@ -101,22 +112,19 @@ export class PipelineComponent {
     this.router.navigate(['/record', p.id]);
   }
 
-  pipelineTab    = signal<'dashboard' | 'pipeline'>('dashboard');
+  // Pipeline view (all active properties)
   pipelineSearch = signal('');
-
-  readonly sourcingStages = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
 
   pipelineProperties = computed(() => {
     const q = this.pipelineSearch().toLowerCase();
     return this.data.properties.filter(p => {
-      if (p.status !== 'active') return false;
       if (!q) return true;
       return p.address.toLowerCase().includes(q) || (p.postcode ?? '').toLowerCase().includes(q);
     });
   });
 
   deptLabel(stage: string): string {
-    return this.sourcingStages.has(stage) ? 'Sourcing' : 'Purchasing';
+    return this.sourcingStageSet.has(stage) ? 'Sourcing' : 'Purchasing';
   }
 
   showCreateModal = signal(false);

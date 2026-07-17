@@ -11,7 +11,7 @@
 
     <div class="nav-section">Pipeline</div>
     <a class="nav-item" [class.active]="view() === 'pipeline'" (click)="navTo('pipeline')">
-      <i class="ti ti-list"></i> All Properties
+      <i class="ti ti-list"></i> Pipeline
       <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ pipelineAllProperties().length }}</span>
     </a>
 
@@ -126,16 +126,16 @@
             <div class="metric-v">{{ filteredProperties().length }}</div>
           </div>
           <div class="metric">
-            <div class="metric-l">In MoS</div>
-            <div class="metric-v">{{ filteredProperties().filter(p => p.stage === 'MemorandumOfSale').length }}</div>
+            <div class="metric-l">Budget Deployed</div>
+            <div class="metric-v">{{ txTotalBudget() | money }}</div>
           </div>
           <div class="metric">
-            <div class="metric-l">Conveyancing</div>
-            <div class="metric-v">{{ filteredProperties().filter(p => p.stage === 'Legals').length }}</div>
+            <div class="metric-l">Avg Yield</div>
+            <div class="metric-v">{{ txAvgYield().toFixed(1) }}%</div>
           </div>
           <div class="metric">
-            <div class="metric-l">Surveys</div>
-            <div class="metric-v">{{ filteredProperties().filter(p => p.stage === 'Refurbishment').length }}</div>
+            <div class="metric-l">EPC C+ on Completion</div>
+            <div class="metric-v">{{ txEpcCPlus() }}<span style="font-size:13px; font-weight:500; color:var(--text3);"> / {{ filteredProperties().length }}</span></div>
           </div>
         </div>
 
@@ -143,6 +143,24 @@
           <div class="tx-filter-bar">
             <input class="form-input tx-input" placeholder="Search address or postcode…"
                    [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)">
+            <select class="form-select tx-select" [value]="txBedsFilter()" (change)="txBedsFilter.set($any($event.target).value)">
+              <option value="all">All beds</option>
+              <option value="1">1 bed</option>
+              <option value="2">2 beds</option>
+              <option value="3">3 beds</option>
+              <option value="4">4 beds</option>
+              <option value="5+">5+ beds</option>
+            </select>
+            <select class="form-select tx-select" [value]="txEpcFilter()" (change)="txEpcFilter.set($any($event.target).value)">
+              <option value="all">All EPC</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+              <option value="F">F</option>
+              <option value="G">G</option>
+            </select>
             <select class="form-select tx-select" [value]="stageFilter()" (change)="stageFilter.set($any($event.target).value)">
               <option value="all">All stages</option>
               @for (s of txStages; track s) {
@@ -157,68 +175,63 @@
               <option value="price-high">Price: high–low</option>
               <option value="price-low">Price: low–high</option>
             </select>
+            @if (txHasFilters()) {
+              <button class="btn-ghost" style="font-size:12px;" (click)="txResetFilters()">
+                <i class="ti ti-refresh" style="margin-right:3px;"></i>Reset
+              </button>
+            }
           </div>
         </div>
 
-        <div class="card">
-          <div class="tx-section-header">
-            <span class="tx-section-title"><i class="ti ti-home-2"></i> Properties in Purchasing</span>
-            <span class="badge badge-gray">{{ filteredProperties().length }} shown</span>
-          </div>
+        <div class="card flush">
           @if (filteredProperties().length === 0) {
             <div class="tx-empty"><i class="ti ti-home-off"></i>No properties match these filters</div>
           } @else {
+            <div style="overflow-x:auto;">
             <table>
               <thead>
                 <tr>
                   <th>Address</th>
-                  <th>Beds</th>
-                  <th>Stage</th>
-                  <th>Purchase price</th>
-                  <th>Compl. statement</th>
                   <th>Phase</th>
-                  <th></th>
+                  <th>Stage</th>
+                  <th>Beds</th>
+                  <th>EPC Before</th>
+                  <th>EPC After</th>
+                  <th class="num-cell">Asking Price</th>
+                  <th class="num-cell">Yield</th>
                 </tr>
               </thead>
               <tbody>
                 @for (p of filteredProperties(); track p.id) {
-                  <tr (click)="openRecord(p)">
-                    <td><span class="tx-prop-link">{{ p.address }}, {{ p.postcode }}</span></td>
-                    <td>{{ p.beds ?? '—' }} bed</td>
+                  <tr (click)="openRecord(p)" style="cursor:pointer;">
                     <td>
-                      <span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span>
+                      <div style="font-weight:600;">{{ p.address }}</div>
+                      @if (p.postcode) {
+                        <div style="font-size:11px; color:var(--text3);">{{ p.postcode }}</div>
+                      }
                     </td>
+                    <td><span class="badge badge-blue">{{ p.phase }}</span></td>
+                    <td><span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span></td>
+                    <td>{{ p.beds ?? '—' }}</td>
                     <td>
-                      @if (p.agreedPrice) {
-                        <span style="font-weight:700; font-size:12.5px;">£{{ p.agreedPrice.toLocaleString('en-GB') }}</span>
-                        @if (priceReduction(p); as reduction) {
-                          <span style="font-size:10px; color:#16a34a; margin-left:4px;">▼ £{{ reduction.toLocaleString('en-GB') }}</span>
-                        }
-                      } @else if (p.financial?.ap) {
-                        <span style="font-size:12px; color:var(--text3);">£{{ p.financial!.ap!.toLocaleString('en-GB') }}</span>
-                      } @else {
-                        <span style="color:var(--text3);">—</span>
+                      @if (p.epcBefore) {
+                        <span class="epc-pill badge-{{ p.epcBefore.r }}">{{ p.epcBefore.r }} ({{ p.epcBefore.s }})</span>
                       }
                     </td>
                     <td>
-                      @if (p.stage === 'Lettings') {
-                        @if (getTxData(p.id).checklist['compl_statement_appr']) {
-                          <span class="badge badge-green">Approved</span>
-                        } @else if (getTxData(p.id).checklist['compl_statement_recv']) {
-                          <span class="badge badge-amber">Received</span>
-                        } @else {
-                          <span class="badge badge-gray">Not sent</span>
-                        }
-                      } @else {
-                        <span style="color:var(--text3); font-size:11px;">—</span>
+                      @if (p.epcAfter) {
+                        <span class="epc-pill badge-{{ p.epcAfter.r }}">{{ p.epcAfter.r }} ({{ p.epcAfter.s }})</span>
                       }
                     </td>
-                    <td style="font-size:12px; color:var(--text3);">{{ p.phase ?? '—' }}</td>
-                    <td><button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="openRecord(p); $event.stopPropagation()">View →</button></td>
+                    <td class="num-cell">{{ p.financial?.ap | money }}</td>
+                    <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
                   </tr>
+                } @empty {
+                  <tr><td colspan="8" style="text-align:center; padding:32px; color:var(--text3);">No properties match the current filters.</td></tr>
                 }
               </tbody>
             </table>
+            </div>
           }
         </div>
       }

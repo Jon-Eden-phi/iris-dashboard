@@ -20,6 +20,7 @@ export class App {
   currentUrl   = signal('');
 
   private titleMap: Record<string, string> = {
+    '/dashboard': 'Dashboard',
     '/pipeline': 'Pipeline',
     '/map': 'Map',
     '/lost': 'Lost Properties',

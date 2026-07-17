@@ -43,12 +43,13 @@ export const routes: Routes = [
     children: [
       { path: '', canActivate: [() => {
           const fn = inject(AuthService).currentUser()?.functionArea;
-          return inject(Router).createUrlTree(fn === 'Buying' ? ['/transactions-portal'] : ['/pipeline']);
+          return inject(Router).createUrlTree(fn === 'Buying' ? ['/transactions-portal'] : ['/dashboard']);
         }], children: [] },
       { path: 'client-portal',       loadComponent: () => import('./views/client-portal/client-portal').then(m => m.ClientPortalComponent) },
       { path: 'transactions-portal', canActivate: [purchasingGuard], loadComponent: () => import('./views/transactions-portal/transactions-portal').then(m => m.TransactionsPortalComponent) },
       { path: 'legal-portal',        loadComponent: () => import('./views/legal-portal/legal-portal').then(m => m.LegalPortalComponent) },
-      { path: 'pipeline',      canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent) },
+      { path: 'dashboard', canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent), data: { mode: 'dashboard' } },
+      { path: 'pipeline',  canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent), data: { mode: 'pipeline'  } },
       { path: 'map',           canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/map/map').then(m => m.MapComponent) },
       { path: 'lost',          canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/lost/lost').then(m => m.LostComponent) },
       { path: 'insights',      canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/insights/insights').then(m => m.InsightsComponent) },
