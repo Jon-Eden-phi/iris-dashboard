@@ -3,8 +3,9 @@ import { TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { AuthService } from '../../services/auth';
+import { ProjectsService } from '../../services/projects';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
-import { ActivityNote, Offer } from '../../models/property.model';
+import { ActivityNote, Offer, PropertyDocument } from '../../models/property.model';
 
 const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
 
@@ -15,10 +16,11 @@ const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Letti
   styleUrl: './record.scss',
 })
 export class RecordComponent {
-  data   = inject(MockDataService);
-  auth   = inject(AuthService);
-  route  = inject(ActivatedRoute);
-  router = inject(Router);
+  data     = inject(MockDataService);
+  auth     = inject(AuthService);
+  projects = inject(ProjectsService);
+  route    = inject(ActivatedRoute);
+  router   = inject(Router);
 
   get propId(): string | null { return this.route.snapshot.paramMap.get('id'); }
 
@@ -234,6 +236,56 @@ export class RecordComponent {
   epcTextColor(r: string): string { return ['C','D'].includes(r) ? '#111' : '#fff'; }
 
   showAicPopover = signal(false);
+  recordTab = signal<'home' | 'financials' | 'contacts' | 'activity' | 'dataroom'>('home');
+
+  // Users allocated to this property's project
+  propertyContacts = computed(() => {
+    const phase = this.property()?.phase;
+    if (!phase) return [];
+    const project = this.projects.all.find(pr => pr.name === phase);
+    if (!project) return this.auth.allUsers.filter(u => u.projects?.length);
+    return this.auth.allUsers.filter(u => u.projects?.includes(project.id));
+  });
+
+  // Documents stored against this property (persisted via mock-data)
+  addDocument(doc: PropertyDocument): void {
+    const id = this.propId;
+    if (!id) return;
+    const docs = [...(this.property()?.documents ?? []), doc];
+    this.data.updateProperty(id, { documents: docs });
+  }
+
+  removeDocument(docId: string): void {
+    const id = this.propId;
+    if (!id) return;
+    const docs = (this.property()?.documents ?? []).filter(d => d.id !== docId);
+    this.data.updateProperty(id, { documents: docs });
+  }
+
+  docUploadCategory = signal<PropertyDocument['category']>('Legal');
+
+  triggerDocUpload(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = (e: Event) => {
+      const files = Array.from((e.target as HTMLInputElement).files ?? []);
+      files.forEach(file => {
+        const doc: PropertyDocument = {
+          id: crypto.randomUUID(),
+          name: file.name,
+          category: this.docUploadCategory(),
+          uploadedBy: this.auth.currentUser()?.name ?? 'Unknown',
+          uploadedAt: new Date().toISOString(),
+          size: file.size > 1_048_576
+            ? (file.size / 1_048_576).toFixed(1) + ' MB'
+            : Math.round(file.size / 1024) + ' KB',
+        };
+        this.addDocument(doc);
+      });
+    };
+    input.click();
+  }
 
   totalCost = computed(() => {
     const f = this.property()?.financial;

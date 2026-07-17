@@ -1,3 +1,12 @@
+export interface PropertyDocument {
+  id: string;
+  name: string;
+  category: 'Legal' | 'Financial' | 'Survey' | 'Other';
+  uploadedBy: string;
+  uploadedAt: string;
+  size?: string;
+}
+
 export type Stage =
   | 'Draft' | 'ClientApproval' | 'Viewing' | 'Negotiations'
   | 'MemorandumOfSale' | 'Legals' | 'Refurbishment' | 'Lettings';
@@ -75,4 +84,7 @@ export interface Property {
   leaseRemaining?: string;
   description?: string;
   daysOnMarket?: number;
+  exCouncil?: boolean;
+  exCare?: string;
+  documents?: PropertyDocument[];
 }

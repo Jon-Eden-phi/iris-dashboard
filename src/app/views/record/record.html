@@ -534,224 +534,445 @@
     </div>
   }
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start;">
+  <!-- ── Tabbed info card ────────────────────────────────────────── -->
+  <div class="card" style="padding:0; overflow:visible;">
 
-    <!-- EPC -->
-    <div class="card">
-      <div class="section-header"><div class="section-title"><i class="ti ti-bolt" style="color:var(--accent);"></i> EPC Ratings</div></div>
-      <div style="display:flex; gap:12px; align-items:stretch;">
-        @if (p.epcBefore) {
-          <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcBefore.r) + '22'">
-            <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Before</div>
-            <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
-                 [style.background]="epcColor(p.epcBefore.r)" [style.color]="epcTextColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
-            <div style="font-size:20px; font-weight:800;">{{ p.epcBefore.s }}</div>
-            <div style="font-size:11px; color:var(--text3);">SAP score</div>
-          </div>
-        }
-        @if (p.epcAfter) {
-          <div style="display:flex; align-items:center; color:var(--teal); font-size:18px;"><i class="ti ti-arrow-right"></i></div>
-          <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcAfter.r) + '22'">
-            <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">After</div>
-            <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
-                 [style.background]="epcColor(p.epcAfter.r)" [style.color]="epcTextColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
-            <div style="font-size:20px; font-weight:800;">{{ p.epcAfter.s }}</div>
-            <div style="font-size:11px; color:var(--text3);">SAP score</div>
-          </div>
-        }
-        @if (p.epcBefore && p.epcAfter) {
-          <div style="flex:1; border-radius:8px; padding:16px; text-align:center; background:rgba(15,124,107,0.08);">
-            <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Uplift</div>
-            <div style="font-size:32px; font-weight:800; color:var(--teal); line-height:1; margin-top:8px;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
-            <div style="font-size:11px; color:var(--text3); margin-top:4px;">SAP points</div>
-          </div>
-        }
-      </div>
+    <!-- Tab bar -->
+    <div style="display:flex; border-bottom:1px solid var(--border); padding:0 20px; overflow-x:auto;">
+      @for (tab of [
+        {key:'home',       label:'Home',      icon:'ti-home-2'},
+        {key:'financials', label:'Financials', icon:'ti-coin'},
+        {key:'contacts',   label:'Contacts',   icon:'ti-users'},
+        {key:'activity',   label:'Activity',   icon:'ti-timeline'},
+        {key:'dataroom',   label:'Data Room',  icon:'ti-folder'}
+      ]; track tab.key) {
+        @let active = recordTab() === tab.key;
+        <button (click)="recordTab.set($any(tab.key))"
+                style="padding:13px 16px; border:none; background:none; cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; border-bottom:2px solid; margin-bottom:-1px; transition:color .15s; white-space:nowrap; flex-shrink:0;"
+                [style.border-color]="active ? 'var(--accent)' : 'transparent'"
+                [style.color]="active ? 'var(--accent)' : 'var(--text3)'">
+          <i class="ti {{ tab.icon }}" style="font-size:14px;"></i>{{ tab.label }}
+        </button>
+      }
     </div>
 
-    <!-- Financials -->
-    @if (p.financial; as f) {
-      <div class="card" (click)="showAicPopover.set(false)">
-        <div class="section-header"><div class="section-title"><i class="ti ti-coin" style="color:var(--accent);"></i> Financials</div></div>
+    <!-- ── Home tab ── -->
+    @if (recordTab() === 'home') {
+      @if (property(); as p) {
+        <div style="padding:20px 24px;">
 
-        <!-- AIC / AGREED / CAPEX strip -->
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid var(--border); border-radius:8px; overflow:visible; margin-bottom:16px;">
+          <!-- EPC -->
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">EPC Ratings</div>
+          <div style="display:flex; gap:12px; align-items:stretch; margin-bottom:24px;">
+            @if (p.epcBefore) {
+              <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcBefore.r) + '22'">
+                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Before</div>
+                <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
+                     [style.background]="epcColor(p.epcBefore.r)" [style.color]="epcTextColor(p.epcBefore.r)">{{ p.epcBefore.r }}</div>
+                <div style="font-size:20px; font-weight:800;">{{ p.epcBefore.s }}</div>
+                <div style="font-size:11px; color:var(--text3);">SAP score</div>
+              </div>
+            }
+            @if (p.epcAfter) {
+              <div style="display:flex; align-items:center; color:var(--teal); font-size:18px;"><i class="ti ti-arrow-right"></i></div>
+              <div style="flex:1; border-radius:8px; padding:16px; text-align:center;" [style.background]="epcColor(p.epcAfter.r) + '22'">
+                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">After</div>
+                <div style="width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800;"
+                     [style.background]="epcColor(p.epcAfter.r)" [style.color]="epcTextColor(p.epcAfter.r)">{{ p.epcAfter.r }}</div>
+                <div style="font-size:20px; font-weight:800;">{{ p.epcAfter.s }}</div>
+                <div style="font-size:11px; color:var(--text3);">SAP score</div>
+              </div>
+            }
+            @if (p.epcBefore && p.epcAfter) {
+              <div style="flex:1; border-radius:8px; padding:16px; text-align:center; background:rgba(15,124,107,0.08);">
+                <div style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; margin-bottom:8px;">Uplift</div>
+                <div style="font-size:32px; font-weight:800; color:var(--teal); line-height:1; margin-top:8px;">+{{ p.epcAfter.s - p.epcBefore.s }}</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:4px;">SAP points</div>
+              </div>
+            }
+            @if (!p.epcBefore && !p.epcAfter) {
+              <div style="color:var(--text3); font-size:13px; padding:8px 0;">No EPC data available</div>
+            }
+          </div>
 
-          <!-- AIC cell — clickable, shows breakdown popover -->
-          <div class="aic-cell" [class.aic-cell-open]="showAicPopover()"
-               (click)="showAicPopover.update(v => !v); $event.stopPropagation()">
-            <div class="aic-cell-label">AIC</div>
-            <div class="aic-cell-value" style="color:var(--accent);">{{ totalCost() | money }}</div>
-            <i class="ti ti-chevron-down" style="font-size:10px; color:var(--text3); margin-top:2px;"></i>
-
-            <!-- Popover -->
-            @if (showAicPopover()) {
-              <div class="aic-popover" (click)="$event.stopPropagation()">
-                <div class="aic-pop-title">AIC Breakdown</div>
-                <div class="aic-pop-row"><span>Asking Price</span><span>{{ f.ap | money }}</span></div>
-                <div class="aic-pop-row"><span>Stamp Duty</span><span>—</span></div>
-                <div class="aic-pop-row"><span>Capex</span><span>{{ f.capex | money }}</span></div>
-                <div class="aic-pop-row"><span>Transaction Costs</span><span>{{ f.tc | money }}</span></div>
-                <div class="aic-pop-row"><span>Service Charge</span><span>{{ f.sc ? (f.sc | money) : '—' }}</span></div>
-                <div class="aic-pop-total"><span>AIC</span><span>{{ totalCost() | money }}</span></div>
+          <!-- Property details grid -->
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Property Details</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px;">
+            @if (p.type) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Type</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.type }}</div>
+              </div>
+            }
+            @if (p.beds) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Bedrooms</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.beds }}</div>
+              </div>
+            }
+            @if (p.tenure) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Tenure</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.tenure }}</div>
+              </div>
+            }
+            @if (p.leaseRemaining) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Lease Remaining</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.leaseRemaining }}</div>
+              </div>
+            }
+            @if (p.floodRisk) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Flood Risk</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.floodRisk }}</div>
+              </div>
+            }
+            @if (p.daysOnMarket) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Days on Market</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.daysOnMarket }}</div>
+              </div>
+            }
+            @if (p.exCouncil) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Ex-Council</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">Yes</div>
+              </div>
+            }
+            @if (p.exCare) {
+              <div style="background:var(--bg); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Ex-Care</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text1);">{{ p.exCare }}</div>
               </div>
             }
           </div>
 
-          <!-- Agreed -->
-          <div style="padding:10px 12px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
-            <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Agreed</div>
-            <div style="font-size:14px; font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</div>
-          </div>
-
-          <!-- Capex -->
-          <div style="padding:10px 12px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
-            <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Capex</div>
-            <div style="font-size:14px; font-weight:700;">{{ f.capex | money }}</div>
-          </div>
-        </div>
-
-        <!-- Detail rows -->
-        <div style="display:flex; flex-direction:column; gap:0;">
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:13px; color:var(--text2);">Asking Price</span>
-            <span style="font-weight:700;">{{ f.ap | money }}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:13px; color:var(--text2);">Capex (Refurb)</span>
-            <span style="font-weight:700;">{{ f.capex | money }}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:13px; color:var(--text2);">Transaction Costs</span>
-            <span style="font-weight:700;">{{ f.tc | money }}</span>
-          </div>
-          @if (f.sc) {
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-              <span style="font-size:13px; color:var(--text2);">Service Charge</span>
-              <span style="font-weight:700;">{{ f.sc | money }}</span>
+          @if (p.description) {
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:8px;">Description</div>
+              <p style="font-size:13px; color:var(--text2); line-height:1.7; margin:0;">{{ p.description }}</p>
             </div>
           }
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-            <span style="font-size:13px; color:var(--text2);">Social Rent (pw)</span>
-            <span style="font-weight:700;">{{ f.sp | money }}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0;">
-            <span style="font-size:13px; color:var(--text2);">Gross Yield</span>
-            <span style="font-weight:800; font-size:16px; color:var(--teal);">{{ f.yield?.toFixed(1) }}%</span>
-          </div>
+
         </div>
-      </div>
+      }
     }
+
+    <!-- ── Financials tab ── -->
+    @if (recordTab() === 'financials') {
+      @if (property(); as p) {
+        <div style="padding:20px 24px;" (click)="showAicPopover.set(false)">
+          @if (p.financial; as f) {
+
+            <!-- AIC / AGREED / CAPEX strip -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid var(--border); border-radius:8px; overflow:visible; margin-bottom:20px;">
+              <div class="aic-cell" [class.aic-cell-open]="showAicPopover()"
+                   (click)="showAicPopover.update(v => !v); $event.stopPropagation()">
+                <div class="aic-cell-label">AIC</div>
+                <div class="aic-cell-value" style="color:var(--accent);">{{ totalCost() | money }}</div>
+                <i class="ti ti-chevron-down" style="font-size:10px; color:var(--text3); margin-top:2px;"></i>
+                @if (showAicPopover()) {
+                  <div class="aic-popover" (click)="$event.stopPropagation()">
+                    <div class="aic-pop-title">AIC Breakdown</div>
+                    <div class="aic-pop-row"><span>Asking Price</span><span>{{ f.ap | money }}</span></div>
+                    <div class="aic-pop-row"><span>Stamp Duty</span><span>—</span></div>
+                    <div class="aic-pop-row"><span>Capex</span><span>{{ f.capex | money }}</span></div>
+                    <div class="aic-pop-row"><span>Transaction Costs</span><span>{{ f.tc | money }}</span></div>
+                    <div class="aic-pop-row"><span>Service Charge</span><span>{{ f.sc ? (f.sc | money) : '—' }}</span></div>
+                    <div class="aic-pop-total"><span>AIC</span><span>{{ totalCost() | money }}</span></div>
+                  </div>
+                }
+              </div>
+              <div style="padding:10px 12px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Agreed</div>
+                <div style="font-size:14px; font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</div>
+              </div>
+              <div style="padding:10px 12px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Capex</div>
+                <div style="font-size:14px; font-weight:700;">{{ f.capex | money }}</div>
+              </div>
+            </div>
+
+            <!-- Detail rows -->
+            <div style="display:flex; flex-direction:column; gap:0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:13px; color:var(--text2);">Asking Price</span>
+                <span style="font-weight:700;">{{ f.ap | money }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:13px; color:var(--text2);">Capex (Refurb)</span>
+                <span style="font-weight:700;">{{ f.capex | money }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:13px; color:var(--text2);">Transaction Costs</span>
+                <span style="font-weight:700;">{{ f.tc | money }}</span>
+              </div>
+              @if (f.sc) {
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                  <span style="font-size:13px; color:var(--text2);">Service Charge</span>
+                  <span style="font-weight:700;">{{ f.sc | money }}</span>
+                </div>
+              }
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:13px; color:var(--text2);">Social Rent (pw)</span>
+                <span style="font-weight:700;">{{ f.sp | money }}</span>
+              </div>
+              @if (p.lha) {
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                  <span style="font-size:13px; color:var(--text2);">LHA Rate (pw)</span>
+                  <span style="font-weight:700;">{{ p.lha | money }}</span>
+                </div>
+              }
+              @if (p.marketRent) {
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border);">
+                  <span style="font-size:13px; color:var(--text2);">Market Rent (pw)</span>
+                  <span style="font-weight:700;">{{ p.marketRent | money }}</span>
+                </div>
+              }
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:9px 0;">
+                <span style="font-size:13px; color:var(--text2);">Gross Yield</span>
+                <span style="font-weight:800; font-size:16px; color:var(--teal);">{{ f.yield?.toFixed(1) }}%</span>
+              </div>
+            </div>
+
+          } @else {
+            <div style="text-align:center; padding:32px; color:var(--text3); font-size:13px;">
+              <i class="ti ti-coin-off" style="display:block; font-size:28px; margin-bottom:8px;"></i>
+              No financial data available
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- ── Contacts tab ── -->
+    @if (recordTab() === 'contacts') {
+      @if (property(); as p) {
+        <div style="padding:20px 24px;">
+
+          <!-- Estate agent from viewing -->
+          @if (p.viewing?.agentName) {
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Estate Agent</div>
+            <div style="display:flex; align-items:center; gap:14px; padding:14px; background:var(--bg); border-radius:10px; margin-bottom:20px;">
+              <div style="width:40px; height:40px; border-radius:50%; background:#2472a822; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#2472a8; flex-shrink:0;">
+                {{ p.viewing!.agentName!.split(' ').map($any(w => w[0])).join('').substring(0,2).toUpperCase() }}
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:14px; font-weight:700; color:var(--text1);">{{ p.viewing!.agentName }}</div>
+                @if (p.viewing?.agentCompany) {
+                  <div style="font-size:12px; color:var(--text3); margin-top:1px;">{{ p.viewing!.agentCompany }}</div>
+                }
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+                @if (p.viewing?.agentEmail) {
+                  <a [href]="'mailto:' + p.viewing!.agentEmail" style="font-size:12px; color:var(--accent); display:flex; align-items:center; gap:5px; text-decoration:none;">
+                    <i class="ti ti-mail" style="font-size:13px;"></i>{{ p.viewing!.agentEmail }}
+                  </a>
+                }
+                @if (p.viewing?.agentPhone) {
+                  <a [href]="'tel:' + p.viewing!.agentPhone" style="font-size:12px; color:var(--text2); display:flex; align-items:center; gap:5px; text-decoration:none;">
+                    <i class="ti ti-phone" style="font-size:13px;"></i>{{ p.viewing!.agentPhone }}
+                  </a>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Team contacts -->
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:12px;">Team</div>
+
+          @if (propertyContacts().length > 0) {
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              @for (user of propertyContacts(); track user.id) {
+                <div style="display:flex; align-items:center; gap:14px; padding:14px; background:var(--bg); border-radius:10px;">
+                  <div style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; flex-shrink:0;"
+                       [style.background]="phaseColor(p.phase)">
+                    {{ (user.firstName ? user.firstName[0] : user.name[0]).toUpperCase() }}{{ (user.lastName ? user.lastName[0] : user.name.split(' ')[1]?.[0] ?? '').toUpperCase() }}
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:14px; font-weight:700; color:var(--text1);">{{ user.name }}</div>
+                    <div style="font-size:12px; color:var(--text3); margin-top:1px; display:flex; gap:8px; flex-wrap:wrap;">
+                      <span>{{ user.role }}</span>
+                      @if (user.companyRole) { <span>· {{ user.companyRole }}</span> }
+                      @if (user.functionArea) { <span>· {{ user.functionArea }}</span> }
+                    </div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end; min-width:0;">
+                    <a [href]="'mailto:' + user.email" style="font-size:12px; color:var(--accent); display:flex; align-items:center; gap:5px; text-decoration:none; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      <i class="ti ti-mail" style="font-size:13px; flex-shrink:0;"></i>{{ user.email }}
+                    </a>
+                    @if (user.mobile) {
+                      <a [href]="'tel:' + user.mobile" style="font-size:12px; color:var(--text2); display:flex; align-items:center; gap:5px; text-decoration:none;">
+                        <i class="ti ti-phone" style="font-size:13px;"></i>{{ user.mobile }}
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div style="text-align:center; padding:32px 20px; color:var(--text3); font-size:13px;">
+              <i class="ti ti-users-group" style="display:block; font-size:28px; margin-bottom:8px;"></i>
+              No team members assigned to this project yet.<br>
+              <span style="font-size:12px;">Assign users to the <strong>{{ p.phase }}</strong> project from the Users tab.</span>
+            </div>
+          }
+
+        </div>
+      }
+    }
+
+    <!-- ── Activity tab ── -->
+    @if (recordTab() === 'activity') {
+      @if (property(); as p) {
+        <div style="padding:20px 24px;">
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Activity Log</div>
+            @if (p.status === 'active') {
+              <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;"
+                      (click)="showNoteForm.update(v => !v)">
+                <i class="ti ti-plus"></i> Add Note
+              </button>
+            }
+          </div>
+
+          @if (showNoteForm()) {
+            <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:16px; border:1px dashed var(--border);">
+              <div style="display:grid; grid-template-columns:1fr auto; gap:10px; margin-bottom:10px; align-items:end;">
+                <div>
+                  <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Note</label>
+                  <input type="text" placeholder="Add a note…" class="form-input"
+                         [value]="noteText()" (input)="noteText.set($any($event.target).value)" (keydown.enter)="submitNote()" />
+                </div>
+                <div>
+                  <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Author</label>
+                  <input type="text" style="width:100px;" class="form-input"
+                         [value]="noteAuthor()" (input)="noteAuthor.set($any($event.target).value)" />
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn-ghost" style="font-size:12px;" (click)="showNoteForm.set(false)">Cancel</button>
+                <button class="btn-primary" style="font-size:12px;" (click)="submitNote()">Save Note</button>
+              </div>
+            </div>
+          }
+
+          @if ((p.activityLog?.length ?? 0) > 0) {
+            <!-- Timeline -->
+            <div style="position:relative; padding-left:28px;">
+              <!-- Vertical line -->
+              <div style="position:absolute; left:10px; top:6px; bottom:6px; width:2px; background:var(--border); border-radius:2px;"></div>
+
+              @for (note of (p.activityLog ?? []).slice().reverse(); track note.id; let last = $last) {
+                <div style="position:relative; margin-bottom:20px;" [style.margin-bottom]="last ? '0' : '20px'">
+                  <!-- Dot on timeline -->
+                  <div style="position:absolute; left:-24px; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid var(--card-bg); box-shadow:0 0 0 1px var(--border);"
+                       [style.background]="labelColor(note.label)"></div>
+
+                  <div style="background:var(--bg); border-radius:10px; padding:12px 14px;">
+                    <!-- Timestamp header -->
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                      <div style="width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff; flex-shrink:0;"
+                           [style.background]="labelColor(note.label)">
+                        {{ note.author.substring(0,2).toUpperCase() }}
+                      </div>
+                      <span style="font-size:12px; font-weight:700; color:var(--text2);">{{ note.author }}</span>
+                      <span style="font-size:11px; color:var(--text3); margin-left:auto; white-space:nowrap;">{{ fmtTimestamp(note.timestamp) }}</span>
+                    </div>
+                    <div style="font-size:13px; color:var(--text1); line-height:1.55; padding-left:32px;">{{ note.text }}</div>
+                    @if (note.label && note.label !== 'info') {
+                      <div style="padding-left:32px; margin-top:5px;">
+                        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:20px; color:#fff;"
+                              [style.background]="labelColor(note.label)">{{ note.label }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div style="text-align:center; padding:32px 20px; color:var(--text3); font-size:13px;">
+              <i class="ti ti-timeline-event-exclamation" style="display:block; font-size:28px; margin-bottom:8px;"></i>
+              No activity recorded yet
+            </div>
+          }
+
+        </div>
+      }
+    }
+
+    <!-- ── Data Room tab ── -->
+    @if (recordTab() === 'dataroom') {
+      @if (property(); as p) {
+        <div style="padding:20px 24px;">
+
+          <!-- Toolbar -->
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Documents</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <select class="form-input" style="font-size:12px; padding:5px 10px; width:auto;"
+                      [value]="docUploadCategory()"
+                      (change)="docUploadCategory.set($any($event.target).value)">
+                <option value="Legal">Legal</option>
+                <option value="Financial">Financial</option>
+                <option value="Survey">Survey</option>
+                <option value="Other">Other</option>
+              </select>
+              <button class="btn-primary" style="font-size:12px; display:inline-flex; align-items:center; gap:6px;"
+                      (click)="triggerDocUpload()">
+                <i class="ti ti-upload"></i> Upload
+              </button>
+            </div>
+          </div>
+
+          @if ((p.documents?.length ?? 0) > 0) {
+            <!-- Group by category -->
+            @for (cat of ['Legal','Financial','Survey','Other']; track cat) {
+              @let catDocs = (p.documents ?? []).filter(d => d.category === cat);
+              @if (catDocs.length > 0) {
+                <div style="margin-bottom:20px;">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <i class="ti ti-folder" style="font-size:12px;"></i>{{ cat }}
+                    <span style="background:var(--border); border-radius:20px; padding:1px 7px; font-size:10px;">{{ catDocs.length }}</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:4px;">
+                    @for (doc of catDocs; track doc.id) {
+                      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--bg); border-radius:8px;">
+                        <i class="ti ti-file-description" style="font-size:18px; color:var(--text3); flex-shrink:0;"></i>
+                        <div style="flex:1; min-width:0;">
+                          <div style="font-size:13px; font-weight:600; color:var(--text1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ doc.name }}</div>
+                          <div style="font-size:11px; color:var(--text3); margin-top:2px;">
+                            Uploaded by {{ doc.uploadedBy }} · {{ fmtTimestamp(doc.uploadedAt) }}
+                            @if (doc.size) { · {{ doc.size }} }
+                          </div>
+                        </div>
+                        <button (click)="removeDocument(doc.id)"
+                                style="width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text3); flex-shrink:0;"
+                                title="Remove">
+                          <i class="ti ti-trash" style="font-size:13px;"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          } @else {
+            <div style="text-align:center; padding:40px 20px; color:var(--text3); font-size:13px;">
+              <i class="ti ti-folder-open" style="display:block; font-size:32px; margin-bottom:10px; opacity:.5;"></i>
+              <div style="font-weight:600; color:var(--text2); margin-bottom:6px;">No documents yet</div>
+              <div style="font-size:12px;">Select a category and click Upload to add documents.</div>
+            </div>
+          }
+
+        </div>
+      }
+    }
+
   </div>
 
-  <!-- MoS details -->
-  @if (p.stage === 'MemorandumOfSale' || p.stage === 'Legals') {
-    <div class="card">
-      <div class="section-header">
-        <div class="section-title"><i class="ti ti-file-description" style="color:var(--accent);"></i> Memorandum of Sale</div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px;">
-        <div><span style="color:var(--text3);">Agreed Price:</span> <strong>{{ (p.agreedPrice ?? p.financial?.ap) | money }}</strong></div>
-        <div><span style="color:var(--text3);">Vendor's Solicitor:</span> <strong>TBC</strong></div>
-        <div><span style="color:var(--text3);">MoS Date:</span> <strong>Pending</strong></div>
-        <div><span style="color:var(--text3);">Exchange Target:</span> <strong>4–6 weeks</strong></div>
-      </div>
-    </div>
-  }
-
-  <!-- Refurb schedule -->
-  @if (p.stage === 'Refurbishment') {
-    <div class="card">
-      <div class="section-header">
-        <div class="section-title"><i class="ti ti-tools" style="color:var(--accent);"></i> Refurbishment Schedule</div>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        @for (item of [
-          { task: 'New boiler & heating system', status: 'complete',    pct: 100 },
-          { task: 'Loft insulation',             status: 'complete',    pct: 100 },
-          { task: 'Kitchen refurbishment',       status: 'in-progress', pct: 60  },
-          { task: 'Bathroom refurbishment',      status: 'in-progress', pct: 40  },
-          { task: 'Decorating & finishing',      status: 'pending',     pct: 0   },
-        ]; track item.task) {
-          <div style="display:flex; align-items:center; gap:10px; font-size:13px;">
-            <div style="flex:1;">{{ item.task }}</div>
-            <div style="width:120px; background:var(--border); border-radius:3px; height:6px; overflow:hidden;">
-              <div [style.width]="item.pct + '%'"
-                   [style.background]="item.pct === 100 ? 'var(--teal)' : 'var(--accent)'"
-                   style="height:100%; border-radius:3px;"></div>
-            </div>
-            <span class="badge" style="min-width:80px; justify-content:center;"
-                  [class.badge-green]="item.status === 'complete'"
-                  [class.badge-orange]="item.status === 'in-progress'"
-                  [class.badge-gray]="item.status === 'pending'">
-              {{ item.status }}
-            </span>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
-  <!-- ── Activity Log ─────────────────────────────────────────────── -->
-  @if (p.status === 'active') {
-    <div class="card">
-      <div class="section-header" style="margin-bottom:14px;">
-        <div class="section-title"><i class="ti ti-notes" style="color:var(--accent);"></i> Activity Log</div>
-        <button class="btn-ghost" style="font-size:12px; display:inline-flex; align-items:center; gap:5px;"
-                (click)="showNoteForm.update(v => !v)">
-          <i class="ti ti-plus"></i> Add Note
-        </button>
-      </div>
-
-      @if (showNoteForm()) {
-        <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:14px; border:1px dashed var(--border);">
-          <div style="display:grid; grid-template-columns:1fr auto; gap:10px; margin-bottom:10px; align-items:end;">
-            <div>
-              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Note</label>
-              <input type="text" placeholder="Add a note…" class="form-input"
-                     [value]="noteText()"
-                     (input)="noteText.set($any($event.target).value)"
-                     (keydown.enter)="submitNote()" />
-            </div>
-            <div>
-              <label style="font-size:11px; color:var(--text3); display:block; margin-bottom:4px;">Author</label>
-              <input type="text" style="width:100px;" class="form-input"
-                     [value]="noteAuthor()"
-                     (input)="noteAuthor.set($any($event.target).value)" />
-            </div>
-          </div>
-          <div style="display:flex; gap:8px; justify-content:flex-end;">
-            <button class="btn-ghost" style="font-size:12px;" (click)="showNoteForm.set(false)">Cancel</button>
-            <button class="btn-primary" style="font-size:12px;" (click)="submitNote()">Save Note</button>
-          </div>
-        </div>
-      }
-
-      @if ((p.activityLog?.length ?? 0) > 0) {
-        <div style="display:flex; flex-direction:column; gap:1px;">
-          @for (note of (p.activityLog ?? []).slice().reverse(); track note.id) {
-            <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);">
-              <div style="width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; flex-shrink:0;"
-                   [style.background]="labelColor(note.label)">
-                {{ note.author.substring(0,2).toUpperCase() }}
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:13px; color:var(--text1); line-height:1.5;">{{ note.text }}</div>
-                <div style="font-size:11px; color:var(--text3); margin-top:3px;">{{ note.author }} · {{ fmtTimestamp(note.timestamp) }}</div>
-              </div>
-              <div style="width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0;"
-                   [style.background]="labelColor(note.label)"></div>
-            </div>
-          }
-        </div>
-      } @else {
-        <div style="text-align:center; padding:20px; color:var(--text3); font-size:13px;">
-          <i class="ti ti-notes-off" style="display:block; font-size:24px; margin-bottom:6px;"></i>
-          No activity yet — add the first note
-        </div>
-      }
-    </div>
-  }
 
 } @else {
   <div class="card" style="text-align:center; padding:48px;">

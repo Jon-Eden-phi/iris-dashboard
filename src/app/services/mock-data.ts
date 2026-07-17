@@ -439,6 +439,10 @@ export class MockDataService {
     });
   }
 
+  updateProperty(id: string, changes: Partial<Property>): void {
+    this._mutate(id, p => ({ ...p, ...changes }));
+  }
+
   addActivity(id: string, note: ActivityNote): void {
     this._mutate(id, p => ({ ...p, activityLog: [...(p.activityLog ?? []), note] }));
   }
