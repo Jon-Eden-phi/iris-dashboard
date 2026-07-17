@@ -221,6 +221,11 @@ export class ClientPortalComponent {
     this.acctPassSuccess.set(true);
   }
 
+  saveNotifPref(pref: 'email' | 'inapp' | 'both'): void {
+    const user = this.auth.currentUser();
+    if (user) this.auth.updateUser(user.id, { notificationPrefs: pref });
+  }
+
   userInitials(): string {
     const name = this.auth.currentUser()?.name ?? '';
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();

@@ -642,6 +642,27 @@
             <i class="ti ti-lock-check"></i> Update password
           </button>
         </div>
+
+        <!-- Notification preferences -->
+        <div style="border-top:1px solid #f3f4f6; padding-top:20px; margin-top:4px;">
+          <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
+            <i class="ti ti-bell" style="color:#9ca3af;"></i> Notification preferences
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+            @for (opt of [{key:'email', label:'Email only', icon:'ti-mail'}, {key:'inapp', label:'In-app only', icon:'ti-bell'}, {key:'both', label:'Both', icon:'ti-bell-ringing'}]; track opt.key) {
+              @let selected = (u.notificationPrefs ?? 'both') === opt.key;
+              <button (click)="saveNotifPref($any(opt.key))"
+                      style="padding:10px 8px; border-radius:10px; cursor:pointer; text-align:center; transition:all .15s; font-size:12px; font-weight:600; border:1.5px solid;"
+                      [style.border-color]="selected ? '#E8601C' : '#e5e7eb'"
+                      [style.background]="selected ? '#fff3ee' : '#fff'"
+                      [style.color]="selected ? '#E8601C' : '#6b7280'">
+                <i class="ti {{ opt.icon }}" style="display:block; font-size:18px; margin-bottom:5px;"></i>
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+        </div>
+
       </div>
     </div>
   }
