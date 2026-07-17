@@ -101,6 +101,24 @@ export class PipelineComponent {
     this.router.navigate(['/record', p.id]);
   }
 
+  pipelineTab    = signal<'dashboard' | 'pipeline'>('dashboard');
+  pipelineSearch = signal('');
+
+  readonly sourcingStages = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
+
+  pipelineProperties = computed(() => {
+    const q = this.pipelineSearch().toLowerCase();
+    return this.data.properties.filter(p => {
+      if (p.status !== 'active') return false;
+      if (!q) return true;
+      return p.address.toLowerCase().includes(q) || (p.postcode ?? '').toLowerCase().includes(q);
+    });
+  });
+
+  deptLabel(stage: string): string {
+    return this.sourcingStages.has(stage) ? 'Sourcing' : 'Purchasing';
+  }
+
   showCreateModal = signal(false);
   draftAddress  = signal('');
   draftPostcode = signal('');

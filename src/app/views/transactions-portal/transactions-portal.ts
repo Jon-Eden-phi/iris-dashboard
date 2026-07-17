@@ -6,7 +6,7 @@ import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
 import { Property } from '../../models/property.model';
 
-type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record';
+type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record' | 'pipeline';
 
 const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
 const ACQ_STAGES = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
@@ -307,6 +307,27 @@ export class TransactionsPortalComponent {
   dataRoom = signal<DataRoomFile[]>(
     JSON.parse(localStorage.getItem('iris_data_room') ?? '[]')
   );
+
+  pipelineSearch = signal('');
+
+  readonly txSourceStages = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
+
+  pipelineAllProperties = computed(() => {
+    const q = this.pipelineSearch().toLowerCase();
+    return this.data.properties.filter(p => {
+      if (p.status !== 'active') return false;
+      if (!q) return true;
+      return p.address.toLowerCase().includes(q) || (p.postcode ?? '').toLowerCase().includes(q);
+    });
+  });
+
+  txDeptLabel(stage: string): string {
+    return this.txSourceStages.has(stage) ? 'Sourcing' : 'Purchasing';
+  }
+
+  navigateToRecord(p: Property): void {
+    this.router.navigate(['/record', p.id]);
+  }
 
   recordTab  = signal<'overview' | 'dataroom' | 'property' | 'media' | 'fees' | 'milestones' | 'parties' | 'notes'>('overview');
   mediaSubTab = signal<'inspection' | 'agent' | 'floorplan' | 'matterport'>('inspection');

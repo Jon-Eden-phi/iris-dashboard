@@ -9,6 +9,12 @@
       </div>
     </div>
 
+    <div class="nav-section">Pipeline</div>
+    <a class="nav-item" [class.active]="view() === 'pipeline'" (click)="navTo('pipeline')">
+      <i class="ti ti-list"></i> All Properties
+      <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ pipelineAllProperties().length }}</span>
+    </a>
+
     <div class="nav-section">Homes</div>
     <a class="nav-item" [class.active]="view() === 'homes'" (click)="navTo('homes')">
       <i class="ti ti-home-2"></i> Homes
@@ -89,6 +95,7 @@
       @if (view() === 'suppliers') { <span class="tx-topbar-title">Surveyor directory</span><span class="tx-topbar-sub">Approved surveying suppliers</span> }
       @if (view() === 'record' && selectedProperty(); as p) { <span class="tx-topbar-title">{{ p.address }}</span><span class="tx-topbar-sub">{{ p.postcode }} · {{ stageLabel(p.stage) }}</span> }
       @if (view() === 'acquisitions') { <span class="tx-topbar-title">Pipeline view</span><span class="tx-topbar-sub">{{ acqProperties().length }} properties in acquisitions — read only</span> }
+      @if (view() === 'pipeline') { <span class="tx-topbar-title">All Properties</span><span class="tx-topbar-sub">{{ pipelineAllProperties().length }} active properties across Sourcing and Purchasing</span> }
       @if (view() === 'acq-record' && acqProperty(); as ap) { <span class="tx-topbar-title">{{ ap.address }}</span><span class="tx-topbar-sub">{{ ap.postcode }} · {{ allStageLabels[ap.stage] }} · read only</span> }
     </div>
 
@@ -1750,6 +1757,80 @@
           </div>
         }
       }
+
+      <!-- ── VIEW: PIPELINE ────────────────────────────── -->
+      @if (view() === 'pipeline') {
+
+        <div class="card" style="padding:10px 16px; margin-bottom:0;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="position:relative; flex:1; min-width:180px;">
+              <i class="ti ti-search" style="position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px;"></i>
+              <input class="form-input" style="padding-left:30px;" type="text" placeholder="Search address or postcode…"
+                     [value]="pipelineSearch()" (input)="pipelineSearch.set($any($event.target).value)" />
+            </div>
+            <span style="font-size:12px; color:var(--text3);">{{ pipelineAllProperties().length }} properties</span>
+          </div>
+        </div>
+
+        <div class="card flush">
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Phase</th>
+                  <th>Dept</th>
+                  <th>Stage</th>
+                  <th>Beds</th>
+                  <th>Type</th>
+                  <th class="num-cell">Asking Price</th>
+                  <th class="num-cell">AIC</th>
+                  <th class="num-cell">Yield</th>
+                  <th>EPC</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of pipelineAllProperties(); track p.id) {
+                  <tr (click)="navigateToRecord(p)" style="cursor:pointer;">
+                    <td>
+                      <div style="font-weight:600;">{{ p.address }}</div>
+                      @if (p.postcode) {
+                        <div style="font-size:11px; color:var(--text3);">{{ p.postcode }}</div>
+                      }
+                    </td>
+                    <td><span class="badge badge-blue">{{ p.phase }}</span></td>
+                    <td>
+                      @if (txSourceStages.has(p.stage)) {
+                        <span class="badge badge-purple" style="font-size:10px;">Sourcing</span>
+                      } @else {
+                        <span class="badge badge-teal" style="font-size:10px;">Purchasing</span>
+                      }
+                    </td>
+                    <td><span class="stage-chip stage-{{ p.stage }}">{{ allStageLabels[p.stage] }}</span></td>
+                    <td>{{ p.beds ?? '—' }}</td>
+                    <td>{{ p.type ?? '—' }}</td>
+                    <td class="num-cell">{{ p.financial?.ap ? ('£' + (p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
+                    <td class="num-cell">{{ p.financial?.tc ? ('£' + (p.financial!.tc!).toLocaleString('en-GB')) : '—' }}</td>
+                    <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
+                    <td>
+                      @if (p.epcBefore) {
+                        <span class="epc-pill badge-{{ p.epcBefore.r }}">{{ p.epcBefore.r }}</span>
+                      }
+                      @if (p.epcAfter) {
+                        <i class="ti ti-arrow-right" style="font-size:10px; color:var(--text3); margin:0 2px;"></i>
+                        <span class="epc-pill badge-{{ p.epcAfter.r }}">{{ p.epcAfter.r }}</span>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="10" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      } <!-- end pipeline view -->
 
     </div>
   </main>

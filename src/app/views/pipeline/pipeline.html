@@ -1,3 +1,20 @@
+<!-- Top tab bar -->
+<div style="display:flex; gap:4px; margin-bottom:4px;">
+  <button class="btn-ghost" [style.background]="pipelineTab()==='dashboard' ? 'var(--accent-soft)' : ''"
+          [style.color]="pipelineTab()==='dashboard' ? 'var(--accent)' : ''"
+          [style.fontWeight]="pipelineTab()==='dashboard' ? '700' : ''"
+          (click)="pipelineTab.set('dashboard')">
+    <i class="ti ti-layout-kanban" style="margin-right:6px; font-size:13px;"></i>Dashboard
+  </button>
+  <button class="btn-ghost" [style.background]="pipelineTab()==='pipeline' ? 'var(--accent-soft)' : ''"
+          [style.color]="pipelineTab()==='pipeline' ? 'var(--accent)' : ''"
+          [style.fontWeight]="pipelineTab()==='pipeline' ? '700' : ''"
+          (click)="pipelineTab.set('pipeline')">
+    <i class="ti ti-list" style="margin-right:6px; font-size:13px;"></i>Pipeline
+  </button>
+</div>
+
+@if (pipelineTab() === 'dashboard') {
 <!-- Phase selector cards + Create Draft -->
 <div style="display:flex; align-items:center; gap:12px;">
   <div class="phase-grid" style="flex:1; grid-template-columns:repeat(5,1fr);">
@@ -135,6 +152,82 @@
     </table>
   </div>
 </div>
+
+} <!-- end dashboard tab -->
+
+<!-- Pipeline tab: all active properties across all stages -->
+@if (pipelineTab() === 'pipeline') {
+
+<div class="card" style="padding:10px 16px;">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div style="position:relative; flex:1; min-width:180px;">
+      <i class="ti ti-search" style="position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px;"></i>
+      <input class="form-input" style="padding-left:30px;" type="text" placeholder="Search address or postcode…"
+             [value]="pipelineSearch()" (input)="pipelineSearch.set($any($event.target).value)" />
+    </div>
+    <span style="font-size:12px; color:var(--text3);">{{ pipelineProperties().length }} properties</span>
+  </div>
+</div>
+
+<div class="card flush">
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Address</th>
+          <th>Phase</th>
+          <th>Dept</th>
+          <th>Stage</th>
+          <th>Beds</th>
+          <th>Type</th>
+          <th class="num-cell">Asking Price</th>
+          <th class="num-cell">AIC</th>
+          <th class="num-cell">Yield</th>
+          <th>EPC</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pipelineProperties(); track p.id) {
+          <tr (click)="navigate(p)" style="cursor:pointer;">
+            <td>
+              <div style="font-weight:600;">{{ p.address }}</div>
+              @if (p.postcode) {
+                <div style="font-size:11px; color:var(--text3);">{{ p.postcode }}</div>
+              }
+            </td>
+            <td><span class="badge badge-blue">{{ p.phase }}</span></td>
+            <td>
+              @if (sourcingStages.has(p.stage)) {
+                <span class="badge badge-purple" style="font-size:10px;">Sourcing</span>
+              } @else {
+                <span class="badge badge-teal" style="font-size:10px;">Purchasing</span>
+              }
+            </td>
+            <td><span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span></td>
+            <td>{{ p.beds ?? '—' }}</td>
+            <td>{{ p.type ?? '—' }}</td>
+            <td class="num-cell">{{ p.financial?.ap ? ('£' + (p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
+            <td class="num-cell">{{ p.financial?.tc ? ('£' + (p.financial!.tc!).toLocaleString('en-GB')) : '—' }}</td>
+            <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
+            <td>
+              @if (p.epcBefore) {
+                <span class="epc-pill badge-{{ p.epcBefore.r }}">{{ p.epcBefore.r }}</span>
+              }
+              @if (p.epcAfter) {
+                <i class="ti ti-arrow-right" style="font-size:10px; color:var(--text3); margin:0 2px;"></i>
+                <span class="epc-pill badge-{{ p.epcAfter.r }}">{{ p.epcAfter.r }}</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="10" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+} <!-- end pipeline tab -->
 
 <!-- Create Draft Modal -->
 @if (showCreateModal()) {
