@@ -30,19 +30,6 @@
       <i class="ti ti-archive"></i> Aborted transactions
     </a>
 
-    <div class="nav-section">Sourcing</div>
-    <a class="nav-item" [class.active]="view() === 'acquisitions' || view() === 'acq-record'" (click)="navTo('acquisitions'); acqSelectedId.set(null)">
-      <i class="ti ti-chart-bar"></i> Pipeline view
-      <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ acqProperties().length }}</span>
-    </a>
-    @if (view() === 'acq-record' && acqProperty(); as ap) {
-      <a class="nav-item active" style="font-size:12px; padding-left:28px;">
-        <i class="ti ti-eye"></i>
-        <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">{{ ap.address }}</span>
-        <span class="badge badge-purple" style="margin-left:4px; flex-shrink:0; font-size:9.5px;">{{ allStageLabels[ap.stage] }}</span>
-      </a>
-    }
-
     <div class="nav-section">Team</div>
     <a class="nav-item" [class.active]="view() === 'surveys'" (click)="navTo('surveys')">
       <i class="ti ti-clipboard-list"></i> Survey tracker
