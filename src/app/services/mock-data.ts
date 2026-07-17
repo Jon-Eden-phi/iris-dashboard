@@ -414,11 +414,32 @@ export class MockDataService {
     { id: 'a4', name: 'Tom Hendricks', role: 'Regional Director', email: 'tom@savills.com', phone: '01424 839280', company: 'Savills Hastings', region: 'Hastings', properties: 4 },
   ];
 
-  advanceStage(id: string): void {
+  private _logEntry(text: string, author: string, label: NoteLabel = 'info'): ActivityNote {
+    return { id: crypto.randomUUID(), text, author, timestamp: new Date().toISOString(), label };
+  }
+
+  private readonly _stageMessages: Partial<Record<Stage, string>> = {
+    Draft:               'Draft submitted for client approval.',
+    ClientApproval:      'Client approved. Viewing booked.',
+    Viewing:             'Viewing complete. Progressed to Negotiations.',
+    Negotiations:        'Offer accepted. Memorandum of Sale issued.',
+    MemorandumOfSale:    'MoS complete. Progressed to Legals.',
+    Legals:              'Legal work complete. Refurbishment started.',
+    Refurbishment:       'Refurbishment complete. Property progressed to Lettings.',
+  };
+
+  advanceStage(id: string, author = 'System'): void {
     const stages: Stage[] = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
     this._mutate(id, p => {
       const idx = stages.indexOf(p.stage as Stage);
-      return idx >= 0 && idx < stages.length - 1 ? { ...p, stage: stages[idx + 1] } : p;
+      if (idx < 0 || idx >= stages.length - 1) return p;
+      const next = stages[idx + 1];
+      const msg = this._stageMessages[p.stage as Stage] ?? `Stage advanced to ${next}.`;
+      return {
+        ...p,
+        stage: next,
+        activityLog: [...(p.activityLog ?? []), this._logEntry(msg, author, 'action')],
+      };
     });
   }
 
@@ -428,14 +449,8 @@ export class MockDataService {
       const idx = stages.indexOf(p.stage as Stage);
       if (idx <= 0) return p;
       const prevStage = stages[idx - 1];
-      const logEntry: ActivityNote = {
-        id: 'revert_' + Date.now(),
-        text: comment ? `Stage reverted to ${prevStage}. Comment: ${comment}` : `Stage reverted to ${prevStage}.`,
-        author,
-        timestamp: new Date().toISOString(),
-        label: 'warning',
-      };
-      return { ...p, stage: prevStage, activityLog: [...(p.activityLog ?? []), logEntry] };
+      const text = comment ? `Stage reverted to ${prevStage}. Comment: ${comment}` : `Stage reverted to ${prevStage}.`;
+      return { ...p, stage: prevStage, activityLog: [...(p.activityLog ?? []), this._logEntry(text, author, 'warning')] };
     });
   }
 
@@ -448,17 +463,31 @@ export class MockDataService {
   }
 
   addOffer(id: string, offer: Offer): void {
-    this._mutate(id, p => ({ ...p, offers: [...(p.offers ?? []), offer] }));
+    const text = `Offer of £${offer.amount.toLocaleString('en-GB')} submitted.${offer.notes ? ' Note: ' + offer.notes : ''}`;
+    this._mutate(id, p => ({
+      ...p,
+      offers: [...(p.offers ?? []), offer],
+      activityLog: [...(p.activityLog ?? []), this._logEntry(text, offer.submittedBy, 'action')],
+    }));
   }
 
-  updateOffer(propertyId: string, offerId: string, status: Offer['status']): void {
+  updateOffer(propertyId: string, offerId: string, status: Offer['status'], author = 'System'): void {
     this._mutate(propertyId, p => {
       const updatedOffers = (p.offers ?? []).map(o => o.id === offerId ? { ...o, status } : o);
-      const acceptedOffer = status === 'accepted' ? updatedOffers.find(o => o.id === offerId) : null;
+      const offer = updatedOffers.find(o => o.id === offerId);
+      const amount = offer ? `£${offer.amount.toLocaleString('en-GB')}` : 'offer';
+      const msgMap: Partial<Record<Offer['status'], [string, NoteLabel]>> = {
+        accepted:  [`Offer of ${amount} accepted.`, 'success'],
+        rejected:  [`Offer of ${amount} rejected.`, 'warning'],
+        countered: [`Offer of ${amount} countered by vendor.`, 'warning'],
+        withdrawn: [`Offer of ${amount} withdrawn.`, 'info'],
+      };
+      const [text, label] = msgMap[status] ?? [`Offer status updated to ${status}.`, 'info'];
       return {
         ...p,
         offers: updatedOffers,
-        ...(acceptedOffer ? { agreedPrice: acceptedOffer.amount } : {}),
+        ...(status === 'accepted' && offer ? { agreedPrice: offer.amount } : {}),
+        activityLog: [...(p.activityLog ?? []), this._logEntry(text, author, label as NoteLabel)],
       };
     });
   }
@@ -471,13 +500,10 @@ export class MockDataService {
       clientMaxPrice: maxPrice,
       activityLog: [
         ...(p.activityLog ?? []),
-        {
-          id: crypto.randomUUID(),
-          text: `Approved by ${approvedBy}. Max authorised price: £${maxPrice.toLocaleString('en-GB')}.`,
-          author: approvedBy,
-          timestamp: new Date().toISOString(),
-          label: 'success' as NoteLabel,
-        },
+        this._logEntry(
+          `Approved by ${approvedBy}. Max authorised price: £${maxPrice.toLocaleString('en-GB')}.`,
+          approvedBy, 'success',
+        ),
       ],
     }));
   }
@@ -486,25 +512,35 @@ export class MockDataService {
     this._mutate(id, p => ({ ...p, viewing: { ...(p.viewing ?? {}), ...changes } }));
   }
 
-  submitViewingForReview(id: string): void {
-    this.updateViewing(id, { clientReview: 'pending' });
+  submitViewingForReview(id: string, author = 'System'): void {
+    this._mutate(id, p => ({
+      ...p,
+      viewing: { ...(p.viewing ?? {}), clientReview: 'pending' as const },
+      activityLog: [...(p.activityLog ?? []), this._logEntry('Viewing report submitted to client for review.', author, 'action')],
+    }));
   }
 
-  approveViewing(id: string): void {
+  approveViewing(id: string, author = 'System'): void {
     const stages: Stage[] = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
     this._mutate(id, p => {
       const idx = stages.indexOf(p.stage as Stage);
       const newStage = (idx >= 0 && idx < stages.length - 1 ? stages[idx + 1] : p.stage) as Stage;
-      return { ...p, stage: newStage, viewing: { ...(p.viewing ?? {}), clientReview: 'approved' as const } };
+      return {
+        ...p,
+        stage: newStage,
+        viewing: { ...(p.viewing ?? {}), clientReview: 'approved' as const },
+        activityLog: [...(p.activityLog ?? []), this._logEntry('Client approved viewing report. Property progressed to Negotiations.', author, 'success')],
+      };
     });
   }
 
-  markLost(id: string, reason: string): void {
+  markLost(id: string, reason: string, author = 'System'): void {
     this._mutate(id, p => ({
       ...p,
       status: 'lost' as const,
       lostReason: reason,
       lostDate: new Date().toISOString().split('T')[0],
+      activityLog: [...(p.activityLog ?? []), this._logEntry(`Property marked as lost. Reason: ${reason}.`, author, 'warning')],
     }));
   }
 

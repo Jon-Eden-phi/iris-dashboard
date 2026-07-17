@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { MockDataService } from '../../services/mock-data';
+import { AuthService } from '../../services/auth';
 import { Property } from '../../models/property.model';
 
 type PortalView = 'dashboard' | 'properties' | 'detail';
@@ -13,6 +14,8 @@ type PortalView = 'dashboard' | 'properties' | 'detail';
 })
 export class ClientPortalComponent {
   data = inject(MockDataService);
+  auth = inject(AuthService);
+  private get _userName(): string { return this.auth.currentUser()?.name ?? 'Client'; }
 
   view         = signal<PortalView>('dashboard');
   selectedId   = signal<string | null>(null);
@@ -141,7 +144,7 @@ export class ClientPortalComponent {
     if (!p) return;
     const reasons = this.rejectReasons();
     const reason  = reasons.length ? reasons.join(', ') : 'Rejected by council';
-    this.data.markLost(p.id, reason);
+    this.data.markLost(p.id, reason, this._userName);
     this.showRejectModal.set(false);
     this.rejectReasons.set([]);
     this.rejectNotes.set('');
@@ -158,7 +161,7 @@ export class ClientPortalComponent {
   approveViewing(): void {
     const p = this.activeProperty();
     if (!p) return;
-    this.data.approveViewing(p.id);
+    this.data.approveViewing(p.id, this._userName);
     this.showViewingApproveModal.set(false);
     this.view.set('dashboard');
     this.selectedId.set(null);
@@ -169,7 +172,7 @@ export class ClientPortalComponent {
     if (!p) return;
     const reasons = this.viewingRejectReasons();
     const reason  = reasons.length ? reasons.join(', ') : 'Rejected at viewing by council';
-    this.data.markLost(p.id, reason);
+    this.data.markLost(p.id, reason, this._userName);
     this.showViewingRejectModal.set(false);
     this.viewingRejectReasons.set([]);
     this.viewingRejectNotes.set('');

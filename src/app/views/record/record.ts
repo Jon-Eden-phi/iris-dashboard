@@ -108,10 +108,12 @@ export class RecordComponent {
 
   stageIndex(s: string): number { return this.stages.indexOf(s); }
 
+  private get _userName(): string { return this.auth.currentUser()?.name ?? 'System'; }
+
   advance(): void {
     const id = this.propId;
     if (!id || !this.canAdvance()) return;
-    this.data.advanceStage(id);
+    this.data.advanceStage(id, this._userName);
   }
 
   submitNote(): void {
@@ -177,7 +179,7 @@ export class RecordComponent {
 
   submitViewingForReview(): void {
     const id = this.propId; if (!id) return;
-    this.data.submitViewingForReview(id);
+    this.data.submitViewingForReview(id, this._userName);
   }
 
   formatViewingDate(d: string | undefined): string {
@@ -192,9 +194,9 @@ export class RecordComponent {
   resolveOffer(offerId: string, status: 'accepted' | 'rejected' | 'withdrawn'): void {
     const id = this.propId;
     if (!id) return;
-    this.data.updateOffer(id, offerId, status);
+    this.data.updateOffer(id, offerId, status, this._userName);
     if (status === 'accepted' && this.property()?.stage === 'Negotiations') {
-      this.data.advanceStage(id);
+      this.data.advanceStage(id, this._userName);
     }
   }
 

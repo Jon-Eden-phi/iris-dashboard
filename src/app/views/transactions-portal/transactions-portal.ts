@@ -1222,7 +1222,7 @@ export class TransactionsPortalComponent {
   }
 
   advanceStage(id: string): void {
-    this.data.advanceStage(id);
+    this.data.advanceStage(id, this.auth.currentUser()?.name ?? 'TX Team');
     this.showToast('Stage advanced', 'ti-arrow-right');
   }
 
