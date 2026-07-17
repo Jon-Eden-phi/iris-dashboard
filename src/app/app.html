@@ -14,11 +14,11 @@
         </div>
 
         @if (canSeeSourcing(user)) {
-          <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">
-            <i class="ti ti-layout-dashboard"></i> Dashboard
-          </a>
           <a class="nav-item" routerLink="/pipeline" routerLinkActive="active" (click)="closeSidebar()">
             <i class="ti ti-list"></i> Pipeline
+          </a>
+          <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+            <i class="ti ti-layout-dashboard"></i> Dashboard
           </a>
           <a class="nav-item" routerLink="/map" routerLinkActive="active" (click)="closeSidebar()">
             <i class="ti ti-map-pin"></i> Map
