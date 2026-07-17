@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { DatePipe, TitleCasePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe, UpperCasePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { AuthService } from '../../services/auth';
 import { Property } from '../../models/property.model';
@@ -8,13 +9,14 @@ type PortalView = 'dashboard' | 'properties' | 'detail';
 
 @Component({
   selector: 'app-client-portal',
-  imports: [DatePipe, TitleCasePipe],
+  imports: [DatePipe, TitleCasePipe, UpperCasePipe],
   templateUrl: './client-portal.html',
   styleUrl: './client-portal.scss',
 })
 export class ClientPortalComponent {
-  data = inject(MockDataService);
-  auth = inject(AuthService);
+  data   = inject(MockDataService);
+  auth   = inject(AuthService);
+  router = inject(Router);
   private get _userName(): string { return this.auth.currentUser()?.name ?? 'Client'; }
 
   view         = signal<PortalView>('dashboard');
@@ -31,6 +33,13 @@ export class ClientPortalComponent {
 
   showViewingApproveModal = signal(false);
   showViewingRejectModal  = signal(false);
+
+  showAccountModal = signal(false);
+  acctCurrentPass  = signal('');
+  acctNewPass      = signal('');
+  acctConfirmPass  = signal('');
+  acctPassError    = signal('');
+  acctPassSuccess  = signal(false);
 
   approverName = signal('');
   maxPrice     = signal('');
@@ -184,6 +193,37 @@ export class ClientPortalComponent {
     this.viewingRejectReasons.update(list =>
       list.includes(r) ? list.filter(x => x !== r) : [...list, r]
     );
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
+
+  openAccountModal(): void {
+    this.acctCurrentPass.set(''); this.acctNewPass.set(''); this.acctConfirmPass.set('');
+    this.acctPassError.set(''); this.acctPassSuccess.set(false);
+    this.showAccountModal.set(true);
+  }
+
+  savePassword(): void {
+    const current = this.acctCurrentPass().trim();
+    const next    = this.acctNewPass().trim();
+    const confirm = this.acctConfirmPass().trim();
+    const user    = this.auth.currentUser();
+    if (!user) return;
+    if (current !== user.password) { this.acctPassError.set('Current password is incorrect.'); return; }
+    if (next.length < 4) { this.acctPassError.set('New password must be at least 4 characters.'); return; }
+    if (next !== confirm) { this.acctPassError.set('Passwords do not match.'); return; }
+    this.auth.updateUser(user.id, { password: next });
+    this.acctPassError.set('');
+    this.acctCurrentPass.set(''); this.acctNewPass.set(''); this.acctConfirmPass.set('');
+    this.acctPassSuccess.set(true);
+  }
+
+  userInitials(): string {
+    const name = this.auth.currentUser()?.name ?? '';
+    return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }
 
   actionType(p: Property): 'property-approval' | 'viewing-review' | null {

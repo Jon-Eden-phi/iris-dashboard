@@ -24,12 +24,16 @@
     </div>
 
     <div class="nav-right">
-      <div class="council-chip">
-        <i class="ti ti-building-bank"></i>
-        <span>Bristol City Council</span>
-      </div>
-      <div class="user-avatar">JS</div>
-      <button class="sign-out-btn">
+      @if (auth.currentUser()?.organisation; as org) {
+        <div class="council-chip">
+          <i class="ti ti-building-bank"></i>
+          <span>{{ org }}</span>
+        </div>
+      }
+      <button class="user-avatar" style="cursor:pointer; border:none; background:none; padding:0;" (click)="openAccountModal()" title="My account">
+        {{ userInitials() }}
+      </button>
+      <button class="sign-out-btn" (click)="logout()">
         <i class="ti ti-logout"></i> Sign out
       </button>
     </div>
@@ -576,6 +580,71 @@
       </div>
     </div>
   </div>
+}
+
+<!-- ══ Account modal ══════════════════════════════════════ -->
+@if (showAccountModal()) {
+  @if (auth.currentUser(); as u) {
+    <div class="modal-overlay" (click)="showAccountModal.set(false)">
+      <div class="modal" style="max-width:440px;" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div style="display:flex; align-items:center; gap:14px; padding-bottom:18px; border-bottom:1px solid #f3f4f6; margin-bottom:20px;">
+          <div style="width:44px; height:44px; border-radius:50%; background:#fff3ee; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:#E8601C; flex-shrink:0;">
+            {{ (u.firstName ? u.firstName[0] : u.name[0]) | uppercase }}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:16px; font-weight:800; color:#111;">{{ u.name }}</div>
+            <div style="font-size:12px; color:#9ca3af; margin-top:2px;">{{ u.email }}@if (u.organisation) { &nbsp;·&nbsp; {{ u.organisation }} }</div>
+          </div>
+          <button (click)="showAccountModal.set(false)"
+                  style="width:30px; height:30px; border-radius:8px; border:1px solid #e5e7eb; background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#9ca3af;">
+            <i class="ti ti-x" style="font-size:14px;"></i>
+          </button>
+        </div>
+
+        <!-- Change password -->
+        <div class="modal-title" style="font-size:13px; display:flex; align-items:center; gap:6px; margin-bottom:14px;">
+          <i class="ti ti-lock" style="color:#9ca3af;"></i> Change password
+        </div>
+
+        <label class="modal-label">Current password</label>
+        <input class="modal-input" type="password" placeholder="Enter current password" style="margin-bottom:12px;"
+               [value]="acctCurrentPass()" (input)="acctCurrentPass.set($any($event.target).value)" />
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div>
+            <label class="modal-label">New password</label>
+            <input class="modal-input" type="password" placeholder="Min. 4 characters"
+                   [value]="acctNewPass()" (input)="acctNewPass.set($any($event.target).value)" />
+          </div>
+          <div>
+            <label class="modal-label">Confirm password</label>
+            <input class="modal-input" type="password" placeholder="Repeat new password"
+                   [value]="acctConfirmPass()" (input)="acctConfirmPass.set($any($event.target).value)" />
+          </div>
+        </div>
+
+        @if (acctPassError()) {
+          <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:10px;">
+            {{ acctPassError() }}
+          </div>
+        }
+        @if (acctPassSuccess()) {
+          <div style="background:rgba(22,163,74,.07); border:1px solid rgba(22,163,74,.25); border-radius:7px; padding:8px 12px; font-size:12px; color:#16a34a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <i class="ti ti-circle-check"></i> Password updated successfully.
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button class="btn-cancel" (click)="showAccountModal.set(false)">Cancel</button>
+          <button class="btn-confirm-approve" (click)="savePassword()">
+            <i class="ti ti-lock-check"></i> Update password
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 }
 
 <!-- ══ Viewing reject modal ═══════════════════════════════ -->
