@@ -391,7 +391,7 @@ export class TransactionsPortalComponent {
     this.router.navigate(['/record', p.id]);
   }
 
-  recordTab  = signal<'overview' | 'dataroom' | 'property' | 'media' | 'fees' | 'milestones' | 'parties' | 'notes'>('overview');
+  recordTab  = signal<'flow' | 'overview' | 'dataroom' | 'property' | 'media' | 'fees' | 'milestones' | 'parties' | 'notes'>('flow');
   mediaSubTab = signal<'inspection' | 'agent' | 'floorplan' | 'matterport'>('inspection');
   drSearch   = signal('');
   drStageFilter = signal('all');
