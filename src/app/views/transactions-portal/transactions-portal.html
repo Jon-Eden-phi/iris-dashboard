@@ -15,9 +15,9 @@
       <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ pipelineAllProperties().length }}</span>
     </a>
 
-    <div class="nav-section">Homes</div>
+    <div class="nav-section">Dashboard</div>
     <a class="nav-item" [class.active]="view() === 'homes'" (click)="navTo('homes')">
-      <i class="ti ti-home-2"></i> Homes
+      <i class="ti ti-layout-dashboard"></i> Dashboard
       <span class="tx-nav-badge tx-nb-gray" style="margin-left:auto;">{{ txProperties().length }}</span>
     </a>
     <a class="nav-item" [class.active]="view() === 'queries'" (click)="navTo('queries')">
@@ -87,7 +87,7 @@
 
     <!-- TOP BAR -->
     <div class="tx-topbar">
-      @if (view() === 'homes')     { <span class="tx-topbar-title">Homes</span><span class="tx-topbar-sub">{{ filteredProperties().length }} of {{ txProperties().length }} in Purchasing</span> }
+      @if (view() === 'homes')     { <span class="tx-topbar-title">Dashboard</span><span class="tx-topbar-sub">{{ filteredProperties().length }} of {{ txProperties().length }} in Purchasing</span> }
       @if (view() === 'queries')   { <span class="tx-topbar-title">My queries</span><span class="tx-topbar-sub">{{ openQueryCount }} open</span> }
       @if (view() === 'lost')      { <span class="tx-topbar-title">Aborted purchasing</span><span class="tx-topbar-sub">{{ lostTx().length }} aborted</span> }
       @if (view() === 'surveys')   { <span class="tx-topbar-title">Survey tracker</span><span class="tx-topbar-sub">Technical surveys across all active purchasing</span> }
