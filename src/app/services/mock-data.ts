@@ -6,17 +6,17 @@ import { Agent } from '../models/agent.model';
 @Injectable({ providedIn: 'root' })
 export class MockDataService {
 
-  private readonly STORAGE_KEY = 'iris-props-v10';
+  private readonly STORAGE_KEY = 'iris-props-v11';
 
   private _props = signal<Property[]>([
     // ── ACQ pipeline (mock) ──────────────────────────────────────────────────
-    { id: 'm001', address: '14 Granby Hill',          postcode: 'BS8 4LS',  phase: 'Bristol P3',    stage: 'Draft',          beds: 3, type: 'End-terrace',    epcBefore: { r: 'E', s: 44 }, financial: { ap: 310000 },                    status: 'active' },
-    { id: 'm002', address: '7 Stapleton Road',        postcode: 'BS5 0QN',  phase: 'Bristol P3',    stage: 'ClientApproval', beds: 2, type: 'Flat',           epcBefore: { r: 'F', s: 33 }, financial: { ap: 185000 },                    status: 'active' },
-    { id: 'm003', address: '22 Whitehouse Street',    postcode: 'BS3 4HA',  phase: 'Bristol P3',    stage: 'Negotiations',   beds: 4, type: 'Semi-detached',  epcBefore: { r: 'D', s: 56 }, financial: { ap: 420000 },                    status: 'active' },
-    { id: 'm004', address: '45 High Street, Merton',  postcode: 'SW19 1DE', phase: 'Merton LAHF',   stage: 'Viewing',        beds: 2, type: 'Flat',           epcBefore: { r: 'E', s: 43 }, financial: { ap: 340000 },                    status: 'active' },
-    { id: 'm005', address: '12 Morden Road',          postcode: 'CR4 4DG',  phase: 'Merton LAHF',   stage: 'Negotiations',   beds: 3, type: 'End-terrace',    epcBefore: { r: 'D', s: 55 }, financial: { ap: 385000 },                    status: 'active' },
-    { id: 'm006', address: '8 Ambra Vale East',       postcode: 'BS8 4RE',  phase: 'Bristol P3',    stage: 'Draft',          beds: 3, type: 'Mid-terrace',    epcBefore: { r: 'E', s: 42 }, financial: { ap: 295000 },                    status: 'active' },
-    { id: 'm007', address: '31 Claremont Road',       postcode: 'BS7 8DE',  phase: 'Bristol P3',    stage: 'Draft',          beds: 2, type: 'Flat',           epcBefore: { r: 'F', s: 31 }, financial: { ap: 210000 },                    status: 'active' },
+    { id: 'm001', address: '14 Granby Hill',          postcode: 'BS8 4LS',  phase: 'Bristol P3',    stage: 'Draft',          beds: 3, type: 'End-terrace',    epcBefore: { r: 'E', s: 44 }, financial: { ap: 310000, capex: 35000, tc: 4800, sp: 780, yield: 5.1 }, status: 'active' },
+    { id: 'm002', address: '7 Stapleton Road',        postcode: 'BS5 0QN',  phase: 'Bristol P3',    stage: 'ClientApproval', beds: 2, type: 'Flat',           epcBefore: { r: 'F', s: 33 }, financial: { ap: 185000, capex: 52000, tc: 3200, sp: 600, yield: 5.8 }, status: 'active' },
+    { id: 'm003', address: '22 Whitehouse Street',    postcode: 'BS3 4HA',  phase: 'Bristol P3',    stage: 'Negotiations',   beds: 4, type: 'Semi-detached',  epcBefore: { r: 'D', s: 56 }, financial: { ap: 420000, capex: 25000, tc: 6200, sp: 1040, yield: 4.7 }, status: 'active' },
+    { id: 'm004', address: '45 High Street, Merton',  postcode: 'SW19 1DE', phase: 'Merton LAHF',   stage: 'Viewing',        beds: 2, type: 'Flat',           epcBefore: { r: 'E', s: 43 }, financial: { ap: 340000, capex: 48000, tc: 5800, sp: 780, yield: 3.9 }, status: 'active' },
+    { id: 'm005', address: '12 Morden Road',          postcode: 'CR4 4DG',  phase: 'Merton LAHF',   stage: 'Negotiations',   beds: 3, type: 'End-terrace',    epcBefore: { r: 'D', s: 55 }, financial: { ap: 385000, capex: 22000, tc: 5600, sp: 900, yield: 4.2 }, status: 'active' },
+    { id: 'm006', address: '8 Ambra Vale East',       postcode: 'BS8 4RE',  phase: 'Bristol P3',    stage: 'Draft',          beds: 3, type: 'Mid-terrace',    epcBefore: { r: 'E', s: 42 }, financial: { ap: 295000, capex: 38000, tc: 4400, sp: 780, yield: 5.0 }, status: 'active' },
+    { id: 'm007', address: '31 Claremont Road',       postcode: 'BS7 8DE',  phase: 'Bristol P3',    stage: 'Draft',          beds: 2, type: 'Flat',           epcBefore: { r: 'F', s: 31 }, financial: { ap: 210000, capex: 55000, tc: 3400, sp: 600, yield: 5.5 }, status: 'active' },
 
     // ── MemorandumOfSale (real) ──────────────────────────────────────────────
     { id: 'p001', address: '15 Hallards Close',       postcode: 'BS11 0JP', phase: 'Bristol P3',    stage: 'MemorandumOfSale', beds: 3, type: 'End-Terrace',   epcBefore: { r: 'E', s: 41 }, financial: { ap: 285000, capex: 38000, tc: 5200, yield: 5.4 }, agreedPrice: 280000, status: 'active' },
