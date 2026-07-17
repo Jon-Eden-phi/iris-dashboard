@@ -4,6 +4,8 @@ import { MockDataService } from '../../services/mock-data';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { Property } from '../../models/property.model';
 
+const EPC_RANK: Record<string, number> = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7 };
+
 @Component({
   selector: 'app-pipeline',
   imports: [MoneyPipe],
@@ -36,7 +38,61 @@ export class PipelineComponent {
   searchQuery   = signal('');
   bedsFilter    = signal('all');
   epcFilter     = signal('all');
-  sortOrder     = signal('newest');
+
+  // Dashboard table sort
+  sortCol = signal('');
+  sortDir = signal<'asc' | 'desc'>('asc');
+
+  sortBy(col: string): void {
+    if (this.sortCol() === col) {
+      this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortCol.set(col);
+      this.sortDir.set('asc');
+    }
+  }
+
+  // Pipeline table sort
+  pipeSortCol = signal('');
+  pipeSortDir = signal<'asc' | 'desc'>('asc');
+
+  pipeSortBy(col: string): void {
+    if (this.pipeSortCol() === col) {
+      this.pipeSortDir.set(this.pipeSortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.pipeSortCol.set(col);
+      this.pipeSortDir.set('asc');
+    }
+  }
+
+  private propVal(p: Property, col: string): string | number {
+    switch (col) {
+      case 'address':   return p.address;
+      case 'phase':     return p.phase ?? '';
+      case 'stage':     return this.stages.indexOf(p.stage);
+      case 'beds':      return p.beds ?? 0;
+      case 'epcBefore': return EPC_RANK[p.epcBefore?.r ?? ''] ?? 99;
+      case 'epcAfter':  return EPC_RANK[p.epcAfter?.r ?? ''] ?? 99;
+      case 'ap':        return p.financial?.ap ?? 0;
+      case 'yield':     return p.financial?.yield ?? 0;
+      case 'dept':      return this.sourcingStageSet.has(p.stage) ? 'Sourcing' : 'Purchasing';
+      case 'type':      return p.type ?? '';
+      case 'tc':        return p.financial?.tc ?? 0;
+      default:          return '';
+    }
+  }
+
+  private applySort(list: Property[], col: string, dir: 'asc' | 'desc'): Property[] {
+    if (!col) return list;
+    return [...list].sort((a, b) => {
+      const va = this.propVal(a, col);
+      const vb = this.propVal(b, col);
+      const cmp = typeof va === 'number' && typeof vb === 'number'
+        ? va - vb
+        : String(va).localeCompare(String(vb));
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  }
 
   filteredProperties = computed(() => {
     const phase = this.selectedPhase();
@@ -44,7 +100,8 @@ export class PipelineComponent {
     const q     = this.searchQuery().toLowerCase();
     const beds  = this.bedsFilter();
     const epc   = this.epcFilter();
-    const sort  = this.sortOrder();
+    const col   = this.sortCol();
+    const dir   = this.sortDir();
 
     let list = this.data.properties.filter(p => {
       if (this.isDashboard && !this.sourcingStageSet.has(p.stage)) return false;
@@ -59,16 +116,12 @@ export class PipelineComponent {
       return true;
     });
 
-    if (sort === 'price-high') list = [...list].sort((a, b) => (b.financial?.ap ?? 0) - (a.financial?.ap ?? 0));
-    else if (sort === 'price-low') list = [...list].sort((a, b) => (a.financial?.ap ?? 0) - (b.financial?.ap ?? 0));
-    else if (sort === 'oldest') list = [...list].reverse();
-
-    return list;
+    return this.applySort(list, col, dir);
   });
 
   hasFilters = computed(() =>
     this.searchQuery() !== '' || this.stageFilter() !== 'all' ||
-    this.bedsFilter() !== 'all' || this.epcFilter() !== 'all' || this.sortOrder() !== 'newest'
+    this.bedsFilter() !== 'all' || this.epcFilter() !== 'all'
   );
 
   resetFilters(): void {
@@ -76,7 +129,6 @@ export class PipelineComponent {
     this.stageFilter.set('all');
     this.bedsFilter.set('all');
     this.epcFilter.set('all');
-    this.sortOrder.set('newest');
   }
 
   totalBudget = computed(() =>
@@ -116,11 +168,14 @@ export class PipelineComponent {
   pipelineSearch = signal('');
 
   pipelineProperties = computed(() => {
-    const q = this.pipelineSearch().toLowerCase();
-    return this.data.properties.filter(p => {
+    const q   = this.pipelineSearch().toLowerCase();
+    const col = this.pipeSortCol();
+    const dir = this.pipeSortDir();
+    let list = this.data.properties.filter(p => {
       if (!q) return true;
       return p.address.toLowerCase().includes(q) || (p.postcode ?? '').toLowerCase().includes(q);
     });
+    return this.applySort(list, col, dir);
   });
 
   deptLabel(stage: string): string {

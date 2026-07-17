@@ -126,7 +126,7 @@
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" style="padding:10px 16px; position:sticky; top:0; z-index:20; background:var(--tx-bg, var(--bg));">
           <div class="tx-filter-bar">
             <input class="form-input tx-input" placeholder="Search address or postcode…"
                    [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)">
@@ -154,14 +154,6 @@
                 <option [value]="s">{{ stageLabel(s) }}</option>
               }
             </select>
-            <select class="form-select tx-select" [value]="sortOrder()" (change)="sortOrder.set($any($event.target).value)">
-              <option value="modified">Default order</option>
-              <option value="stage">Stage: MoS → Exchange</option>
-              <option value="stage-desc">Stage: Exchange → MoS</option>
-              <option value="address">Address A–Z</option>
-              <option value="price-high">Price: high–low</option>
-              <option value="price-low">Price: low–high</option>
-            </select>
             @if (txHasFilters()) {
               <button class="btn-ghost" style="font-size:12px;" (click)="txResetFilters()">
                 <i class="ti ti-refresh" style="margin-right:3px;"></i>Reset
@@ -178,14 +170,30 @@
             <table>
               <thead>
                 <tr>
-                  <th>Address</th>
-                  <th>Phase</th>
-                  <th>Stage</th>
-                  <th>Beds</th>
-                  <th>EPC Before</th>
-                  <th>EPC After</th>
-                  <th class="num-cell">Asking Price</th>
-                  <th class="num-cell">Yield</th>
+                  <th (click)="homeSortBy('address')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Address <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='address' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="homeSortBy('phase')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Phase <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='phase' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="homeSortBy('stage')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Stage <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='stage' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="homeSortBy('beds')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Beds <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='beds' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="homeSortBy('epcBefore')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    EPC Before <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='epcBefore' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="homeSortBy('epcAfter')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    EPC After <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='epcAfter' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th class="num-cell" (click)="homeSortBy('ap')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Asking Price <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='ap' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th class="num-cell" (click)="homeSortBy('yield')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Yield <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='yield' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1761,7 +1769,7 @@
       <!-- ── VIEW: PIPELINE ────────────────────────────── -->
       @if (view() === 'pipeline') {
 
-        <div class="card" style="padding:10px 16px; margin-bottom:0;">
+        <div class="card" style="padding:10px 16px; position:sticky; top:0; z-index:20; background:var(--tx-bg, var(--bg));">
           <div style="display:flex; align-items:center; gap:10px;">
             <div style="position:relative; flex:1; min-width:180px;">
               <i class="ti ti-search" style="position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px;"></i>
@@ -1777,16 +1785,36 @@
             <table>
               <thead>
                 <tr>
-                  <th>Address</th>
-                  <th>Phase</th>
-                  <th>Dept</th>
-                  <th>Stage</th>
-                  <th>Beds</th>
-                  <th>Type</th>
-                  <th class="num-cell">Asking Price</th>
-                  <th class="num-cell">AIC</th>
-                  <th class="num-cell">Yield</th>
-                  <th>EPC</th>
+                  <th (click)="pipeSortBy('address')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Address <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='address' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="pipeSortBy('phase')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Phase <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='phase' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="pipeSortBy('dept')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Dept <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='dept' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="pipeSortBy('stage')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Stage <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='stage' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="pipeSortBy('beds')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Beds <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='beds' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="pipeSortBy('type')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Type <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='type' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th class="num-cell" (click)="pipeSortBy('ap')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Asking Price <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='ap' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th class="num-cell" (click)="pipeSortBy('tc')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    AIC <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='tc' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th class="num-cell" (click)="pipeSortBy('yield')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Yield <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='yield' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
+                  <th (click)="pipeSortBy('epcBefore')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    EPC <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='epcBefore' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

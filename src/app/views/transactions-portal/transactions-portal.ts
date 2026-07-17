@@ -187,8 +187,66 @@ export class TransactionsPortalComponent {
   selectedStageView = signal<string | null>(null);
   searchQuery   = signal('');
   stageFilter   = signal('all');
-  sortOrder     = signal('modified');
   selectedPhase = signal('all');
+
+  // Dashboard table sort
+  homeSortCol = signal('');
+  homeSortDir = signal<'asc' | 'desc'>('asc');
+
+  homeSortBy(col: string): void {
+    if (this.homeSortCol() === col) {
+      this.homeSortDir.set(this.homeSortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.homeSortCol.set(col);
+      this.homeSortDir.set('asc');
+    }
+  }
+
+  // Pipeline table sort
+  pipeSortCol = signal('');
+  pipeSortDir = signal<'asc' | 'desc'>('asc');
+
+  pipeSortBy(col: string): void {
+    if (this.pipeSortCol() === col) {
+      this.pipeSortDir.set(this.pipeSortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.pipeSortCol.set(col);
+      this.pipeSortDir.set('asc');
+    }
+  }
+
+  private readonly EPC_RANK: Record<string, number> = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7 };
+  private readonly TX_STAGE_ORDER = ['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings'];
+  private readonly ALL_STAGE_ORDER = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
+
+  private propVal(p: Property, col: string): string | number {
+    switch (col) {
+      case 'address':   return p.address;
+      case 'phase':     return p.phase ?? '';
+      case 'stage':     return this.ALL_STAGE_ORDER.indexOf(p.stage);
+      case 'beds':      return p.beds ?? 0;
+      case 'epcBefore': return this.EPC_RANK[p.epcBefore?.r ?? ''] ?? 99;
+      case 'epcAfter':  return this.EPC_RANK[p.epcAfter?.r ?? ''] ?? 99;
+      case 'ap':        return p.financial?.ap ?? 0;
+      case 'yield':     return p.financial?.yield ?? 0;
+      case 'dept':      return this.txSourceStages.has(p.stage) ? 'Sourcing' : 'Purchasing';
+      case 'type':      return p.type ?? '';
+      case 'tc':        return p.financial?.tc ?? 0;
+      default:          return '';
+    }
+  }
+
+  private applySort(list: Property[], col: string, dir: 'asc' | 'desc'): Property[] {
+    if (!col) return list;
+    return [...list].sort((a, b) => {
+      const va = this.propVal(a, col);
+      const vb = this.propVal(b, col);
+      const cmp = typeof va === 'number' && typeof vb === 'number'
+        ? va - vb
+        : String(va).localeCompare(String(vb));
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  }
 
   showNoteModal      = signal(false);
   showQueryModal     = signal(false);
@@ -314,12 +372,15 @@ export class TransactionsPortalComponent {
   readonly txSourceStages = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
 
   pipelineAllProperties = computed(() => {
-    const q = this.pipelineSearch().toLowerCase();
-    return this.data.properties.filter(p => {
+    const q   = this.pipelineSearch().toLowerCase();
+    const col = this.pipeSortCol();
+    const dir = this.pipeSortDir();
+    let list = this.data.properties.filter(p => {
       if (p.status !== 'active') return false;
       if (!q) return true;
       return p.address.toLowerCase().includes(q) || (p.postcode ?? '').toLowerCase().includes(q);
     });
+    return this.applySort(list, col, dir);
   });
 
   txDeptLabel(stage: string): string {
@@ -390,9 +451,10 @@ export class TransactionsPortalComponent {
     const q     = this.searchQuery().toLowerCase();
     const stage = this.stageFilter();
     const phase = this.selectedPhase();
-    const sort  = this.sortOrder();
     const beds  = this.txBedsFilter();
     const epc   = this.txEpcFilter();
+    const col   = this.homeSortCol();
+    const dir   = this.homeSortDir();
 
     let list = this.txProperties().filter(p => {
       if (phase !== 'all' && p.phase !== phase) return false;
@@ -406,14 +468,7 @@ export class TransactionsPortalComponent {
       return true;
     });
 
-    const stageOrder = ['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings'];
-    if (sort === 'stage')       list = [...list].sort((a, b) => stageOrder.indexOf(a.stage) - stageOrder.indexOf(b.stage));
-    if (sort === 'stage-desc')  list = [...list].sort((a, b) => stageOrder.indexOf(b.stage) - stageOrder.indexOf(a.stage));
-    if (sort === 'address')     list = [...list].sort((a, b) => a.address.localeCompare(b.address));
-    if (sort === 'price-high')  list = [...list].sort((a, b) => (b.financial?.ap ?? 0) - (a.financial?.ap ?? 0));
-    if (sort === 'price-low')   list = [...list].sort((a, b) => (a.financial?.ap ?? 0) - (b.financial?.ap ?? 0));
-
-    return list;
+    return this.applySort(list, col, dir);
   });
 
   txTotalBudget = computed(() =>
@@ -431,7 +486,7 @@ export class TransactionsPortalComponent {
 
   txHasFilters = computed(() =>
     this.searchQuery() !== '' || this.stageFilter() !== 'all' ||
-    this.txBedsFilter() !== 'all' || this.txEpcFilter() !== 'all' || this.sortOrder() !== 'modified'
+    this.txBedsFilter() !== 'all' || this.txEpcFilter() !== 'all'
   );
 
   txResetFilters(): void {
@@ -439,7 +494,6 @@ export class TransactionsPortalComponent {
     this.stageFilter.set('all');
     this.txBedsFilter.set('all');
     this.txEpcFilter.set('all');
-    this.sortOrder.set('modified');
   }
 
   phaseCount(phaseId: string): number {
