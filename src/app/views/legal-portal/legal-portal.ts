@@ -159,6 +159,25 @@ export class LegalPortalComponent {
 
   constructor() {
     effect(() => {
+      const matters = this.activeMatters();
+      const all = { ...this.legalData() };
+      let updated = false;
+      for (const p of matters) {
+        if (!all[p.id]?.targetExchange) {
+          const start = p.legalsStartedAt ? new Date(p.legalsStartedAt) : new Date();
+          const exchange = new Date(start); exchange.setDate(exchange.getDate() + 56);
+          const completion = new Date(exchange); completion.setDate(completion.getDate() + 14);
+          all[p.id] = {
+            ...(all[p.id] ?? this._defaultMatter()),
+            targetExchange:   exchange.toISOString().split('T')[0],
+            targetCompletion: completion.toISOString().split('T')[0],
+          };
+          updated = true;
+        }
+      }
+      if (updated) this.legalData.set(all);
+    });
+    effect(() => {
       localStorage.setItem(LEGAL_DATA_KEY, JSON.stringify(this.legalData()));
     });
     effect(() => {
@@ -372,6 +391,16 @@ export class LegalPortalComponent {
       m.solicitorRef = val;
       return { ...all, [propId]: m };
     });
+  }
+
+  isOverdue(dateStr: string): boolean {
+    if (!dateStr) return false;
+    return new Date(dateStr) < new Date(new Date().toDateString());
+  }
+
+  fmtDate(dateStr: string): string {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   initials(name: string): string {

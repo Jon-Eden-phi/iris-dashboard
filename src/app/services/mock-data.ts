@@ -25,7 +25,7 @@ export class MockDataService {
 
     // ── Legals (real) ────────────────────────────────────────────────────────
     { id: 'p004', address: '94 Middleton Road',       postcode: 'SM4 6RR',  phase: 'Merton LAHF',   stage: 'Legals',           beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 64 }, financial: { ap: 475000, capex: 11000, tc: 5865, yield: 3.65, sp: 17951 }, agreedPrice: 461500, status: 'active', tenure: 'Freehold', bathrooms: 1, size: 87, daysOnMarket: 8, lha: 17951, marketRent: undefined, floodRisk: 'None', description: 'Three bedroom terraced house with lounge, dining room, kitchen, three bedrooms, bathroom, rear garden and driveway.', exLocalAuthority: false, ageOfProperty: '1950-1966', mainHeatDescription: 'Boiler and radiators, mains gas', gasSafeRegister: '2023-08-16', wallsDescription: 'Solid brick, as built, no insulation (assumed)', localAuthority: 'Merton', brma: 'Outer South London BRMA', ward: 'Pollards Hill', ccg: 'NHS South West London CCG', ndss: false, auction: false, newHome: false, builtYear: 'N/A', estateManagementCharges: 'N/A' },
-    { id: 'p005', address: '120 Rye Road',            postcode: 'TN35 5DB', phase: 'Hastings ESPH', stage: 'Legals',           beds: 2, type: 'Flat',          epcBefore: { r: 'D', s: 67 }, financial: { ap: 210000, capex: 42000, tc: 13080, yield: 6.37 }, agreedPrice: 185000, status: 'active' },
+    { id: 'p005', address: '120 Rye Road',            postcode: 'TN35 5DB', phase: 'Hastings ESPH', stage: 'Legals',           beds: 2, type: 'Flat',          epcBefore: { r: 'D', s: 67 }, financial: { ap: 210000, capex: 42000, tc: 13080, yield: 6.37 }, agreedPrice: 185000, status: 'active', legalsStartedAt: '2026-06-22' },
 
     // ── Refurbishment (real) ─────────────────────────────────────────────────
     { id: 'p006', address: '74 Avenue Road',          postcode: 'SW16 4HL', phase: 'Merton LAHF',   stage: 'Refurbishment',    beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 57 }, financial: { ap: 475000, capex: 11000, tc: 5865, yield: 3.65 },                    status: 'active' },
@@ -438,6 +438,7 @@ export class MockDataService {
       return {
         ...p,
         stage: next,
+        ...(next === 'Legals' && !p.legalsStartedAt ? { legalsStartedAt: new Date().toISOString().split('T')[0] } : {}),
         activityLog: [...(p.activityLog ?? []), this._logEntry(msg, author, 'action')],
       };
     });

@@ -115,13 +115,23 @@
                     @if (m.targetExchange) {
                       <div>
                         <div style="font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); font-weight:600;">Target exchange</div>
-                        <div style="font-size:13px; font-weight:700; margin-top:2px;">{{ m.targetExchange }}</div>
+                        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                          <span style="font-size:13px; font-weight:700;" [style.color]="isOverdue(m.targetExchange) ? '#dc2626' : 'inherit'">{{ fmtDate(m.targetExchange) }}</span>
+                          @if (isOverdue(m.targetExchange)) {
+                            <span style="font-size:10px; font-weight:700; background:#fee2e2; color:#dc2626; padding:1px 6px; border-radius:4px;">OVERDUE</span>
+                          }
+                        </div>
                       </div>
                     }
                     @if (m.targetCompletion) {
                       <div>
                         <div style="font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); font-weight:600;">Target completion</div>
-                        <div style="font-size:13px; font-weight:700; margin-top:2px;">{{ m.targetCompletion }}</div>
+                        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                          <span style="font-size:13px; font-weight:700;" [style.color]="isOverdue(m.targetCompletion) ? '#dc2626' : 'inherit'">{{ fmtDate(m.targetCompletion) }}</span>
+                          @if (isOverdue(m.targetCompletion)) {
+                            <span style="font-size:10px; font-weight:700; background:#fee2e2; color:#dc2626; padding:1px 6px; border-radius:4px;">OVERDUE</span>
+                          }
+                        </div>
                       </div>
                     }
                   </div>

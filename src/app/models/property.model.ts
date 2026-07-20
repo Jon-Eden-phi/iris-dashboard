@@ -78,6 +78,7 @@ export interface Property {
   lostReason?: string;
   lostDate?: string;
   completedDate?: string;
+  legalsStartedAt?: string;
   isInvestorDeal?: boolean;
   tenure?: string;
   lha?: number;
