@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
+import { AuthService } from '../../services/auth';
+import { ProjectsService } from '../../services/projects';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { Property } from '../../models/property.model';
 
@@ -13,8 +15,10 @@ const EPC_RANK: Record<string, number> = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G
   styleUrl: './pipeline.scss',
 })
 export class PipelineComponent {
-  data   = inject(MockDataService);
-  router = inject(Router);
+  data     = inject(MockDataService);
+  auth     = inject(AuthService);
+  projects = inject(ProjectsService);
+  router   = inject(Router);
   private route = inject(ActivatedRoute);
 
   readonly isDashboard = this.route.snapshot.data['mode'] === 'dashboard';
@@ -94,6 +98,24 @@ export class PipelineComponent {
     });
   }
 
+  private readonly sourcingRoleStages = new Set(['Draft','ClientApproval','Viewing','Negotiations']);
+  private readonly purchasingRoleStages = new Set(['MemorandumOfSale','Legals','Refurbishment','Lettings']);
+
+  private roleStageFilter = computed((): Set<string> | null => {
+    const role = this.auth.currentUser()?.role;
+    if (role === 'Sourcing')   return this.sourcingRoleStages;
+    if (role === 'Purchasing') return this.purchasingRoleStages;
+    return null;
+  });
+
+  private userPhaseFilter = computed((): Set<string> | null => {
+    const ids = this.auth.currentUser()?.projects ?? [];
+    if (!ids.length) return null;
+    return new Set(
+      this.projects.all.filter(p => ids.includes(p.id)).map(p => p.name)
+    );
+  });
+
   filteredProperties = computed(() => {
     const phase = this.selectedPhase();
     const stage = this.stageFilter();
@@ -103,7 +125,12 @@ export class PipelineComponent {
     const col   = this.sortCol();
     const dir   = this.sortDir();
 
+    const roleStages  = this.roleStageFilter();
+    const userPhases  = this.userPhaseFilter();
+
     let list = this.data.properties.filter(p => {
+      if (roleStages && !roleStages.has(p.stage)) return false;
+      if (userPhases && !userPhases.has(p.phase)) return false;
       if (this.isDashboard && !this.sourcingStageSet.has(p.stage)) return false;
       if (phase !== 'all' && p.phase !== phase) return false;
       if (stage !== 'all' && p.stage !== stage) return false;
@@ -145,9 +172,14 @@ export class PipelineComponent {
   );
 
   phaseCount(phaseId: string): number {
-    const base = this.isDashboard
-      ? this.data.properties.filter(p => this.sourcingStageSet.has(p.stage))
-      : this.data.properties;
+    const roleStages = this.roleStageFilter();
+    const userPhases = this.userPhaseFilter();
+    const base = this.data.properties.filter(p => {
+      if (roleStages && !roleStages.has(p.stage)) return false;
+      if (userPhases && !userPhases.has(p.phase)) return false;
+      if (this.isDashboard && !this.sourcingStageSet.has(p.stage)) return false;
+      return true;
+    });
     if (phaseId === 'all') return base.length;
     return base.filter(p => p.phase === phaseId).length;
   }
@@ -168,10 +200,14 @@ export class PipelineComponent {
   pipelineSearch = signal('');
 
   pipelineProperties = computed(() => {
-    const q   = this.pipelineSearch().toLowerCase();
-    const col = this.pipeSortCol();
-    const dir = this.pipeSortDir();
+    const q          = this.pipelineSearch().toLowerCase();
+    const col        = this.pipeSortCol();
+    const dir        = this.pipeSortDir();
+    const roleStages = this.roleStageFilter();
+    const userPhases = this.userPhaseFilter();
     let list = this.data.properties.filter(p => {
+      if (roleStages && !roleStages.has(p.stage)) return false;
+      if (userPhases && !userPhases.has(p.phase)) return false;
       if (!q) return true;
       return p.address.toLowerCase().includes(q) || (p.postcode ?? '').toLowerCase().includes(q);
     });
