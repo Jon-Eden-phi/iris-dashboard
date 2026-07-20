@@ -55,6 +55,9 @@
             </td>
             <td style="text-align:right;">
               <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                <button class="btn-ghost" style="font-size:12px; padding:4px 11px; display:inline-flex; align-items:center; gap:5px;" (click)="openProjects(u)">
+                  <i class="ti ti-folder"></i> Projects
+                </button>
                 <button class="btn-ghost" style="font-size:12px; padding:4px 11px; display:inline-flex; align-items:center; gap:5px;" (click)="openReset(u)">
                   <i class="ti ti-key"></i> Reset
                 </button>
@@ -240,6 +243,51 @@
       }
     </div>
   </div>
+}
+
+<!-- ══ Edit projects modal ══════════════════════════ -->
+@if (showProjectsModal()) {
+  @if (projectsTarget(); as u) {
+    <div style="position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;"
+         (click)="showProjectsModal.set(false)">
+      <div style="background:#fff; border-radius:14px; padding:28px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,.15);"
+           (click)="$event.stopPropagation()">
+        <div style="font-size:17px; font-weight:800; margin-bottom:4px;">Edit projects</div>
+        <div style="font-size:13px; color:var(--text3); margin-bottom:20px;">
+          Assign or remove projects for <strong>{{ u.name }}</strong>.
+        </div>
+
+        @if (projects.all$().length === 0) {
+          <div style="font-size:13px; color:var(--text3); font-style:italic; padding:12px 0;">
+            No projects yet — add some in the Projects tab.
+          </div>
+        } @else {
+          <div style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;">
+            @for (p of projects.all$(); track p.id) {
+              @let active = editProjects().includes(p.id);
+              <label style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:9px; border:1.5px solid; cursor:pointer; transition:all .15s;"
+                     [style.border-color]="active ? 'var(--accent)' : 'var(--border)'"
+                     [style.background]="active ? 'var(--accent-soft)' : 'var(--bg)'">
+                <input type="checkbox" [checked]="active" (change)="toggleEditProject(p.id)"
+                       style="width:15px; height:15px; accent-color:var(--accent); flex-shrink:0;" />
+                <div>
+                  <div style="font-size:13px; font-weight:700; color:var(--text1);">{{ p.name }}</div>
+                  <div style="font-size:11px; color:var(--text3);">{{ p.purchaser }}</div>
+                </div>
+              </label>
+            }
+          </div>
+        }
+
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:22px;">
+          <button class="btn-ghost" style="font-size:13px;" (click)="showProjectsModal.set(false)">Cancel</button>
+          <button class="btn-primary" style="font-size:13px;" (click)="saveProjects()">
+            <i class="ti ti-device-floppy" style="margin-right:5px;"></i>Save
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 }
 
 <!-- ══ Reset password modal ═════════════════════════ -->

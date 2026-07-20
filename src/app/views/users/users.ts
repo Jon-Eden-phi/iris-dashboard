@@ -130,6 +130,30 @@ export class UsersComponent {
     return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  // ── Edit projects modal ───────────────────────────
+  showProjectsModal = signal(false);
+  projectsTarget    = signal<IrisUser | null>(null);
+  editProjects      = signal<string[]>([]);
+
+  openProjects(u: IrisUser): void {
+    this.projectsTarget.set(u);
+    this.editProjects.set([...(u.projects ?? [])]);
+    this.showProjectsModal.set(true);
+  }
+
+  toggleEditProject(id: string): void {
+    this.editProjects.update(list =>
+      list.includes(id) ? list.filter(p => p !== id) : [...list, id]
+    );
+  }
+
+  saveProjects(): void {
+    const target = this.projectsTarget();
+    if (!target) return;
+    this.auth.updateUser(target.id, { projects: this.editProjects() });
+    this.showProjectsModal.set(false);
+  }
+
   // ── Reset password modal ──────────────────────────
   showReset   = signal(false);
   resetTarget = signal<IrisUser | null>(null);
