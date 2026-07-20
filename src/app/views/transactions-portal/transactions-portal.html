@@ -431,6 +431,38 @@
       @if (view() === 'record') {
         @if (selectedProperty(); as p) {
 
+          <!-- Property header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+            <div>
+              <div style="font-size:24px; font-weight:800; letter-spacing:-0.02em; line-height:1.2; color:var(--text1);">{{ p.address }}</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
+                @if (p.phase) { <span style="font-size:11px; font-weight:700; background:rgba(124,58,237,0.08); color:#7c3aed; padding:2px 8px; border-radius:20px;">{{ p.phase }}</span> }
+                <span style="font-size:13px; color:var(--text3);">{{ p.postcode }}</span>
+                @if (p.type) { <span style="font-size:13px; color:var(--text3);">· {{ p.type }}</span> }
+                @if (p.beds) { <span style="font-size:13px; color:var(--text3);">· {{ p.beds }} bed</span> }
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showQueryModal.set(true)">
+                <i class="ti ti-message-question" style="font-size:13px;"></i> Raise query
+              </button>
+              @if (txStages.indexOf(p.stage) > 0) {
+                <button class="btn-ghost" style="font-size:12px; padding:6px 12px; color:#b45309; border-color:#b45309;" (click)="showRevertModal.set(true)">
+                  <i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Revert stage
+                </button>
+              }
+              @if (p.stage !== 'Lettings') {
+                <button class="tx-btn-advance" (click)="advanceStage(p.id)">
+                  <i class="ti ti-arrow-right" style="font-size:13px;"></i> Next stage
+                </button>
+              }
+              <button class="tx-btn-abort" (click)="showAbortModal.set(true)">
+                <i class="ti ti-archive" style="font-size:13px;"></i> Abort
+              </button>
+              <span class="stage-chip stage-{{ p.stage }}" style="font-size:12px; padding:4px 12px;">{{ stageLabel(p.stage) }}</span>
+            </div>
+          </div>
+
           <!-- Record tabs -->
           <div style="display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:16px; overflow-x:auto; flex-shrink:0;">
             <button (click)="recordTab.set('flow')"
@@ -733,42 +765,6 @@
 
             </div>
           }
-
-          <!-- Property header -->
-          <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
-              <div>
-                <div style="font-size:11px; font-weight:700; color:var(--teal); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">{{ p.id }}</div>
-                <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em; line-height:1.2;">{{ p.address }}, {{ p.postcode }}</div>
-                <div style="font-size:12.5px; color:var(--text3); margin-top:4px;">{{ p.beds ?? '—' }} bed · {{ p.phase ?? '—' }}</div>
-                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-                  <span class="stage-chip stage-{{ p.stage }}">{{ stageLabel(p.stage) }}</span>
-                  @if (p.isInvestorDeal) { <span class="tx-badge tx-badge-blue"><i class="ti ti-building-bank" style="font-size:10px; margin-right:3px;"></i>Investor deal</span> }
-                  @if (p.epcBefore?.r) { <span class="epc-pill badge-{{ p.epcBefore!.r }}">EPC {{ p.epcBefore!.r }}</span> }
-                  @if (p.financial?.ap) { <span class="badge badge-gray">£{{ p.financial!.ap!.toLocaleString('en-GB') }}</span> }
-                  @if (p.agreedPrice) { <span class="badge badge-green">Agreed £{{ p.agreedPrice.toLocaleString('en-GB') }}</span> }
-                </div>
-              </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn-ghost" style="font-size:12px; padding:6px 12px;" (click)="showQueryModal.set(true)">
-                  <i class="ti ti-message-question" style="font-size:13px;"></i> Raise query
-                </button>
-                @if (txStages.indexOf(p.stage) > 0) {
-                  <button class="btn-ghost" style="font-size:12px; padding:6px 12px; color:#b45309; border-color:#b45309;" (click)="showRevertModal.set(true)">
-                    <i class="ti ti-arrow-back-up" style="font-size:13px;"></i> Revert stage
-                  </button>
-                }
-                @if (p.stage !== 'Lettings') {
-                  <button class="tx-btn-advance" (click)="advanceStage(p.id)">
-                    <i class="ti ti-arrow-right" style="font-size:13px;"></i> Next stage
-                  </button>
-                }
-                <button class="tx-btn-abort" (click)="showAbortModal.set(true)">
-                  <i class="ti ti-archive" style="font-size:13px;"></i> Abort
-                </button>
-              </div>
-            </div>
-          </div>
 
           <!-- Financial quick stats -->
           @if (p.financial) {
