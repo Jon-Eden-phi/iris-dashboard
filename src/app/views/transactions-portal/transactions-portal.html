@@ -80,7 +80,7 @@
       @if (view() === 'surveys')   { <span class="tx-topbar-title">Survey tracker</span><span class="tx-topbar-sub">Technical surveys across all active purchasing</span> }
       @if (view() === 'teamdash')  { <span class="tx-topbar-title">Team dashboard</span><span class="tx-topbar-sub">Workload across the Purchasing team</span> }
       @if (view() === 'suppliers') { <span class="tx-topbar-title">Surveyor directory</span><span class="tx-topbar-sub">Approved surveying suppliers</span> }
-      @if (view() === 'record' && selectedProperty(); as p) { <span class="tx-topbar-title">{{ p.address }}</span><span class="tx-topbar-sub">{{ p.postcode }} · {{ stageLabel(p.stage) }}</span> }
+      @if (view() === 'record') { <span class="tx-topbar-title">Property record</span> }
       @if (view() === 'acquisitions') { <span class="tx-topbar-title">Pipeline view</span><span class="tx-topbar-sub">{{ acqProperties().length }} properties in acquisitions — read only</span> }
       @if (view() === 'pipeline') { <span class="tx-topbar-title">All Properties</span><span class="tx-topbar-sub">{{ pipelineAllProperties().length }} active properties across Sourcing and Purchasing</span> }
       @if (view() === 'acq-record' && acqProperty(); as ap) { <span class="tx-topbar-title">{{ ap.address }}</span><span class="tx-topbar-sub">{{ ap.postcode }} · {{ allStageLabels[ap.stage] }} · read only</span> }
