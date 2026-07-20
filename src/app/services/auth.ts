@@ -27,7 +27,7 @@ const INITIAL_USERS: IrisUser[] = [
   { id: 'u5',  email: 'hayley@winksherwood.co.uk', name: 'Hayley Briggs', role: 'Legal Provider', isAdmin: false, password: 'legal24'     },
   { id: 'u6',  email: 'holly@simplyphi.co.uk',     name: 'Holly Clarke',  role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
   { id: 'u7',  email: 'priya@simplyphi.co.uk',     name: 'Priya Shah',    role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
-  { id: 'u8',  email: 's.jones@bristol.gov.uk',    name: 'Sarah Jones',   role: 'Client',         isAdmin: false, password: 'bristol24',   organisation: 'Bristol City Council' },
+  { id: 'u8',  email: 's.jones@bristol.gov.uk',    name: 'Sarah Jones',   role: 'Client',         isAdmin: false, password: 'bristol24',   organisation: 'Bristol City Council', projects: ['proj-bristol-p3'] },
   { id: 'u9',  email: 'sukritibisht4@gmail.com',   name: 'Sukriti Bisht', role: 'Internal',       isAdmin: false, password: 'simplyphi24' },
   { id: 'u10', email: 'jiya@simplyphi.co.uk',      name: 'Jiya Chowdhury', role: 'Transactions',   isAdmin: false, password: 'tx24'        },
   { id: 'u11', email: 'marcus@simplyphi.co.uk',    name: 'Marcus Webb',    role: 'Transactions',   isAdmin: false, password: 'tx24'        },
@@ -45,7 +45,7 @@ export class AuthService {
       const merged = [...stored];
       for (const seed of INITIAL_USERS) {
         const idx = merged.findIndex(u => u.id === seed.id);
-        if (idx >= 0) merged[idx] = { ...merged[idx], ...seed };
+        if (idx >= 0) merged[idx] = { ...merged[idx], ...seed, projects: merged[idx].projects ?? seed.projects };
         else merged.push(seed);
       }
       this._saveUsers(merged);

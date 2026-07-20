@@ -141,6 +141,50 @@ export class ClientPortalComponent {
     this.activeProperties().reduce((a, p) => a + (p.financial?.ap ?? 0), 0)
   );
 
+  stageCounts = computed(() => {
+    const order = ['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale','Legals','Refurbishment','Lettings'];
+    const props = this.activeProperties();
+    return order
+      .map(s => ({ stage: s, label: this.stageLabel(s), count: props.filter(p => p.stage === s).length }))
+      .filter(s => s.count > 0);
+  });
+
+  bedBreakdown = computed(() => {
+    const counts: Record<string, number> = {};
+    for (const p of this.activeProperties()) {
+      const key = !p.beds ? '?' : p.beds >= 5 ? '5+' : String(p.beds);
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return ['1','2','3','4','5+'].map(b => ({ beds: b, count: counts[b] ?? 0 })).filter(b => b.count > 0);
+  });
+
+  private readonly committedStages = new Set(['MemorandumOfSale','Legals','Refurbishment','Lettings']);
+
+  committedSpend = computed(() =>
+    this.activeProperties()
+      .filter(p => this.committedStages.has(p.stage))
+      .reduce((sum, p) => sum + (p.agreedPrice ?? p.financial?.ap ?? 0), 0)
+  );
+
+  committedCount = computed(() =>
+    this.activeProperties().filter(p => this.committedStages.has(p.stage)).length
+  );
+
+  epcTargetMet = computed(() =>
+    this.activeProperties().filter(p => p.epcAfter && ['A','B','C'].includes(p.epcAfter.r)).length
+  );
+
+  epcRatingCounts = computed(() => {
+    const counts: Record<string, number> = {};
+    for (const p of this.activeProperties()) {
+      const r = p.epcBefore?.r;
+      if (r) counts[r] = (counts[r] ?? 0) + 1;
+    }
+    return ['A','B','C','D','E','F','G']
+      .map(r => ({ r, count: counts[r] ?? 0 }))
+      .filter(x => x.count > 0);
+  });
+
   openDetail(p: Property): void {
     this.selectedId.set(p.id);
     this.view.set('detail');

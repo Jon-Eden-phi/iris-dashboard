@@ -68,6 +68,68 @@
       </div>
     </div>
 
+    <!-- Stage pipeline -->
+    <div style="background:#fff; border-radius:12px; border:1px solid #f0f0f0; padding:18px 20px; margin-bottom:14px;">
+      <div style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px;">Stage pipeline</div>
+      <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; gap:6px;">
+        @for (s of stageCounts(); track s.stage; let last = $last) {
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:8px; background:#f9fafb; border:1px solid #e5e7eb;">
+              <span style="font-size:12px; font-weight:600; color:#374151;">{{ s.label }}</span>
+              <span style="font-size:13px; font-weight:800; color:#E8601C; min-width:16px; text-align:center;">{{ s.count }}</span>
+            </div>
+            @if (!last) {
+              <i class="ti ti-chevron-right" style="font-size:12px; color:#d1d5db; flex-shrink:0;"></i>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Bedroom breakdown + Committed spend + EPC -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px;">
+
+      <!-- Bedroom breakdown -->
+      <div style="background:#fff; border-radius:12px; border:1px solid #f0f0f0; padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px;">Bedroom breakdown</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          @for (b of bedBreakdown(); track b.beds) {
+            <div style="text-align:center; flex:1; min-width:40px;">
+              <div style="font-size:22px; font-weight:800; color:#111; line-height:1;">{{ b.count }}</div>
+              <div style="font-size:11px; color:#9ca3af; margin-top:4px; font-weight:600;">{{ b.beds }} bed</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Committed spend -->
+      <div style="background:#fff; border-radius:12px; border:1px solid #f0f0f0; padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px;">Committed spend</div>
+        <div style="font-size:26px; font-weight:800; color:#111; line-height:1; margin-bottom:6px;">{{ fmt(committedSpend()) }}</div>
+        <div style="font-size:12px; color:#9ca3af;">{{ committedCount() }} {{ committedCount() === 1 ? 'property' : 'properties' }} at MoS or beyond</div>
+      </div>
+
+      <!-- EPC summary -->
+      <div style="background:#fff; border-radius:12px; border:1px solid #f0f0f0; padding:18px 20px;">
+        <div style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px;">EPC ratings (current)</div>
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+          @for (e of epcRatingCounts(); track e.r) {
+            <div style="text-align:center;">
+              <div style="font-size:13px; font-weight:800; color:#fff; width:28px; height:28px; border-radius:5px; display:flex; align-items:center; justify-content:center; margin:0 auto 4px;"
+                   [style.background]="epcColor(e.r)">{{ e.r }}</div>
+              <div style="font-size:12px; font-weight:700; color:#111;">{{ e.count }}</div>
+            </div>
+          }
+        </div>
+        @if (epcTargetMet() > 0) {
+          <div style="font-size:11px; color:#16a34a; margin-top:10px; font-weight:600;">
+            <i class="ti ti-bolt" style="margin-right:3px;"></i>{{ epcTargetMet() }} confirmed C+ after refurb
+          </div>
+        }
+      </div>
+
+    </div>
+
     <!-- Action required -->
     @if (actionRequired().length > 0) {
       <div class="section-head">
