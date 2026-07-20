@@ -3,6 +3,7 @@ import { DatePipe, TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { AuthService } from '../../services/auth';
+import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
 type PortalView = 'dashboard' | 'properties' | 'detail';
@@ -14,9 +15,10 @@ type PortalView = 'dashboard' | 'properties' | 'detail';
   styleUrl: './client-portal.scss',
 })
 export class ClientPortalComponent {
-  data   = inject(MockDataService);
-  auth   = inject(AuthService);
-  router = inject(Router);
+  data     = inject(MockDataService);
+  auth     = inject(AuthService);
+  router   = inject(Router);
+  projects = inject(ProjectsService);
   private get _userName(): string { return this.auth.currentUser()?.name ?? 'Client'; }
 
   view         = signal<PortalView>('dashboard');
@@ -73,9 +75,18 @@ export class ClientPortalComponent {
     return id ? this.data.getProperty(id) : undefined;
   });
 
-  activeProperties = computed(() =>
-    this.data.properties.filter(p => p.status === 'active')
-  );
+  activeProperties = computed(() => {
+    const userProjectIds = this.auth.currentUser()?.projects ?? [];
+    if (!userProjectIds.length) return [];
+    const assignedPhases = new Set(
+      this.projects.all
+        .filter(proj => userProjectIds.includes(proj.id))
+        .map(proj => proj.name)
+    );
+    return this.data.properties.filter(p =>
+      p.status === 'active' && assignedPhases.has(p.phase)
+    );
+  });
 
   filteredProperties = computed(() => {
     const q     = this.filterSearch().toLowerCase();
