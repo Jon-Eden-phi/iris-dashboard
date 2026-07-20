@@ -32,7 +32,7 @@ export class LoginComponent {
       if (ok) {
         const role = this.auth.currentUser()?.role;
         const dest = role === 'Client' ? '/client-portal'
-                   : role === 'Transactions' ? '/transactions-portal'
+                   : role === 'Purchasing' ? '/transactions-portal'
                    : role === 'Legal Provider' ? '/legal-portal'
                    : '/pipeline';
         this.router.navigate([dest]);

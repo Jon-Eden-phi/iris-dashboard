@@ -51,7 +51,7 @@
     }
 
     <div style="flex:1"></div>
-    @if (auth.currentUser()?.role === 'Internal') {
+    @if (auth.currentUser()?.role !== 'Purchasing') {
       <a class="nav-item" style="font-size:12.5px; margin:0 8px 8px; padding:8px 12px; border-radius:7px; display:flex; align-items:center; gap:8px; color:var(--text3); text-decoration:none; cursor:pointer; border:1px solid var(--border);"
          [routerLink]="['/pipeline']">
         <i class="ti ti-arrow-left" style="font-size:13px;"></i> Sourcing

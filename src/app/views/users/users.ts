@@ -17,8 +17,8 @@ export class UsersComponent {
   projects  = inject(ProjectsService);
 
   roleFilter = signal('all');
-  readonly roles = ['all', 'Internal', 'Transactions', 'Legal Provider', 'Client'];
-  readonly roleOptions: UserRole[] = ['Internal', 'Transactions', 'Legal Provider', 'Client'];
+  readonly roles = ['all', 'Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client'];
+  readonly roleOptions: UserRole[] = ['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client'];
 
   filtered = computed(() => {
     const r = this.roleFilter();
@@ -98,7 +98,7 @@ export class UsersComponent {
     const companyRole = this.inviteCompanyRole();
     const role: UserRole = companyRole === 'Conveyancer' ? 'Legal Provider'
       : (companyRole === 'Purchaser' || companyRole === 'Recipient') ? 'Client'
-      : 'Internal';
+      : 'Sourcing';
     const inviteObj = {
       token, email,
       organisation: this.inviteOrg(),
@@ -178,18 +178,24 @@ export class UsersComponent {
   isMe(u: IrisUser): boolean    { return u.id === this.auth.currentUser()?.id; }
 
   roleColor(role: string): string {
-    if (role === 'Internal')       return 'var(--text2)';
-    if (role === 'Transactions')   return '#0f7c6b';
-    if (role === 'Legal Provider') return '#6d28d9';
-    if (role === 'Client')         return 'var(--accent)';
+    if (role === 'Sourcing')          return '#0369a1';
+    if (role === 'Purchasing')        return '#0f7c6b';
+    if (role === 'Operations')        return '#7c3aed';
+    if (role === 'Finance')           return '#b45309';
+    if (role === 'Admin Controller')  return 'var(--text2)';
+    if (role === 'Legal Provider')    return '#6d28d9';
+    if (role === 'Client')            return 'var(--accent)';
     return 'var(--text3)';
   }
 
   roleBg(role: string): string {
-    if (role === 'Internal')       return 'var(--bg)';
-    if (role === 'Transactions')   return 'rgba(15,124,107,0.08)';
-    if (role === 'Legal Provider') return '#f3f0ff';
-    if (role === 'Client')         return 'var(--accent-soft)';
+    if (role === 'Sourcing')          return 'rgba(3,105,161,0.08)';
+    if (role === 'Purchasing')        return 'rgba(15,124,107,0.08)';
+    if (role === 'Operations')        return 'rgba(124,58,237,0.08)';
+    if (role === 'Finance')           return 'rgba(180,83,9,0.08)';
+    if (role === 'Admin Controller')  return 'var(--bg)';
+    if (role === 'Legal Provider')    return '#f3f0ff';
+    if (role === 'Client')            return 'var(--accent-soft)';
     return 'var(--bg)';
   }
 }

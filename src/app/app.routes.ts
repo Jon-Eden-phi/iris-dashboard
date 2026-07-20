@@ -20,17 +20,17 @@ const internalGuard = () => {
   return true;
 };
 
-// Blocks Buying-function users from sourcing routes → sends them to Purchasing portal
+// Blocks Purchasing-role users from sourcing routes → sends them to Purchasing portal
 const sourcingGuard = () => {
-  const fn = inject(AuthService).currentUser()?.functionArea;
-  if (fn === 'Buying') return inject(Router).createUrlTree(['/transactions-portal']);
+  const role = inject(AuthService).currentUser()?.role;
+  if (role === 'Purchasing') return inject(Router).createUrlTree(['/transactions-portal']);
   return true;
 };
 
-// Blocks Sourcing-function users from the Purchasing portal → sends them to Pipeline
+// Blocks Sourcing-role users from the Purchasing portal → sends them to Pipeline
 const purchasingGuard = () => {
-  const fn = inject(AuthService).currentUser()?.functionArea;
-  if (fn === 'Sourcing') return inject(Router).createUrlTree(['/pipeline']);
+  const role = inject(AuthService).currentUser()?.role;
+  if (role === 'Sourcing') return inject(Router).createUrlTree(['/pipeline']);
   return true;
 };
 
@@ -42,8 +42,8 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', canActivate: [() => {
-          const fn = inject(AuthService).currentUser()?.functionArea;
-          return inject(Router).createUrlTree(fn === 'Buying' ? ['/transactions-portal'] : ['/dashboard']);
+          const role = inject(AuthService).currentUser()?.role;
+          return inject(Router).createUrlTree(role === 'Purchasing' ? ['/transactions-portal'] : ['/dashboard']);
         }], children: [] },
       { path: 'client-portal',       loadComponent: () => import('./views/client-portal/client-portal').then(m => m.ClientPortalComponent) },
       { path: 'transactions-portal', canActivate: [purchasingGuard], loadComponent: () => import('./views/transactions-portal/transactions-portal').then(m => m.TransactionsPortalComponent) },

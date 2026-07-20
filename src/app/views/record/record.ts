@@ -61,7 +61,7 @@ export class RecordComponent {
     const idx = this.stages.indexOf(p.stage);
     if (idx < 0 || idx >= this.stages.length - 1) return false;
     // TX stages can only be advanced from the Transactions portal
-    if (TX_STAGES.has(p.stage) && this.auth.currentUser()?.role !== 'Transactions') return false;
+    if (TX_STAGES.has(p.stage) && !['Purchasing', 'Admin Controller'].includes(this.auth.currentUser()?.role ?? '')) return false;
     return true;
   });
 
