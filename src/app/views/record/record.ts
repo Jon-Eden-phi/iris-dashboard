@@ -241,6 +241,43 @@ export class RecordComponent {
 
   showAicPopover = signal(false);
 
+  stagePopup = signal<string | null>(null);
+
+  openStagePopup(s: string, e: MouseEvent): void {
+    e.stopPropagation();
+    this.stagePopup.update(v => v === s ? null : s);
+  }
+
+  popupExchangeDate(p: { legalsStartedAt?: string }): string {
+    if (!p.legalsStartedAt) return '—';
+    const d = new Date(p.legalsStartedAt);
+    d.setDate(d.getDate() + 56);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  popupCompletionDate(p: { legalsStartedAt?: string }): string {
+    if (!p.legalsStartedAt) return '—';
+    const d = new Date(p.legalsStartedAt);
+    d.setDate(d.getDate() + 70);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  fmtShortDate(iso: string | undefined): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  stageGroupColor(s: string): string {
+    return this.stageGroups.find(g => g.stages.includes(s))?.color ?? '#888';
+  }
+
+  popupExchangeOverdue(p: { legalsStartedAt?: string }): boolean {
+    if (!p.legalsStartedAt) return false;
+    const d = new Date(p.legalsStartedAt);
+    d.setDate(d.getDate() + 56);
+    return d < new Date();
+  }
+
   private readonly flowStages = new Set(['Draft','ClientApproval','Viewing','Negotiations','MemorandumOfSale']);
 
   recordTab = signal<'flow' | 'home' | 'financials' | 'contacts' | 'activity' | 'dataroom'>(

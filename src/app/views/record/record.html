@@ -55,10 +55,11 @@
                 <div style="display:flex; align-items:center; flex-shrink:0;">
                   <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
                     <!-- Circle -->
-                    <div style="width:30px; height:30px; border-radius:50%; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; transition:.2s;"
+                    <div style="width:30px; height:30px; border-radius:50%; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; transition:.2s; cursor:pointer;"
                          [style.background]="stageIndex(p.stage) > stageIndex(s) ? group.color : stageIndex(p.stage) === stageIndex(s) ? group.color : 'transparent'"
                          [style.border-color]="stageIndex(p.stage) >= stageIndex(s) ? group.color : 'var(--border)'"
-                         [style.color]="stageIndex(p.stage) >= stageIndex(s) ? '#fff' : 'var(--text3)'">
+                         [style.color]="stageIndex(p.stage) >= stageIndex(s) ? '#fff' : 'var(--text3)'"
+                         (click)="openStagePopup(s, $event)">
                       @if (stageIndex(p.stage) > stageIndex(s)) {
                         <i class="ti ti-check" style="font-size:12px;"></i>
                       } @else {
@@ -1068,6 +1069,154 @@
 
   </div>
 
+
+  <!-- ── Stage info popup ─────────────────────────────────────────── -->
+  @if (stagePopup(); as popupStage) {
+    @if (property(); as p) {
+      <div style="position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:400; display:flex; align-items:center; justify-content:center; padding:20px;"
+           (click)="stagePopup.set(null)">
+        <div style="background:#fff; border-radius:14px; width:100%; max-width:460px; box-shadow:0 24px 64px rgba(0,0,0,.18); overflow:hidden;"
+             (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px;">
+            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; flex-shrink:0;"
+                 [style.background]="stageGroupColor(popupStage)">
+              {{ stageIndex(popupStage) + 1 }}
+            </div>
+            <div>
+              <div style="font-size:15px; font-weight:800;">{{ stageLabels[popupStage] ?? popupStage }}</div>
+              <div style="font-size:11px; color:var(--text3); margin-top:1px;">{{ p.address }}</div>
+            </div>
+            <button (click)="stagePopup.set(null)"
+                    style="margin-left:auto; width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text3);">
+              <i class="ti ti-x" style="font-size:13px;"></i>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div style="padding:18px 20px; display:flex; flex-direction:column; gap:10px;">
+
+            @let row_style = "display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;";
+            @let lbl_style = "color:var(--text3); font-size:12px;";
+            @let val_style = "font-weight:600; color:var(--text1);";
+
+            <!-- Draft -->
+            @if (popupStage === 'Draft') {
+              <div [style]="row_style"><span [style]="lbl_style">Asking Price</span><span [style]="val_style">{{ p.financial?.ap | money }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Est. CapEx</span><span [style]="val_style">{{ p.financial?.capex | money }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Beds / Type</span><span [style]="val_style">{{ p.beds ?? '—' }} bed · {{ p.type ?? '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Tenure</span><span [style]="val_style">{{ p.tenure ?? '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">EPC (before)</span>
+                <span [style]="val_style">
+                  @if (p.epcBefore) { {{ p.epcBefore.r }} ({{ p.epcBefore.s }}) } @else { — }
+                </span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Phase</span><span class="badge badge-blue">{{ p.phase }}</span></div>
+            }
+
+            <!-- Client Approval -->
+            @if (popupStage === 'ClientApproval') {
+              <div [style]="row_style"><span [style]="lbl_style">Approved by</span><span [style]="val_style">{{ p.clientApprovedBy ?? '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Client max price</span><span [style]="val_style">{{ p.clientMaxPrice ? (p.clientMaxPrice | money) : '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Viewing review</span>
+                <span [style]="val_style">{{ p.viewing?.clientReview ?? 'pending' | titlecase }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Phase</span><span class="badge badge-blue">{{ p.phase }}</span></div>
+            }
+
+            <!-- Viewing -->
+            @if (popupStage === 'Viewing') {
+              <div [style]="row_style"><span [style]="lbl_style">Date</span><span [style]="val_style">{{ fmtShortDate(p.viewing?.date) }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Time</span><span [style]="val_style">{{ p.viewing?.time ?? '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Attendee</span><span [style]="val_style">{{ p.viewing?.attendee ?? '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Agent</span><span [style]="val_style">{{ p.viewing?.agentName ?? '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Condition</span><span [style]="val_style">{{ p.viewing?.reportCondition ?? '—' | titlecase }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Client review</span>
+                <span style="font-weight:600;"
+                      [style.color]="p.viewing?.clientReview === 'approved' ? 'var(--teal)' : p.viewing?.clientReview === 'rejected' ? '#ef4444' : 'var(--text3)'">
+                  {{ p.viewing?.clientReview ?? 'Pending' | titlecase }}
+                </span>
+              </div>
+            }
+
+            <!-- Negotiations -->
+            @if (popupStage === 'Negotiations') {
+              <div [style]="row_style"><span [style]="lbl_style">Offers submitted</span><span [style]="val_style">{{ p.offers?.length ?? 0 }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Latest offer</span>
+                <span [style]="val_style">
+                  @if (p.offers?.length) { {{ p.offers![p.offers!.length-1].amount | money }} } @else { — }
+                </span>
+              </div>
+              <div [style]="row_style"><span [style]="lbl_style">Latest status</span>
+                <span style="font-weight:600; text-transform:capitalize;"
+                      [style.color]="offerStatusColor(p.offers?.[p.offers!.length-1]?.status ?? '')">
+                  {{ p.offers?.length ? p.offers![p.offers!.length-1].status : '—' }}
+                </span>
+              </div>
+              <div [style]="row_style"><span [style]="lbl_style">Asking Price</span><span [style]="val_style">{{ p.financial?.ap | money }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Agreed price</span><span style="font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</span></div>
+            }
+
+            <!-- MoS -->
+            @if (popupStage === 'MemorandumOfSale') {
+              <div [style]="row_style"><span [style]="lbl_style">Agreed price</span><span style="font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Asking price</span><span [style]="val_style">{{ p.financial?.ap | money }}</span></div>
+              @if (p.agreedPrice && p.financial?.ap) {
+                <div [style]="row_style"><span [style]="lbl_style">vs Asking</span>
+                  <span style="font-weight:600;" [style.color]="p.agreedPrice <= p.financial!.ap! ? 'var(--teal)' : 'var(--accent)'">
+                    {{ pctVsAsking(p.agreedPrice) }}
+                  </span>
+                </div>
+              }
+              <div [style]="row_style"><span [style]="lbl_style">Transaction costs</span><span [style]="val_style">{{ p.financial?.tc | money }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Phase</span><span class="badge badge-blue">{{ p.phase }}</span></div>
+            }
+
+            <!-- Legals -->
+            @if (popupStage === 'Legals') {
+              <div [style]="row_style"><span [style]="lbl_style">Legals started</span><span [style]="val_style">{{ fmtShortDate(p.legalsStartedAt) }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Target exchange</span>
+                <span [style.color]="popupExchangeOverdue(p) ? '#ef4444' : 'var(--text1)'" style="font-weight:600;">
+                  {{ popupExchangeDate(p) }}{{ popupExchangeOverdue(p) ? ' — OVERDUE' : '' }}
+                </span>
+              </div>
+              <div [style]="row_style"><span [style]="lbl_style">Target completion</span><span [style]="val_style">{{ popupCompletionDate(p) }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Agreed price</span><span style="font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Phase</span><span class="badge badge-blue">{{ p.phase }}</span></div>
+            }
+
+            <!-- Refurbishment -->
+            @if (popupStage === 'Refurbishment') {
+              <div [style]="row_style"><span [style]="lbl_style">CapEx budget</span><span [style]="val_style">{{ p.financial?.capex | money }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">EPC before</span>
+                <span [style]="val_style">
+                  @if (p.epcBefore) { {{ p.epcBefore.r }} ({{ p.epcBefore.s }}) } @else { — }
+                </span>
+              </div>
+              <div [style]="row_style"><span [style]="lbl_style">EPC target</span>
+                <span [style]="val_style">
+                  @if (p.epcAfter) { {{ p.epcAfter.r }} ({{ p.epcAfter.s }}) } @else { — }
+                </span>
+              </div>
+              <div [style]="row_style"><span [style]="lbl_style">Agreed price</span><span style="font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Phase</span><span class="badge badge-blue">{{ p.phase }}</span></div>
+            }
+
+            <!-- Lettings -->
+            @if (popupStage === 'Lettings') {
+              <div [style]="row_style"><span [style]="lbl_style">Social rent (p.a)</span><span [style]="val_style">{{ p.financial?.sp | money }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Market rent (p.a)</span><span [style]="val_style">{{ p.marketRent ? (p.marketRent | money) : '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">LHA rate (p.a)</span><span [style]="val_style">{{ p.lha ? (p.lha | money) : '—' }}</span></div>
+              <div [style]="row_style"><span [style]="lbl_style">Gross yield</span><span style="font-weight:700; color:var(--teal);">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</span></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px;"><span [style]="lbl_style">Agreed price</span><span style="font-weight:700; color:var(--teal);">{{ p.agreedPrice ? (p.agreedPrice | money) : '—' }}</span></div>
+            }
+
+          </div>
+        </div>
+      </div>
+    }
+  }
 
 } @else {
   <div class="card" style="text-align:center; padding:48px;">
