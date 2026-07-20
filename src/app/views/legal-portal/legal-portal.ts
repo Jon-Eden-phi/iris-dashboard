@@ -3,6 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
+import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
 type LegalView = 'matters' | 'record';
@@ -123,9 +124,10 @@ const DR_KEY = 'iris_data_room';
   standalone: true,
 })
 export class LegalPortalComponent {
-  auth   = inject(AuthService);
-  data   = inject(MockDataService);
-  router = inject(Router);
+  auth     = inject(AuthService);
+  data     = inject(MockDataService);
+  router   = inject(Router);
+  projects = inject(ProjectsService);
   private doc = inject(DOCUMENT);
 
   view       = signal<LegalView>('matters');
@@ -191,9 +193,17 @@ export class LegalPortalComponent {
 
   activeMatters = computed(() => {
     const tx = this.txDataSig();
+    const userProjectIds = this.auth.currentUser()?.projects ?? [];
+    const assignedPhases = new Set(
+      this.projects.all
+        .filter(proj => userProjectIds.includes(proj.id))
+        .map(proj => proj.name)
+    );
+    if (!userProjectIds.length) return [];
     return this.data.properties.filter((p: Property) =>
       p.status === 'active' &&
-      (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed)
+      (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed) &&
+      assignedPhases.has(p.phase)
     );
   });
 
