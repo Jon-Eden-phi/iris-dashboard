@@ -70,6 +70,15 @@ export class MockDataService {
   }
 
   private _seedDemoData(): void {
+    this._mutate('m001', p => ({ ...p,
+      viewing: {
+        agentName: 'Sophie Grant', agentCompany: 'Savills · Bristol',
+        agentEmail: 's.grant@savills.com', agentPhone: '0117 910 2200',
+        date: '2026-07-20', time: '15:15', attendee: 'Hannah Briggs',
+        reportCondition: 'good',
+        reportNotes: 'Well-presented end-terrace in good structural order. Kitchen and bathrooms dated but functional. EPC E — strong uplift potential with standard insulation package. South-facing rear garden. On-street parking.',
+      },
+    }));
     this._mutate('m002', p => ({ ...p,
       viewing: {
         agentName: 'Edward Carr', agentCompany: 'Knight Frank · Clifton',
@@ -106,7 +115,7 @@ export class MockDataService {
     // ── TX properties: backfill acquisition history ─────────────────────────
     // p001 — 15 Hallards Close (MoS)
     this._mutate('p001', p => ({ ...p,
-      viewing: { agentName: 'Claire Hobbs', agentCompany: 'Savills · Bristol', agentEmail: 'c.hobbs@savills.com', agentPhone: '0117 910 2200', date: '2026-04-08', time: '11:00', attendee: 'Aryan', reportCondition: 'good', reportNotes: 'Structurally sound. Some cosmetic work needed in kitchen and bathroom. Roof felt is aging but not urgent. Good natural light throughout.' },
+      viewing: { agentName: 'Claire Hobbs', agentCompany: 'Savills · Bristol', agentEmail: 'c.hobbs@savills.com', agentPhone: '0117 910 2200', date: '2026-04-08', time: '11:00', attendee: 'Ryan Okonkwo', reportCondition: 'good', reportNotes: 'Structurally sound. Some cosmetic work needed in kitchen and bathroom. Roof felt is aging but not urgent. Good natural light throughout.' },
       clientApprovedBy: 'David Mensah', clientMaxPrice: 285000,
       offers: [
         { id: 'op001a', amount: 270000, status: 'rejected',  date: '2026-04-15T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor holding firm at £280k' },
@@ -134,7 +143,7 @@ export class MockDataService {
 
     // p003 — 32 Orchard Avenue (MoS)
     this._mutate('p003', p => ({ ...p,
-      viewing: { agentName: 'Laura Kim', agentCompany: 'Fox & Sons · Bristol', agentEmail: 'l.kim@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-03-28', time: '10:00', attendee: 'Aryan', reportCondition: 'good', reportNotes: 'Well-maintained end-terrace. New boiler installed 2024. Rear extension planning permission granted but not built. EPC B already achieved.' },
+      viewing: { agentName: 'Laura Kim', agentCompany: 'Fox & Sons · Bristol', agentEmail: 'l.kim@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-03-28', time: '10:00', attendee: 'Hannah Briggs', reportCondition: 'good', reportNotes: 'Well-maintained end-terrace. New boiler installed 2024. Rear extension planning permission granted but not built. EPC B already achieved.' },
       clientApprovedBy: 'David Mensah', clientMaxPrice: 305000,
       offers: [
         { id: 'op003a', amount: 290000, status: 'countered', date: '2026-04-03T11:00:00Z', submittedBy: 'Aryan', notes: 'Vendor countered at £300k' },
@@ -203,7 +212,7 @@ export class MockDataService {
 
     // p008 — 26 Dunster Road (Refurbishment)
     this._mutate('p008', p => ({ ...p,
-      viewing: { agentName: 'Rachel Ford', agentCompany: 'Fox & Sons · Bristol', agentEmail: 'r.ford@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-02-25', time: '11:30', attendee: 'Aryan', reportCondition: 'fair', reportNotes: 'Semi-detached in reasonable structural condition. Rear bathroom dated, kitchen serviceable. Side access for skip/materials. EPC C — capex scope mainly cosmetic and insulation works.' },
+      viewing: { agentName: 'Rachel Ford', agentCompany: 'Fox & Sons · Bristol', agentEmail: 'r.ford@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-02-25', time: '11:30', attendee: 'Ryan Okonkwo', reportCondition: 'fair', reportNotes: 'Semi-detached in reasonable structural condition. Rear bathroom dated, kitchen serviceable. Side access for skip/materials. EPC C — capex scope mainly cosmetic and insulation works.' },
       clientApprovedBy: 'David Mensah', clientMaxPrice: 295000,
       offers: [
         { id: 'op008a', amount: 260000, status: 'rejected',  date: '2026-03-04T10:00:00Z', submittedBy: 'Aryan', notes: 'Vendor has set floor at £270k' },
