@@ -332,32 +332,47 @@ export class LegalPortalComponent {
 
   uploadDoc(propId: string, stage: string = 'Legals'): void {
     const docType = this.uploadDocType().trim();
-    if (!docType || !this.selectedFile()) return;
-    const fileName = this.uploadFileName().trim() || this.selectedFile()!.name;
+    const file = this.selectedFile();
+    if (!docType || !file) return;
+    const entryId = 'dr_' + Date.now();
     const entry: DataRoomFile = {
-      id: 'dr_' + Date.now(),
+      id: entryId,
       propertyId: propId,
       stage,
-      fileName,
+      fileName: this.uploadFileName().trim() || file.name,
       docType,
       uploadedBy: this.auth.currentUser()?.name ?? 'Solicitor',
       uploadedAt: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       note: this.uploadNote().trim(),
-      url: URL.createObjectURL(this.selectedFile()!),
     };
+    // Read file as persistent data URL (survives localStorage round-trip)
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.dataRoom.update(list =>
+        list.map(f => f.id === entryId ? { ...f, url: reader.result as string } : f)
+      );
+    };
+    reader.readAsDataURL(file);
     this.dataRoom.update(list => [...list, entry]);
     this.uploadDocType.set('');
     this.uploadFileName.set('');
     this.uploadNote.set('');
     this.selectedFile.set(null);
     this.showUploadModal.set(false);
-    // Reset the file input so the same file can be re-selected later
     const input = this.doc.getElementById('lg-file-input') as HTMLInputElement | null;
     if (input) input.value = '';
   }
 
   previewFile(file: DataRoomFile): void {
-    if (file.url) window.open(file.url, '_blank');
+    if (!file.url) return;
+    const a = this.doc.createElement('a');
+    a.href = file.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    this.doc.body.appendChild(a);
+    a.click();
+    this.doc.body.removeChild(a);
   }
 
   deleteDoc(fileId: string): void {
