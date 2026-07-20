@@ -373,12 +373,12 @@
         <div class="lg-modal-header">
           <div>
             <div class="lg-modal-title">{{ modal.title }}</div>
-            <div class="lg-modal-sub">{{ modal.files.length }} document{{ modal.files.length > 1 ? 's' : '' }} available</div>
+            <div class="lg-modal-sub">{{ docsForItem(modal.propId, modal.itemKey).length }} document{{ docsForItem(modal.propId, modal.itemKey).length !== 1 ? 's' : '' }} available</div>
           </div>
           <button class="lg-modal-close" (click)="reviewModal.set(null)"><i class="ti ti-x"></i></button>
         </div>
         <div style="padding:20px; display:flex; flex-direction:column; gap:8px;">
-          @for (file of modal.files; track file.id) {
+          @for (file of docsForItem(modal.propId, modal.itemKey); track file.id) {
             <div class="lg-doc-row"
                  [style.cursor]="file.url ? 'pointer' : 'default'"
                  [style.opacity]="file.url ? '1' : '0.85'"
@@ -391,9 +391,12 @@
                   <div style="font-size:12px; color:var(--text2); margin-top:3px;">{{ file.note }}</div>
                 }
               </div>
-              @if (file.url) {
-                <i class="ti ti-external-link" style="font-size:14px; color:var(--text3); flex-shrink:0;"></i>
-              }
+              <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;" (click)="$event.stopPropagation()">
+                @if (file.url) {
+                  <i class="ti ti-external-link" style="font-size:14px; color:var(--text3);" (click)="previewFile(file)"></i>
+                }
+                <i class="ti ti-trash" style="font-size:14px; color:#dc2626; cursor:pointer;" (click)="deleteDoc(file.id)"></i>
+              </div>
             </div>
           }
         </div>
