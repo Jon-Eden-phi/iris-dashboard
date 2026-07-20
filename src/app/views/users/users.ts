@@ -51,6 +51,10 @@ export class UsersComponent {
     ])].sort();
   }
 
+  private isSimplyPhi(name: string): boolean {
+    return this.companies.getByName(name)?.companyRole === 'Project Manager';
+  }
+
   onCompanyChange(name: string): void {
     this.inviteOrg.set(name);
     const company = this.companies.getByName(name);
@@ -58,6 +62,7 @@ export class UsersComponent {
     this.inviteFnMode.set('select');
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
+    this.inviteProjects.set(this.isSimplyPhi(name) ? this.projects.all.map(p => p.id) : []);
   }
 
   openInvite(): void {
@@ -66,12 +71,13 @@ export class UsersComponent {
     this.linkCopied.set(false);
     this.inviteEmail.set('');
     const first = this.companies.all[0];
-    this.inviteOrg.set(first?.name ?? '');
+    const firstName = first?.name ?? '';
+    this.inviteOrg.set(firstName);
     this.inviteCompanyRole.set(first?.companyRole ?? '');
     this.inviteFnMode.set('select');
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
-    this.inviteProjects.set([]);
+    this.inviteProjects.set(this.isSimplyPhi(firstName) ? this.projects.all.map(p => p.id) : []);
     this.inviteError.set('');
     this.showInvite.set(true);
   }
