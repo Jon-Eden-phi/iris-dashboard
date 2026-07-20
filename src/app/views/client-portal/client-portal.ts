@@ -170,6 +170,10 @@ export class ClientPortalComponent {
     this.activeProperties().filter(p => this.committedStages.has(p.stage)).length
   );
 
+  lettingsCount = computed(() =>
+    this.activeProperties().filter(p => p.stage === 'Lettings').length
+  );
+
   epcTargetMet = computed(() =>
     this.activeProperties().filter(p => p.epcAfter && ['A','B','C'].includes(p.epcAfter.r)).length
   );
