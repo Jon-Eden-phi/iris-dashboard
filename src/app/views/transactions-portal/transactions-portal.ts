@@ -96,6 +96,7 @@ interface DataRoomFile {
   uploadedBy: string;
   uploadedAt: string;
   note: string;
+  url?: string;
 }
 
 @Component({
@@ -170,6 +171,16 @@ export class TransactionsPortalComponent {
   deleteFile(fileId: string): void {
     this.dataRoom.update(list => list.filter(f => f.id !== fileId));
     this.showToast('File removed', 'ti-trash');
+  }
+
+  previewFile(file: DataRoomFile): void {
+    if (!file.url) return;
+    fetch(file.url)
+      .then(r => r.blob())
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+      });
   }
 
   drExpandedStages = signal<Set<string>>(new Set());
@@ -812,10 +823,11 @@ export class TransactionsPortalComponent {
     if (!p) return;
     const docType = this.uploadDocType();
     const note = this.uploadNote().trim();
-    const fileName = this.uploadFileName().trim() || this.selectedFile()?.name || docType + '_document.pdf';
-    // Save to data room
+    const file = this.selectedFile();
+    const fileName = this.uploadFileName().trim() || file?.name || docType + '_document.pdf';
+    const entryId = 'dr_' + Date.now();
     const newFile: DataRoomFile = {
-      id: 'dr_' + Date.now(),
+      id: entryId,
       propertyId: p.id,
       stage: p.stage,
       docType,
@@ -824,6 +836,15 @@ export class TransactionsPortalComponent {
       uploadedAt: new Date().toLocaleDateString('en-GB'),
       note,
     };
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.dataRoom.update(list =>
+          list.map(f => f.id === entryId ? { ...f, url: reader.result as string } : f)
+        );
+      };
+      reader.readAsDataURL(file);
+    }
     this.dataRoom.update(list => [...list, newFile]);
     // Expand that stage folder automatically
     this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
