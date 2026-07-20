@@ -1013,7 +1013,7 @@
                         <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'searches_ordered') {
-                      <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="showSearchesModal.set(true); $event.stopPropagation()">
+                      <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="openSearchesModal(p.id); $event.stopPropagation()">
                         <i class="ti ti-search" style="font-size:11px;"></i> Order searches
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'searches_received') {
@@ -1159,7 +1159,7 @@
             <div class="card">
               <div class="tx-section-header">
                 <span class="tx-section-title"><i class="ti ti-clipboard-list"></i> Surveys for this property</span>
-                <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="showSurveyModal.set(true)"><i class="ti ti-plus" style="font-size:12px;"></i> Add</button>
+                <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="openSurveyModal(p!.id)"><i class="ti ti-plus" style="font-size:12px;"></i> Add</button>
               </div>
               <table>
                 <thead><tr><th>Type</th><th>Provider</th><th>Instructed</th><th>Site visit</th><th>Status</th><th class="num-cell">Cost</th></tr></thead>
@@ -2041,14 +2041,8 @@
       <button class="tx-modal-close" (click)="showSearchesModal.set(false)"><i class="ti ti-x"></i></button>
     </div>
     <div class="tx-modal-body">
-      <label class="form-label">Assignee</label>
-      <select class="form-select" style="margin-bottom:14px;" [value]="searchAssignee()" (change)="searchAssignee.set($any($event.target).value)">
-        <option value="">Select assignee</option>
-        <option>Hayley Briggs (Winkworth Sherwood)</option>
-        <option>Zan Williams (Winkworth Sherwood)</option>
-        <option>Jiya Chowdhury</option>
-        <option>Tom Resnick</option>
-      </select>
+      <label class="form-label">Assignee (solicitor)</label>
+      <input class="form-input" type="text" style="margin-bottom:14px;" placeholder="Solicitor name / firm" [value]="searchAssignee()" (input)="searchAssignee.set($any($event.target).value)">
       <label class="form-label" style="margin-bottom:8px;">Available searches</label>
       <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:14px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; background:var(--surface2, var(--surface));">
@@ -2562,13 +2556,15 @@
     </div>
     <div class="tx-modal-body">
       @if (selectedProperty(); as p) {
-        <p style="font-size:13px; color:var(--text2); margin-bottom:0;">
+        <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">
           This will open a matter for <strong>{{ p.address }}</strong> in the legal portal. The solicitor will receive the MoS and confirm receipt once the matter is opened.
         </p>
+        <label class="form-label">Solicitor name / firm</label>
+        <input class="form-input" type="text" placeholder="e.g. Hayley Briggs (Winkworth Sherwood)" [value]="instructSolicitorName()" (input)="instructSolicitorName.set($any($event.target).value)">
       }
     </div>
     <div class="tx-modal-footer">
-      <button class="btn-ghost" (click)="showInstructSolicitorModal.set(false)">Cancel</button>
+      <button class="btn-ghost" (click)="showInstructSolicitorModal.set(false); instructSolicitorName.set('')">Cancel</button>
       @if (selectedProperty(); as p) {
         <button class="btn-primary" (click)="instructSolicitor(p)">
           <i class="ti ti-scale" style="font-size:13px;"></i> Instruct solicitor

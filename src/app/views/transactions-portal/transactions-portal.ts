@@ -83,6 +83,7 @@ interface TxPropertyData {
   notes?: TxNote[];
   fees?: TxFee[];
   solicitorInstructed?: boolean;
+  solicitorName?: string;
   authorityToExchange?: boolean;
 }
 
@@ -281,6 +282,7 @@ export class TransactionsPortalComponent {
   showInstructSurveysModal    = signal(false);
   showAdditionalWorksModal    = signal(false);
   showInstructSolicitorModal  = signal(false);
+  instructSolicitorName       = signal('');
   showReviewDocModal          = signal(false);
   showRequestFundsModal           = signal(false);
   showAuthorityModal              = signal(false);
@@ -1049,9 +1051,24 @@ export class TransactionsPortalComponent {
   }
 
   instructSolicitor(p: Property): void {
-    this.setTxData(p.id, { solicitorInstructed: true });
+    this.setTxData(p.id, { solicitorInstructed: true, solicitorName: this.instructSolicitorName().trim() || undefined });
     this.showInstructSolicitorModal.set(false);
+    this.instructSolicitorName.set('');
     this.showToast('Solicitor instructed — matter opened in legal portal', 'ti-scale');
+  }
+
+  solicitorNameFor(propId: string): string {
+    return this.getTxData(propId)?.solicitorName ?? '';
+  }
+
+  openSearchesModal(propId: string): void {
+    this.searchAssignee.set(this.solicitorNameFor(propId));
+    this.showSearchesModal.set(true);
+  }
+
+  openSurveyModal(propId: string): void {
+    this.surveyOrderAssignee.set(this.solicitorNameFor(propId));
+    this.showSurveyModal.set(true);
   }
 
   uploadDraftRot(): void {
