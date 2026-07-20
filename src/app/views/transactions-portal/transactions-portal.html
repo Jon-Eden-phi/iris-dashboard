@@ -994,7 +994,7 @@
                     @if (_checked) {
                       @if (_autoChecked && (action.key === 'mos_received' || action.key === 'contract_pack_received' || action.key === 'survey_report_received' || action.key === 'searches_received')) {
                         <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
-                                (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
+                                (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : action.key === 'searches_received' ? ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
                       } @else {
