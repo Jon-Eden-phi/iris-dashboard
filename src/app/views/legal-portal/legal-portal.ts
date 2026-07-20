@@ -365,14 +365,13 @@ export class LegalPortalComponent {
 
   previewFile(file: DataRoomFile): void {
     if (!file.url) return;
-    const a = this.doc.createElement('a');
-    a.href = file.url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.style.display = 'none';
-    this.doc.body.appendChild(a);
-    a.click();
-    this.doc.body.removeChild(a);
+    // data: URLs are blocked as top-level navigation in Chrome — convert to blob URL at view time
+    fetch(file.url)
+      .then(r => r.blob())
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+      });
   }
 
   deleteDoc(fileId: string): void {
