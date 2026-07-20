@@ -32,6 +32,7 @@ interface DataRoomFile {
   uploadedBy: string;
   uploadedAt: string;
   note: string;
+  url?: string;
 }
 
 // Maps checklist keys to document types they relate to
@@ -342,6 +343,7 @@ export class LegalPortalComponent {
       uploadedBy: this.auth.currentUser()?.name ?? 'Solicitor',
       uploadedAt: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       note: this.uploadNote().trim(),
+      url: URL.createObjectURL(this.selectedFile()!),
     };
     this.dataRoom.update(list => [...list, entry]);
     this.uploadDocType.set('');
@@ -352,6 +354,10 @@ export class LegalPortalComponent {
     // Reset the file input so the same file can be re-selected later
     const input = this.doc.getElementById('lg-file-input') as HTMLInputElement | null;
     if (input) input.value = '';
+  }
+
+  previewFile(file: DataRoomFile): void {
+    if (file.url) window.open(file.url, '_blank');
   }
 
   deleteDoc(fileId: string): void {
