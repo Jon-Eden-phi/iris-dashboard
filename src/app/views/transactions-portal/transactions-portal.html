@@ -787,27 +787,6 @@
             </div>
           }
 
-          <!-- Key dates -->
-          <div class="card">
-            <div class="tx-section-header">
-              <span class="tx-section-title"><i class="ti ti-calendar-event"></i> Key dates</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px;">
-              <div>
-                <label class="form-label" style="font-size:11px;">Est. exchange date</label>
-                <input class="form-input" type="date"
-                       [value]="getTxData(p.id).exchangeDate"
-                       (change)="setTxData(p.id, {exchangeDate: $any($event.target).value})">
-              </div>
-              <div>
-                <label class="form-label" style="font-size:11px;">Est. completion date</label>
-                <input class="form-input" type="date"
-                       [value]="getTxData(p.id).completionDate"
-                       (change)="setTxData(p.id, {completionDate: $any($event.target).value})">
-              </div>
-            </div>
-          </div>
-
           <!-- Flow stage cards -->
           @if (stageActions[p.stage]; as actions) {
 
@@ -1132,6 +1111,27 @@
                   </div>
                   }
                 }
+              </div>
+            </div>
+
+            <!-- Key dates -->
+            <div class="card">
+              <div class="tx-section-header">
+                <span class="tx-section-title"><i class="ti ti-calendar-event"></i> Key dates</span>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px;">
+                <div>
+                  <label class="form-label" style="font-size:11px;">Est. exchange date</label>
+                  <input class="form-input" type="date"
+                         [value]="getTxData(p.id).exchangeDate"
+                         (change)="setTxData(p.id, {exchangeDate: $any($event.target).value})">
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:11px;">Est. completion date</label>
+                  <input class="form-input" type="date"
+                         [value]="getTxData(p.id).completionDate"
+                         (change)="setTxData(p.id, {completionDate: $any($event.target).value})">
+                </div>
               </div>
             </div>
 
