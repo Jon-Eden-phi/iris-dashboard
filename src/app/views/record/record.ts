@@ -7,7 +7,8 @@ import { ProjectsService } from '../../services/projects';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { ActivityNote, Offer, PropertyDocument } from '../../models/property.model';
 
-const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
+const TX_STAGES       = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
+const SOURCING_STAGES = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
 
 @Component({
   selector: 'app-record',
@@ -60,8 +61,9 @@ export class RecordComponent {
     if (!p || p.status !== 'active') return false;
     const idx = this.stages.indexOf(p.stage);
     if (idx < 0 || idx >= this.stages.length - 1) return false;
-    // TX stages can only be advanced from the Transactions portal
-    if (TX_STAGES.has(p.stage) && !['Purchasing', 'Admin Controller'].includes(this.auth.currentUser()?.role ?? '')) return false;
+    const role = this.auth.currentUser()?.role ?? '';
+    if (TX_STAGES.has(p.stage)       && !['Purchasing', 'Admin Controller'].includes(role)) return false;
+    if (SOURCING_STAGES.has(p.stage) && !['Sourcing',   'Admin Controller'].includes(role)) return false;
     return true;
   });
 
