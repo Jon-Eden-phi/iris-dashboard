@@ -6,6 +6,13 @@ export interface IrisProject {
   purchaser: string;
 }
 
+const SEED_PROJECTS: IrisProject[] = [
+  { id: 'proj-bristol-p3',    name: 'Bristol P3',    purchaser: 'Bristol City Council' },
+  { id: 'proj-merton-lahf',   name: 'Merton LAHF',   purchaser: 'London Borough of Merton' },
+  { id: 'proj-hastings-esph', name: 'Hastings ESPH', purchaser: 'East Sussex Pathfinder Housing' },
+  { id: 'proj-leeds-p1',      name: 'Leeds P1',      purchaser: 'Leeds City Council' },
+];
+
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
   private readonly STORAGE_KEY = 'iris-projects-v1';
@@ -13,9 +20,15 @@ export class ProjectsService {
   private _load(): IrisProject[] {
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      const stored: IrisProject[] = raw ? JSON.parse(raw) : [];
+      const merged = [...stored];
+      for (const seed of SEED_PROJECTS) {
+        if (!merged.find(p => p.id === seed.id)) merged.unshift(seed);
+      }
+      this._save(merged);
+      return merged;
     } catch { /* ignore */ }
-    return [];
+    return SEED_PROJECTS;
   }
 
   private _save(list: IrisProject[]): void {
