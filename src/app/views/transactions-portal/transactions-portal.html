@@ -822,111 +822,180 @@
           <!-- ── FLOW TAB ──────────────────────────────── -->
           @if (recordTab() === 'flow') {
 
-          <!-- Stage checklist -->
+          <!-- Flow stage cards -->
           @if (stageActions[p.stage]; as actions) {
+
+            <!-- ── MoS: context + setup panels ── -->
+            @if (p.stage === 'MemorandumOfSale') {
+              <div class="card">
+                <div style="background:rgba(15,124,107,0.07); border:1px solid rgba(15,124,107,0.2); border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+                  <i class="ti ti-file-description" style="color:var(--teal); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+                  <span><strong>Memorandum of Sale</strong> — instruct the solicitor, assign a fee earner and confirm contract pack receipt to progress to Legals.</span>
+                  @if (stageStatus(p.id, p.stage); as st) {
+                    <span style="margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;"
+                          [style.background]="st.done ? 'rgba(22,163,74,0.1)' : 'rgba(15,124,107,0.1)'"
+                          [style.color]="st.done ? '#16a34a' : 'var(--teal)'">
+                      <i [class]="st.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:10px;"></i> {{ st.label }}
+                    </span>
+                  }
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                  <!-- Solicitor panel -->
+                  <div style="background:var(--bg); border-radius:10px; padding:14px 16px;">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">Solicitor</div>
+                    @if (getTxData(p.id).solicitorInstructed) {
+                      <div style="display:flex; align-items:center; gap:7px; margin-bottom:8px;">
+                        <div style="width:30px; height:30px; border-radius:50%; background:rgba(15,124,107,.12); color:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="ti ti-scale" style="font-size:13px;"></i></div>
+                        <div>
+                          <div style="font-weight:700; font-size:13px;">Solicitor instructed</div>
+                          <div style="font-size:11px; color:var(--text3);">Matter opened in legal portal</div>
+                        </div>
+                      </div>
+                      <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:rgba(22,163,74,0.1); color:#16a34a;"><i class="ti ti-circle-check" style="font-size:10px;"></i> Instructed</span>
+                    } @else {
+                      <div style="font-size:12px; color:var(--text3); margin-bottom:10px; line-height:1.5;">Not yet instructed — opens the matter in the legal portal.</div>
+                      <button class="btn-ghost" style="font-size:12px; padding:5px 10px; display:inline-flex; align-items:center; gap:5px;" (click)="showInstructSolicitorModal.set(true)">
+                        <i class="ti ti-scale" style="font-size:12px;"></i> Instruct solicitor
+                      </button>
+                    }
+                  </div>
+                  <!-- Fee earner panel -->
+                  <div style="background:var(--bg); border-radius:10px; padding:14px 16px;">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">Fee Earner</div>
+                    @if (getTxData(p.id).checklist['fee_earner_added']) {
+                      <div style="display:flex; align-items:center; gap:7px; margin-bottom:8px;">
+                        <div style="width:30px; height:30px; border-radius:50%; background:rgba(15,124,107,.12); color:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="ti ti-user-check" style="font-size:13px;"></i></div>
+                        <div>
+                          <div style="font-weight:700; font-size:13px;">Fee earner assigned</div>
+                          <div style="font-size:11px; color:var(--text3);">See activity log for details</div>
+                        </div>
+                      </div>
+                      <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:rgba(22,163,74,0.1); color:#16a34a;"><i class="ti ti-circle-check" style="font-size:10px;"></i> Assigned</span>
+                    } @else {
+                      <div style="font-size:12px; color:var(--text3); margin-bottom:10px; line-height:1.5;">No fee earner assigned yet.</div>
+                      <button class="btn-ghost" style="font-size:12px; padding:5px 10px; display:inline-flex; align-items:center; gap:5px;" (click)="showFeeEarnerModal.set(true)">
+                        <i class="ti ti-user-plus" style="font-size:12px;"></i> Add fee earner
+                      </button>
+                    }
+                  </div>
+                  <!-- Contract pack panel -->
+                  <div style="background:var(--bg); border-radius:10px; padding:14px 16px;">
+                    <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">Contract Pack</div>
+                    @if (txHasDocs(p.id, ['Contract Pack', 'Draft Contract'])) {
+                      <div style="font-size:13px; font-weight:700; margin-bottom:8px;">Received</div>
+                      <span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; background:rgba(22,163,74,0.1); color:#16a34a;"><i class="ti ti-circle-check" style="font-size:10px;"></i> In data room</span>
+                    } @else {
+                      <div style="font-size:12px; color:var(--text3); margin-bottom:10px; line-height:1.5;">Not yet received from vendor's solicitor.</div>
+                      <button class="btn-ghost" style="font-size:12px; padding:5px 10px; display:inline-flex; align-items:center; gap:5px;" (click)="showContractPackModal.set(true)">
+                        <i class="ti ti-file-check" style="font-size:12px;"></i> Upload contract pack
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ── Legals context banner ── -->
+            @if (p.stage === 'Legals') {
+              <div class="card" style="padding:14px 16px;">
+                <div style="background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.18); border-radius:8px; padding:10px 14px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+                  <i class="ti ti-scale" style="color:var(--blue); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+                  <span><strong>Legals in progress.</strong> Coordinate searches, report on title and exchange authority to advance to Refurbishment.</span>
+                  @if (stageStatus(p.id, p.stage); as st) {
+                    <span style="margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;"
+                          [style.background]="st.done ? 'rgba(22,163,74,0.1)' : 'rgba(36,114,168,0.1)'"
+                          [style.color]="st.done ? '#16a34a' : '#2472a8'">
+                      <i [class]="st.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:10px;"></i> {{ st.label }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- ── Refurbishment context banner ── -->
+            @if (p.stage === 'Refurbishment') {
+              <div class="card" style="padding:14px 16px;">
+                <div style="background:rgba(124,58,237,0.07); border:1px solid rgba(124,58,237,0.18); border-radius:8px; padding:10px 14px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+                  <i class="ti ti-tools" style="color:#7c3aed; font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+                  <span><strong>Refurbishment underway.</strong> Track contractor sign-offs and surveys through to practical completion.</span>
+                  @if (stageStatus(p.id, p.stage); as st) {
+                    <span style="margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;"
+                          [style.background]="st.done ? 'rgba(22,163,74,0.1)' : 'rgba(124,58,237,0.1)'"
+                          [style.color]="st.done ? '#16a34a' : '#7c3aed'">
+                      <i [class]="st.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:10px;"></i> {{ st.label }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- ── Lettings context banner ── -->
+            @if (p.stage === 'Lettings') {
+              <div class="card" style="padding:14px 16px;">
+                <div style="background:rgba(15,124,107,0.07); border:1px solid rgba(15,124,107,0.2); border-radius:8px; padding:10px 14px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
+                  <i class="ti ti-home-check" style="color:var(--teal); font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+                  <span><strong>Lettings stage.</strong> Complete exchange, confirm completion and onboard the tenant to close out this transaction.</span>
+                  @if (stageStatus(p.id, p.stage); as st) {
+                    <span style="margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;"
+                          [style.background]="st.done ? 'rgba(22,163,74,0.1)' : 'rgba(15,124,107,0.1)'"
+                          [style.color]="st.done ? '#16a34a' : 'var(--teal)'">
+                      <i [class]="st.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:10px;"></i> {{ st.label }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- ── Stage milestones ── -->
             <div class="card">
-              <div class="tx-section-header" style="margin-bottom:14px;">
-                <div>
-                  <span class="tx-section-title"><i class="ti ti-list-check"></i> Stage checklist — {{ stageLabel(p.stage) }}</span>
-                  @if (stageStatus(p.id, p.stage); as status) {
-                    <div style="margin-top:6px;">
-                      <span style="font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px;"
-                            [style.background]="status.done ? 'rgba(22,163,74,0.1)' : 'rgba(180,83,9,0.1)'"
-                            [style.color]="status.done ? '#16a34a' : '#b45309'">
-                        <i [class]="status.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:11px;"></i>
-                        {{ status.label }}
-                      </span>
-                    </div>
-                  }
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                  <span class="badge badge-gray">{{ checklistProgress(p.id, p.stage).done }} / {{ checklistProgress(p.id, p.stage).total }}</span>
-                </div>
-              </div>
-
-              <!-- Progress bar -->
-              <div style="height:5px; background:var(--border); border-radius:3px; margin-bottom:16px; overflow:hidden;">
-                <div style="height:100%; background:var(--teal); border-radius:3px; transition:width .3s;"
-                     [style.width.%]="checklistProgress(p.id, p.stage).total > 0 ? (checklistProgress(p.id, p.stage).done / checklistProgress(p.id, p.stage).total) * 100 : 0"></div>
-              </div>
-
-              <!-- Outstanding action banners -->
-              @if (p.stage === 'MemorandumOfSale' && !getTxData(p.id).solicitorInstructed) {
-                <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; background:rgba(36,114,168,0.07); border:1px solid rgba(36,114,168,0.25); border-radius:7px; margin-bottom:14px;">
-                  <i class="ti ti-scale" style="font-size:14px; color:#2472a8; flex-shrink:0;"></i>
-                  <span style="font-size:12.5px; color:#1e4f78; font-weight:500;">Solicitor not yet instructed — instruct to open this matter in the legal portal</span>
-                  <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSolicitorModal.set(true)">
-                    <i class="ti ti-scale" style="font-size:11px;"></i> Instruct solicitor
-                  </button>
-                </div>
-              }
-              @if (!getTxData(p.id).checklist['fee_earner_added'] || !txHasDocs(p.id, ['Contract Pack', 'Draft Contract'])) {
-                <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
-                  @if (!getTxData(p.id).checklist['fee_earner_added']) {
-                    <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.2); border-radius:7px;">
-                      <i class="ti ti-user-exclamation" style="font-size:14px; color:#b45309; flex-shrink:0;"></i>
-                      <span style="font-size:12.5px; color:#92400e; font-weight:500;">Fee earner not yet assigned</span>
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showFeeEarnerModal.set(true)">
-                        <i class="ti ti-user-plus" style="font-size:11px;"></i> Add fee earner
-                      </button>
-                    </div>
-                  }
-                  @if (!txHasDocs(p.id, ['Contract Pack', 'Draft Contract'])) {
-                    <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.2); border-radius:7px;">
-                      <i class="ti ti-file-alert" style="font-size:14px; color:#b45309; flex-shrink:0;"></i>
-                      <span style="font-size:12.5px; color:#92400e; font-weight:500;">Contract pack not yet received</span>
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true)">
-                        <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
-                      </button>
-                    </div>
-                  }
-                </div>
-              }
-
-              <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:14px;">Stage milestones</div>
+              <div style="display:flex; flex-direction:column; gap:1px; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
                 @for (action of actions; track action.key) {
+
+                  <!-- Solicitor sign-off ready hint -->
                   @if (action.key === 'authority_to_exchange' && !getTxData(p.id).checklist['authority_to_exchange'] && solicitorSignedOffExchange(p.id)) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor has given exchange sign-off</strong> — request client authority to proceed to exchange.</span>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d; line-height:1.5;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has given exchange sign-off</strong> — request client authority to proceed.</span>
                     </div>
                   }
                   @if (action.key === 'searches_received' && !getTxData(p.id).checklist['searches_received'] && txHasDocs(p.id, ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
                       <span><strong>Search results are in the data room</strong> — review and confirm receipt.</span>
                     </div>
                   }
                   @if (action.key === 'draft_rot_received' && !getTxData(p.id).checklist['draft_rot_received'] && txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
                       <span><strong>A report on title is in the data room</strong> — review and confirm receipt.</span>
                     </div>
                   }
                   @if (action.key === 'enquiries_raised' && !getTxData(p.id).checklist['enquiries_raised'] && legalCheck(p.id, 'enquiries_out')) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor has raised enquiries</strong> — enquiries have been submitted to the seller's solicitor.</span>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor has raised enquiries</strong> — confirm receipt below.</span>
                     </div>
                   }
                   @if (action.key === 'sols_confirmed' && txHasDocs(p.id, ['Memorandum of Sale', 'MoS'])) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
                       <span><strong>Solicitor has received the MoS</strong> — the matter is now open.</span>
                     </div>
                   }
                   @if (action.key === 'exchange_completed' && !getTxData(p.id).checklist['exchange_completed'] && legalCheck(p.id, 'exchanged')) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor confirms contracts have been exchanged</strong> — mark this transaction as exchanged.</span>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor confirms contracts exchanged</strong> — mark as exchanged.</span>
                     </div>
                   }
                   @if (action.key === 'completion_confirmed' && !getTxData(p.id).checklist['completion_confirmed'] && legalCheck(p.id, 'completed')) {
-                    <div style="display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:rgba(22,163,74,0.07); border:1.5px solid rgba(22,163,74,0.25); border-radius:7px; font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor confirms completion</strong> — the transaction has completed. Mark as confirmed.</span>
+                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
+                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Solicitor confirms completion</strong> — mark as confirmed.</span>
                     </div>
                   }
+
                   @if (action.key !== 'investor_authority_to_exchange' || p.isInvestorDeal) {
                   @let _mosDoc = txHasDocs(p.id, ['Memorandum of Sale', 'MoS']);
                   @let _contractDoc = txHasDocs(p.id, ['Contract Pack', 'Draft Contract']);
@@ -939,55 +1008,51 @@
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
                   <div
                     (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
-                    style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; border:1.5px solid; width:100%; transition:.12s; font-size:13px; font-weight:500;"
+                    style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:var(--surface); font-size:13px; transition:.12s;"
                     [style.cursor]="_autoChecked ? 'default' : 'pointer'"
-                    [style.background]="_checked ? '#f0fdf4' : 'var(--surface)'"
-                    [style.border-color]="_checked ? '#22c55e' : 'var(--border)'"
-                    [style.color]="_checked ? '#15803d' : 'var(--text2)'">
-                    <span style="width:20px; height:20px; border-radius:50%; border:2px solid; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; transition:.12s;"
-                          [style.border-color]="_checked ? '#22c55e' : 'var(--border)'"
-                          [style.background]="_checked ? '#22c55e' : 'transparent'"
-                          [style.color]="_checked ? '#fff' : 'transparent'">
-                      <i class="ti ti-check"></i>
-                    </span>
-                    <span [style.text-decoration]="_checked ? 'line-through' : 'none'"
-                          [style.opacity]="_checked ? '0.6' : '1'">
+                    [style.background]="_checked ? 'rgba(22,163,74,0.04)' : 'var(--surface)'">
+                    <i style="font-size:15px; flex-shrink:0; width:16px; text-align:center;"
+                       [class]="_checked ? 'ti ti-circle-check' : 'ti ti-circle'"
+                       [style.color]="_checked ? '#16a34a' : 'var(--border)'"></i>
+                    <span style="flex:1; font-weight:500;"
+                          [style.color]="_checked ? 'var(--text3)' : 'var(--text1)'"
+                          [style.text-decoration]="_checked && !_autoChecked ? 'line-through' : 'none'">
                       {{ action.label }}
                     </span>
                     @if (_checked) {
                       @if (_autoChecked && (action.key === 'mos_received' || action.key === 'contract_pack_received' || action.key === 'survey_report_received' || action.key === 'searches_received')) {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
+                        <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
                                 (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
                       } @else {
-                        <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">
+                        <span style="font-size:11px; color:#16a34a; font-weight:600;">
                           @if (_autoChecked) { Confirmed by solicitor } @else { Done }
                         </span>
                       }
                     } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_received') {
                       @if (legalCheck(p.id, 'mos_received')) {
-                        <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Received by legal</span>
+                        <span style="font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Received by legal</span>
                       } @else {
-                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Handled by legal team</span>
+                        <span style="font-size:11px; color:var(--text3);">Handled by legal team</span>
                         <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('MoS'); showUploadModal.set(true); $event.stopPropagation()">
                           <i class="ti ti-upload" style="font-size:11px;"></i> Upload if needed
                         </button>
                       }
                     } @else if (action.key === 'fee_earner_added') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showFeeEarnerModal.set(true); $event.stopPropagation()">
+                      <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="showFeeEarnerModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-user-plus" style="font-size:11px;"></i> Add fee earner
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'contract_pack_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
+                      <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'searches_ordered') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showSearchesModal.set(true); $event.stopPropagation()">
+                      <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="showSearchesModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-search" style="font-size:11px;"></i> Order searches
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'searches_received') {
-                      <div style="display:flex; gap:6px; margin-left:auto;" (click)="$event.stopPropagation()">
+                      <div style="display:flex; gap:6px;" (click)="$event.stopPropagation()">
                         @if (txHasDocs(p.id, ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])) {
                           <button class="btn-ghost" style="font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Search Results', ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'])">
                             <i class="ti ti-eye" style="font-size:11px;"></i> View
