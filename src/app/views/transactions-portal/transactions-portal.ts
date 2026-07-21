@@ -942,6 +942,9 @@ export class TransactionsPortalComponent {
     if (!ctx || !note) return;
     if (ctx.checklistKey === 'draft_rot_received') {
       this.setTxData(ctx.propId, { rotQuery: note });
+      const existing = this.getTxData(ctx.propId);
+      const newLog = [{ text: 'Draft RoT received from lawyers', ts: new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }), author: this.auth.currentUser()?.name ?? 'TX Team' }, ...existing.txLog];
+      this.setTxData(ctx.propId, { checklist: { ...existing.checklist, draft_rot_received: true }, txLog: newLog });
     }
     this.data.addActivity(ctx.propId, {
       id: 'changes_' + Date.now(),

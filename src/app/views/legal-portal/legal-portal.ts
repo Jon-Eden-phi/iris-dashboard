@@ -46,7 +46,7 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
   survey_report:   ['Survey Report', 'HomeBuyer Report', 'Structural Survey'],
   contract_rx:     ['Draft Contract', 'Contract Pack'],
   contract_rev:    ['Draft Contract', 'Contract Pack'],
-  title_report:         ['Draft Report on Title'],
+  title_report:         ['Draft Report on Title', 'Report on Title'],
   rot_query_addressed:  ['Final Report on Title'],
 };
 
