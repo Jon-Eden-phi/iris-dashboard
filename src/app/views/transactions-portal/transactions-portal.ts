@@ -390,6 +390,10 @@ export class TransactionsPortalComponent {
     JSON.parse(localStorage.getItem('iris_rot_approvals') ?? '{}')
   );
 
+  isRotApproved(propId: string): boolean {
+    return this.rotApprovalsSig()[propId]?.status === 'approved';
+  }
+
   pipelineSearch = signal('');
 
   readonly txSourceStages = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);

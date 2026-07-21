@@ -936,7 +936,8 @@
                                    || (action.key === 'contract_pack_received' && _contractDoc)
                                    || (action.key === 'red_flag_cleared' && legalCheck(p.id, 'contract_rev'))
                                    || (action.key === 'survey_report_received' && _surveyDoc)
-                                   || (action.key === 'searches_received' && txHasAllSearches(p.id));
+                                   || (action.key === 'searches_received' && txHasAllSearches(p.id))
+                                   || (action.key === 'final_rot_approved' && isRotApproved(p.id));
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
                   <div
                     (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
