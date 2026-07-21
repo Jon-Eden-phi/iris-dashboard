@@ -259,13 +259,36 @@
                     </div>
                   }
                   @if (group.label === 'Report on Title' && !!txRotQuery(p.id) && !getMatter(p.id).checklist['rot_query_addressed']) {
-                    <div style="background:rgba(180,83,9,0.07); border:1px solid rgba(180,83,9,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#b45309; display:flex; align-items:flex-start; gap:7px;">
-                      <i class="ti ti-alert-circle" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <div>
-                        <strong>Query raised by TX team</strong> — please address before uploading the final Report on Title.
-                        @if (txRotQuery(p.id)) {
-                          <div style="margin-top:6px; padding:7px 9px; background:rgba(180,83,9,0.08); border-radius:5px; font-style:italic; white-space:pre-wrap;">{{ txRotQuery(p.id) }}</div>
-                        }
+                    @let _queryResponse = getMatter(p.id).rotQueryResponse;
+                    <div style="background:rgba(180,83,9,0.07); border:1px solid rgba(180,83,9,0.25); border-radius:6px; padding:10px 12px; margin-bottom:8px; font-size:12px; color:#b45309;">
+                      <div style="display:flex; align-items:flex-start; gap:7px;">
+                        <i class="ti ti-alert-circle" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                        <div style="flex:1; min-width:0;">
+                          <strong>Query raised by TX team</strong> — please address before uploading the final Report on Title.
+                          <div style="margin-top:6px; padding:7px 9px; background:rgba(180,83,9,0.08); border-radius:5px; font-style:italic; white-space:pre-wrap; color:#92400e;">{{ txRotQuery(p.id) }}</div>
+                          @if (_queryResponse) {
+                            <div style="margin-top:8px; display:flex; align-items:flex-start; gap:6px; padding:8px 10px; background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.2); border-radius:5px; color:#15803d;">
+                              <i class="ti ti-message-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
+                              <div>
+                                <div style="font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px;">Your response</div>
+                                <div style="font-style:italic; white-space:pre-wrap; color:#166534;">{{ _queryResponse }}</div>
+                              </div>
+                            </div>
+                          } @else {
+                            <div style="margin-top:10px;" (click)="$event.stopPropagation()">
+                              <textarea class="lg-input lg-textarea"
+                                        style="width:100%; font-size:12px; padding:7px 9px; color:var(--text1);"
+                                        placeholder="Type your response to the TX team…"
+                                        [value]="queryResponseDraft()"
+                                        (input)="queryResponseDraft.set($any($event.target).value)"></textarea>
+                              <button class="lg-btn-primary" style="margin-top:6px; font-size:12px; padding:5px 12px;"
+                                      [disabled]="!queryResponseDraft().trim()"
+                                      (click)="submitQueryResponse(p.id); $event.stopPropagation()">
+                                <i class="ti ti-send" style="font-size:11px;"></i> Submit response
+                              </button>
+                            </div>
+                          }
+                        </div>
                       </div>
                     </div>
                   }

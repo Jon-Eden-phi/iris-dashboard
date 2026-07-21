@@ -21,6 +21,7 @@ interface LegalMatterData {
   notes: LegalNote[];
   targetExchange: string;
   targetCompletion: string;
+  rotQueryResponse?: string;
 }
 
 interface DataRoomFile {
@@ -454,6 +455,26 @@ export class LegalPortalComponent {
       m.solicitorRef = val;
       return { ...all, [propId]: m };
     });
+  }
+
+  queryResponseDraft = signal('');
+
+  submitQueryResponse(propId: string): void {
+    const text = this.queryResponseDraft().trim();
+    if (!text) return;
+    this.legalData.update(all => {
+      const m = { ...(all[propId] ?? this._defaultMatter()) };
+      m.rotQueryResponse = text;
+      return { ...all, [propId]: m };
+    });
+    // Write response back to txData so TX portal can see it
+    try {
+      const tx = this._txRaw();
+      tx[propId] = { ...(tx[propId] ?? {}), rotQueryResponse: text };
+      localStorage.setItem('iris_tx_data', JSON.stringify(tx));
+      this.txDataSig.set(tx);
+    } catch { /* ignore */ }
+    this.queryResponseDraft.set('');
   }
 
   isOverdue(dateStr: string): boolean {
