@@ -6,6 +6,19 @@ import { AuthService } from '../../services/auth';
 import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
+const DR_KEY = 'iris_data_room';
+const ROT_APPROVALS_KEY = 'iris_rot_approvals';
+
+interface DataRoomFile {
+  id: string;
+  propertyId: string;
+  docType: string;
+  fileName: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  url?: string;
+}
+
 type PortalView = 'dashboard' | 'properties' | 'detail';
 
 @Component({
@@ -30,8 +43,17 @@ export class ClientPortalComponent {
   filterStage  = signal('all');
   filterSort   = signal('newest');
 
+  private dataRoom = signal<DataRoomFile[]>(
+    JSON.parse(localStorage.getItem(DR_KEY) ?? '[]')
+  );
+
+  private rotApprovals = signal<Record<string, { status: string; approvedBy?: string }>>(
+    JSON.parse(localStorage.getItem(ROT_APPROVALS_KEY) ?? '{}')
+  );
+
   showApproveModal = signal(false);
   showRejectModal  = signal(false);
+  showRotApproveModal = signal(false);
 
   showViewingApproveModal = signal(false);
   showViewingRejectModal  = signal(false);
@@ -69,6 +91,17 @@ export class ClientPortalComponent {
     'Structural concerns',
     'Other',
   ];
+
+  constructor() {
+    window.addEventListener('storage', (e: StorageEvent) => {
+      if (e.key === DR_KEY) {
+        try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
+      }
+      if (e.key === ROT_APPROVALS_KEY) {
+        try { this.rotApprovals.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+      }
+    });
+  }
 
   activeProperty = computed(() => {
     const id = this.selectedId();
@@ -129,7 +162,8 @@ export class ClientPortalComponent {
   actionRequired = computed(() =>
     this.activeProperties().filter(p =>
       p.stage === 'ClientApproval' ||
-      (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending')
+      (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') ||
+      (p.stage === 'Legals' && this.rotApprovals()[p.id]?.status === 'pending')
     )
   );
 
@@ -290,10 +324,37 @@ export class ClientPortalComponent {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }
 
-  actionType(p: Property): 'property-approval' | 'viewing-review' | null {
+  actionType(p: Property): 'property-approval' | 'viewing-review' | 'rot-approval' | null {
     if (p.stage === 'ClientApproval') return 'property-approval';
     if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') return 'viewing-review';
+    if (p.stage === 'Legals' && this.rotApprovals()[p.id]?.status === 'pending') return 'rot-approval';
     return null;
+  }
+
+  rotDocForProp(propId: string): DataRoomFile | undefined {
+    return this.dataRoom().find(f => f.propertyId === propId && f.docType === 'Final Report on Title');
+  }
+
+  rotApprovalStatus(propId: string): string | undefined {
+    return this.rotApprovals()[propId]?.status;
+  }
+
+  previewRotFile(propId: string): void {
+    const file = this.rotDocForProp(propId);
+    if (!file?.url) return;
+    fetch(file.url)
+      .then(r => r.blob())
+      .then(blob => { window.open(URL.createObjectURL(blob), '_blank'); });
+  }
+
+  approveRot(propId: string): void {
+    const approvals = { ...this.rotApprovals() };
+    approvals[propId] = { status: 'approved', approvedBy: this._userName };
+    localStorage.setItem(ROT_APPROVALS_KEY, JSON.stringify(approvals));
+    this.rotApprovals.set(approvals);
+    this.showRotApproveModal.set(false);
+    this.view.set('dashboard');
+    this.selectedId.set(null);
   }
 
   stagePct(stage: string): number {
@@ -317,7 +378,9 @@ export class ClientPortalComponent {
       case 'Viewing':           return p.viewing?.clientReview === 'pending' ? 'Viewing report sent — awaiting your decision' : 'Viewing being arranged';
       case 'Negotiations':      return 'Offer negotiations in progress';
       case 'MemorandumOfSale':  return 'Memorandum of Sale agreed';
-      case 'Legals':            return 'Legal conveyancing in progress';
+      case 'Legals':
+        if (this.rotApprovals()[p.id]?.status === 'approved') return 'Final Report on Title approved — conveyancing in progress';
+        return 'Legal conveyancing in progress';
       case 'Refurbishment':     return 'Refurbishment underway';
       case 'Lettings':          return 'Property in lettings';
       default: return p.stage;

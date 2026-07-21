@@ -152,6 +152,10 @@
             <span class="action-badge" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">
               <i class="ti ti-eye"></i> Viewing decision needed
             </span>
+          } @else if (actionType(p) === 'rot-approval') {
+            <span class="action-badge" style="background:#eff6ff; color:#0369a1; border-color:#bae6fd;">
+              <i class="ti ti-certificate"></i> Final RoT awaiting approval
+            </span>
           } @else {
             <span class="action-badge">
               <i class="ti ti-clock"></i> Awaiting approval
@@ -533,6 +537,46 @@
                 <i class="ti ti-circle-x"></i>
                 Reject at viewing
               </button>
+            </div>
+
+          } @else if (rotApprovalStatus(p.id) === 'pending') {
+            <div class="action-panel">
+              <div class="action-panel-title">Final Report on Title ready</div>
+              <p class="action-panel-desc">Your solicitor has uploaded the Final Report on Title. Please review the document and approve to proceed with the purchase.</p>
+              @let rotDoc = rotDocForProp(p.id);
+              @if (rotDoc) {
+                <div style="background:#f0f9ff; border-radius:8px; padding:11px 13px; margin-bottom:14px; border:1px solid #bae6fd;">
+                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#0369a1; font-weight:700; margin-bottom:7px;">Document</div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="ti ti-file-certificate" style="font-size:22px; color:#0369a1; flex-shrink:0;"></i>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:600; color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ rotDoc.fileName }}</div>
+                      <div style="font-size:11px; color:#9ca3af; margin-top:2px;">Uploaded {{ rotDoc.uploadedAt }} · {{ rotDoc.uploadedBy }}</div>
+                    </div>
+                    @if (rotDoc.url) {
+                      <button style="flex-shrink:0; padding:5px 10px; border-radius:6px; border:1px solid #bae6fd; background:#fff; font-size:12px; font-weight:600; color:#0369a1; cursor:pointer; display:flex; align-items:center; gap:4px;"
+                              (click)="previewRotFile(p.id)">
+                        <i class="ti ti-external-link" style="font-size:12px;"></i> View
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              <button class="btn-approve" (click)="approveRot(p.id)">
+                <i class="ti ti-circle-check"></i>
+                Approve Final Report on Title
+              </button>
+            </div>
+
+          } @else if (rotApprovalStatus(p.id) === 'approved') {
+            <div class="status-card">
+              <i class="ti ti-circle-check status-icon" style="color:#16a34a;"></i>
+              <div class="status-msg">Final RoT approved</div>
+              <div class="status-sub">{{ statusMsg(p) }}</div>
+            </div>
+            <div class="detail-section" style="margin-top:14px; background:rgba(22,163,74,.04); border-color:rgba(22,163,74,.18);">
+              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-certificate" style="color:#16a34a;"></i> Report on Title approved</div>
+              <div style="font-size:13px; color:#374151;">Your approval of the Final Report on Title has been recorded. The legal team will proceed to exchange.</div>
             </div>
 
           } @else {

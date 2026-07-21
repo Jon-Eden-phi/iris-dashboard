@@ -110,6 +110,7 @@ const TX_UPLOADED_ITEMS: ReadonlySet<string> = new Set(['search_la_r', 'search_w
 
 const LEGAL_DATA_KEY = 'iris_legal_data';
 const DR_KEY = 'iris_data_room';
+const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 
 @Component({
   selector: 'app-legal-portal',
@@ -151,6 +152,10 @@ export class LegalPortalComponent {
     JSON.parse(localStorage.getItem(DR_KEY) ?? '[]')
   );
 
+  private rotApprovalsSig = signal<Record<string, { status: string; approvedBy?: string }>>(
+    this._loadRotApprovals()
+  );
+
   constructor() {
     effect(() => {
       const matters = this.activeMatters();
@@ -183,6 +188,9 @@ export class LegalPortalComponent {
         if (e.key === 'iris_tx_data') this.txDataSig.set(this._txRaw());
         if (e.key === DR_KEY) {
           try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
+        }
+        if (e.key === ROT_APPROVALS_KEY) {
+          try { this.rotApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
       });
     }
@@ -281,6 +289,18 @@ export class LegalPortalComponent {
     try { return JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}'); } catch { return {}; }
   }
 
+  private _loadRotApprovals(): Record<string, { status: string; approvedBy?: string }> {
+    try { return JSON.parse(localStorage.getItem(ROT_APPROVALS_KEY) ?? '{}'); } catch { return {}; }
+  }
+
+  rotClientApproved(propId: string): boolean {
+    return this.rotApprovalsSig()[propId]?.status === 'approved';
+  }
+
+  rotClientPending(propId: string): boolean {
+    return this.rotApprovalsSig()[propId]?.status === 'pending';
+  }
+
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
     return ['search_la_r','search_water','search_env','survey_report','contract_rev','rot_query_addressed','title_sent','funds']
@@ -351,6 +371,14 @@ export class LegalPortalComponent {
     };
     reader.readAsDataURL(file);
     this.dataRoom.update(list => [...list, entry]);
+    if (docType === 'Final Report on Title') {
+      const current = { ...this.rotApprovalsSig() };
+      if (current[propId]?.status !== 'approved') {
+        current[propId] = { status: 'pending' };
+        localStorage.setItem(ROT_APPROVALS_KEY, JSON.stringify(current));
+        this.rotApprovalsSig.set(current);
+      }
+    }
     this.uploadDocType.set('');
     this.uploadFileName.set('');
     this.uploadNote.set('');

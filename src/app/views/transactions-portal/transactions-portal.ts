@@ -125,6 +125,9 @@ export class TransactionsPortalComponent {
         if (e.key === this.DR_KEY) {
           try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
         }
+        if (e.key === this.ROT_APPROVALS_KEY) {
+          try { this.rotApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
       });
     }
 
@@ -373,6 +376,7 @@ export class TransactionsPortalComponent {
 
   private readonly TX_DATA_KEY = 'iris_tx_data';
   private readonly DR_KEY = 'iris_data_room';
+  private readonly ROT_APPROVALS_KEY = 'iris_rot_approvals';
 
   txData = signal<Record<string, TxPropertyData>>(
     JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
@@ -380,6 +384,10 @@ export class TransactionsPortalComponent {
 
   dataRoom = signal<DataRoomFile[]>(
     JSON.parse(localStorage.getItem('iris_data_room') ?? '[]')
+  );
+
+  private rotApprovalsSig = signal<Record<string, { status: string }>>(
+    JSON.parse(localStorage.getItem('iris_rot_approvals') ?? '{}')
   );
 
   pipelineSearch = signal('');
@@ -728,6 +736,8 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Draft Report on Title', 'Report on Title']) || this.legalCheck(propId, 'title_report');
     if (key === 'final_rot_received')
       return this.txHasDocs(propId, ['Final Report on Title', 'Report on Title']);
+    if (key === 'final_rot_approved')
+      return this.rotApprovalsSig()[propId]?.status === 'approved';
     return false;
   }
 
@@ -749,7 +759,7 @@ export class TransactionsPortalComponent {
       if (!cl['searches_received'])         return { label: 'Searches in Progress', done: false };
       if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_received'))       return { label: 'Final RoT Awaited from Lawyers', done: false };
-      if (!cl['final_rot_approved'])        return { label: 'Final RoT – Pending Approval', done: false };
+      if (!done('final_rot_approved'))      return { label: 'Final RoT – Pending Approval', done: false };
       return { label: 'Conveyancing Complete', done: true };
     }
     if (stage === 'Refurbishment') {
