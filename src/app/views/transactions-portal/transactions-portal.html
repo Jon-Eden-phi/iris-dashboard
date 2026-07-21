@@ -2428,6 +2428,7 @@
 }
 
 @if (showDraftRotModal()) {
+  <input type="file" id="rot-file-input" style="display:none" accept=".pdf,.doc,.docx,.xls,.xlsx" (change)="onRotFileSelected($event)">
   <div class="tx-modal-backdrop" (click)="showDraftRotModal.set(false)"></div>
   <div class="tx-modal" (click)="$event.stopPropagation()">
     <div class="tx-modal-header">
@@ -2451,11 +2452,18 @@
       <label class="form-label">Note <span style="font-weight:400; color:var(--text3);">(optional)</span></label>
       <textarea class="form-input" style="min-height:60px; resize:vertical;" placeholder="Add a note…"
                 [value]="uploadRotNote()" (input)="uploadRotNote.set($any($event.target).value)"></textarea>
-      <div style="margin-top:14px; padding:20px; border:2px dashed var(--border); border-radius:8px; text-align:center; color:var(--text3); font-size:13px;">
-        <i class="ti ti-cloud-upload" style="font-size:26px; display:block; margin-bottom:6px; color:var(--accent);"></i>
-        Drag and drop to upload Draft RoT<br>
-        <span style="color:var(--accent); font-weight:600; cursor:pointer;">or browse files</span>
-        <div style="font-size:11px; margin-top:6px;">PDF, Word, Excel supported · up to 15 MB</div>
+      <div style="margin-top:14px; padding:20px; border:2px dashed var(--border); border-radius:8px; text-align:center; color:var(--text3); font-size:13px; cursor:pointer;"
+           (click)="triggerRotFileInput()">
+        @if (uploadRotFile()) {
+          <i class="ti ti-file-check" style="font-size:26px; display:block; margin-bottom:6px; color:#16a34a;"></i>
+          <span style="color:var(--text1); font-weight:600;">{{ uploadRotFile()!.name }}</span>
+          <div style="font-size:11px; margin-top:4px;">Click to change file</div>
+        } @else {
+          <i class="ti ti-cloud-upload" style="font-size:26px; display:block; margin-bottom:6px; color:var(--accent);"></i>
+          Drag and drop to upload Draft RoT<br>
+          <span style="color:var(--accent); font-weight:600;">or browse files</span>
+          <div style="font-size:11px; margin-top:6px;">PDF, Word, Excel supported · up to 15 MB</div>
+        }
       </div>
     </div>
     <div class="tx-modal-footer">

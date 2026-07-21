@@ -330,6 +330,7 @@ export class TransactionsPortalComponent {
   ];
   uploadRotNote         = signal('');
   uploadRotFileName     = signal('');
+  uploadRotFile         = signal<File | null>(null);
   contractPackNote      = signal('');
   contractPackFileName  = signal('');
   contractReceivedDate  = signal('');
@@ -1092,13 +1093,25 @@ export class TransactionsPortalComponent {
     this.showSurveyModal.set(true);
   }
 
+  onRotFileSelected(event: Event): void {
+    const f = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.uploadRotFile.set(f);
+    if (f && !this.uploadRotFileName()) this.uploadRotFileName.set(f.name);
+  }
+
+  triggerRotFileInput(): void {
+    this.doc.getElementById('rot-file-input')?.click();
+  }
+
   uploadDraftRot(): void {
     const p = this.selectedProperty();
     if (!p) return;
     const note = this.uploadRotNote().trim();
-    const fileName = this.uploadRotFileName() || 'Draft_RoT.pdf';
+    const file = this.uploadRotFile();
+    const fileName = this.uploadRotFileName().trim() || file?.name || 'Draft_RoT.pdf';
+    const entryId = 'dr_' + Date.now();
     this.dataRoom.update(list => [...list, {
-      id: 'dr_' + Date.now(),
+      id: entryId,
       propertyId: p.id,
       stage: p.stage,
       docType: 'Draft Report on Title',
@@ -1107,6 +1120,15 @@ export class TransactionsPortalComponent {
       uploadedAt: new Date().toLocaleDateString('en-GB'),
       note,
     }]);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.dataRoom.update(list =>
+          list.map(f => f.id === entryId ? { ...f, url: reader.result as string } : f)
+        );
+      };
+      reader.readAsDataURL(file);
+    }
     this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
     this.data.addActivity(p.id, {
       id: 'rot_draft_' + Date.now(),
@@ -1121,6 +1143,9 @@ export class TransactionsPortalComponent {
     this.showDraftRotModal.set(false);
     this.uploadRotNote.set('');
     this.uploadRotFileName.set('');
+    this.uploadRotFile.set(null);
+    const input = this.doc.getElementById('rot-file-input') as HTMLInputElement | null;
+    if (input) input.value = '';
     this.showToast('Draft RoT uploaded — saved to Data Room', 'ti-upload');
   }
 
