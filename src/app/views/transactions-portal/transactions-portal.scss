@@ -402,6 +402,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   z-index: 901;
   background: var(--surface);
   border-radius: var(--radius);
@@ -432,7 +435,7 @@
   color: var(--text2);
   font-size: 13px;
 }
-.tx-modal-body   { padding: 18px 20px; }
+.tx-modal-body   { padding: 18px 20px; overflow-y: auto; flex: 1; }
 .tx-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
 .tx-form-label   { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 5px; display: block; }
 
