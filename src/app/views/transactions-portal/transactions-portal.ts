@@ -337,7 +337,7 @@ export class TransactionsPortalComponent {
 
   readonly stageDocTypes: Record<string, string[]> = {
     MemorandumOfSale: ['MoS', 'Offer Letter', 'ID Verification', 'Property Information Form', 'Other'],
-    Legals:           ['Contract Pack', 'Report on Title', 'Searches', 'Transfer Deed', 'Enquiries', 'Replies to Enquiries', 'Other'],
+    Legals:           ['Contract Pack', 'Draft Report on Title', 'Report on Title', 'Annexure', 'Searches', 'Transfer Deed', 'Enquiries', 'Replies to Enquiries', 'Other'],
     Refurbishment:    ['Survey Report', 'Scope of Works', 'Contractor Quote', 'EPC', 'Building Regulations', 'Other'],
     Lettings:         ['Completion Statement', 'Transfer Deed', 'Land Registry', 'Tenancy Agreement', 'Inventory', 'Other'],
   };
@@ -601,9 +601,9 @@ export class TransactionsPortalComponent {
       { key: 'searches_ordered',       label: 'Searches & survey instructed' },
       { key: 'survey_report_received', label: 'Survey report received' },
       { key: 'searches_received',      label: 'Search results received' },
-      { key: 'draft_rot_received',     label: 'Draft RoT received' },
-      { key: 'enquiries_raised',       label: 'Enquiries raised' },
-      { key: 'final_rot_received',     label: 'Final RoT received' },
+      { key: 'draft_rot_received',     label: 'Draft RoT received from lawyers' },
+      { key: 'enquiries_raised',       label: 'Query raised on draft RoT' },
+      { key: 'final_rot_received',     label: 'Final RoT received from lawyers' },
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
     ],
     Refurbishment: [
@@ -724,6 +724,10 @@ export class TransactionsPortalComponent {
       return this.legalCheck(propId, 'contract_rev');
     if (key === 'survey_report_received')
       return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
+    if (key === 'draft_rot_received')
+      return this.txHasDocs(propId, ['Draft Report on Title', 'Report on Title']) || this.legalCheck(propId, 'title_report');
+    if (key === 'final_rot_received')
+      return this.txHasDocs(propId, ['Report on Title', 'Draft Report on Title']);
     return false;
   }
 
@@ -743,9 +747,9 @@ export class TransactionsPortalComponent {
       if (!cl['searches_ordered'])          return { label: 'Searches & Survey to Instruct', done: false };
       if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
       if (!cl['searches_received'])         return { label: 'Searches in Progress', done: false };
-      if (!cl['draft_rot_received'])        return { label: 'Draft RoT Pending', done: false };
-      if (!cl['enquiries_raised'])          return { label: 'Enquiries Required', done: false };
-      if (!cl['final_rot_received'])        return { label: 'Final RoT Pending', done: false };
+      if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
+      if (!cl['enquiries_raised'])           return { label: 'Raise Query on Draft RoT', done: false };
+      if (!done('final_rot_received'))       return { label: 'Final RoT Awaited from Lawyers', done: false };
       if (!cl['final_rot_approved'])        return { label: 'Final RoT – Pending Approval', done: false };
       return { label: 'Conveyancing Complete', done: true };
     }

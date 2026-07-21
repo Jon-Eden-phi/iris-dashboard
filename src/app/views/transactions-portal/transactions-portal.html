@@ -909,12 +909,6 @@
                       <span><strong>A report on title is in the data room</strong> — review and confirm receipt.</span>
                     </div>
                   }
-                  @if (action.key === 'enquiries_raised' && !getTxData(p.id).checklist['enquiries_raised'] && legalCheck(p.id, 'enquiries_out')) {
-                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor has raised enquiries</strong> — confirm receipt below.</span>
-                    </div>
-                  }
                   @if (action.key === 'sols_confirmed' && txHasDocs(p.id, ['Memorandum of Sale', 'MoS'])) {
                     <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
                       <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
@@ -1008,13 +1002,16 @@
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'draft_rot_received') {
                       @if (txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Draft Report on Title', ['Report on Title', 'Draft Report on Title']); $event.stopPropagation()">
-                          <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
-                        </button>
+                        <div style="display:flex; gap:6px; margin-left:auto;" (click)="$event.stopPropagation()">
+                          <button class="btn-ghost" style="font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Draft Report on Title', ['Report on Title', 'Draft Report on Title'])">
+                            <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
+                          </button>
+                          <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Annexure'); uploadDocTypeFilter.set(['Annexure']); showUploadModal.set(true)">
+                            <i class="ti ti-paperclip" style="font-size:11px;"></i> Upload annexures
+                          </button>
+                        </div>
                       } @else {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showDraftRotModal.set(true); $event.stopPropagation()">
-                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload draft RoT
-                        </button>
+                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting from lawyers</span>
                       }
                     } @else if (p.stage === 'Refurbishment' && action.key === 'surveys_ordered') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
@@ -1026,9 +1023,7 @@
                           <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
                         </button>
                       } @else {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Report on Title'); showUploadModal.set(true); $event.stopPropagation()">
-                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload final RoT
-                        </button>
+                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting from lawyers</span>
                       }
                     } @else if (p.stage === 'Refurbishment' && action.key === 'scope_prepared') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAdditionalWorksModal.set(true); $event.stopPropagation()">
