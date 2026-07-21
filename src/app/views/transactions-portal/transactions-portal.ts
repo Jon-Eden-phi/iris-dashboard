@@ -630,9 +630,8 @@ export class TransactionsPortalComponent {
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
     ],
     Refurbishment: [
-      { key: 'site_visits_booked',      label: 'Site visits booked' },
-      { key: 'survey_reports_received', label: 'Survey reports received' },
-      { key: 'scope_prepared',          label: 'Scope of works prepared' },
+      { key: 'site_visits_booked', label: 'Site visits booked' },
+      { key: 'scope_prepared',     label: 'Scope of works prepared' },
     ],
     Lettings: [
       { key: 'contract_pack',          label: 'Contract pack received' },
