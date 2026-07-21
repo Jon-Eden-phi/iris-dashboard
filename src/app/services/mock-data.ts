@@ -32,8 +32,10 @@ export class MockDataService {
     { id: 'p007', address: '148 Malvern Way',         postcode: 'TN34 3QG', phase: 'Hastings ESPH', stage: 'Refurbishment',    beds: 3, type: 'Terraced',      epcBefore: { r: 'D', s: 65 }, financial: { ap: 225000, capex: 72000, tc: 12874, yield: 5.2 }, agreedPrice: 210000, status: 'active' },
     { id: 'p008', address: '26 Dunster Road',         postcode: 'BS4 1BU',  phase: 'Bristol P3',    stage: 'Refurbishment',    beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 70 }, financial: { ap: 290000, capex: 32000, tc: 5200, yield: 5.0 }, agreedPrice: 270000, status: 'active' },
 
-    // ── Demo: fresh MoS property to walk through TX flow ─────────────────────
+    // ── Demo: fresh MoS properties to walk through TX flow ──────────────────
     { id: 'p011', address: '41 Ferndale Road', postcode: 'LS6 1AH', phase: 'Leeds P1', stage: 'MemorandumOfSale', beds: 3, type: 'Semi-Detached', epcBefore: { r: 'D', s: 62 }, financial: { ap: 235000, capex: 45000, tc: 8500, yield: 5.8 }, agreedPrice: 225000, status: 'active', tenure: 'Freehold', floodRisk: 'Low', daysOnMarket: 38, description: 'Three-bedroom semi-detached in Hyde Park, Leeds. Solid Victorian bay-fronted terrace. EPC D — target C via insulation and boiler upgrade. Strong rental demand from professionals and post-grads.' },
+    { id: 'p012', address: '9 Cotham Hill',    postcode: 'BS6 6LD',  phase: 'Bristol P3', stage: 'MemorandumOfSale', beds: 3, type: 'Mid-Terrace',    epcBefore: { r: 'E', s: 45 }, financial: { ap: 320000, capex: 34000, tc: 5100, yield: 5.2 }, agreedPrice: 315000, status: 'active', tenure: 'Freehold', floodRisk: 'Low', daysOnMarket: 22, description: 'Three-bedroom mid-terrace in Cotham, Bristol. Well-maintained Victorian terrace with original features. EPC E — clear uplift path via loft insulation and boiler replacement.' },
+    { id: 'p013', address: '52 Knowle Road',   postcode: 'BS4 2DX',  phase: 'Bristol P3', stage: 'MemorandumOfSale', beds: 2, type: 'End-Terrace',    epcBefore: { r: 'F', s: 32 }, financial: { ap: 220000, capex: 52000, tc: 4200, yield: 5.6 }, agreedPrice: 215000, status: 'active', tenure: 'Freehold', floodRisk: 'Low', daysOnMarket: 41, description: 'Two-bedroom end-terrace in Knowle, Bristol. Requires full insulation and heating upgrade to reach EPC C. Good rental demand in area — strong yield potential post-refurb.' },
 
     // ── Lettings / Exchange & Completion (real) ──────────────────────────────
     { id: 'p009', address: '26 Norton Farm Road',     postcode: 'BS10 7ER', phase: 'Bristol P3',    stage: 'Lettings',         beds: 3, type: 'Semi-Detached', epcBefore: { r: 'C', s: 75 }, epcAfter: { r: 'B', s: 84 }, financial: { ap: 335000, capex: 18000, tc: 4800, sp: 850, yield: 5.8 }, agreedPrice: 330000, status: 'active', isInvestorDeal: true, tenure: 'Freehold', lha: 12480, marketRent: 18000, floodRisk: 'Low', leaseRemaining: 'N/A', daysOnMarket: 62, description: 'Three-bedroom semi-detached property in Brentry, Bristol. Benefits from driveway parking, south-facing rear garden and recently upgraded kitchen. EPC C — target B post-refurb.', viewing: { agentName: 'Rachel Ford', agentCompany: 'Fox & Sons', agentEmail: 'r.ford@foxandsons.co.uk', agentPhone: '0117 902 5000', date: '2026-01-12', time: '10:00', attendee: 'Hannah Briggs', reportCondition: 'good', reportNotes: 'Three-bedroom semi in good structural order. Kitchen upgraded 2022. South-facing garden and driveway. EPC C — strong insulation baseline. Minimal refurb scope.' } },
@@ -49,6 +51,7 @@ export class MockDataService {
     } else {
       this._seedDemoData();
     }
+    this._backfillProperties();
 
     // Sync across browser tabs — when one tab mutates, all others update instantly
     window.addEventListener('storage', e => {
@@ -552,6 +555,19 @@ export class MockDataService {
       lostDate: new Date().toISOString().split('T')[0],
       activityLog: [...(p.activityLog ?? []), this._logEntry(`Property marked as lost. Reason: ${reason}.`, author, 'warning')],
     }));
+  }
+
+  private _backfillProperties(): void {
+    const BACKFILL: Property[] = [
+      { id: 'p012', address: '9 Cotham Hill',  postcode: 'BS6 6LD', phase: 'Bristol P3', stage: 'MemorandumOfSale', beds: 3, type: 'Mid-Terrace', epcBefore: { r: 'E', s: 45 }, financial: { ap: 320000, capex: 34000, tc: 5100, yield: 5.2 }, agreedPrice: 315000, status: 'active', tenure: 'Freehold', floodRisk: 'Low', daysOnMarket: 22, description: 'Three-bedroom mid-terrace in Cotham, Bristol. Well-maintained Victorian terrace with original features. EPC E — clear uplift path via loft insulation and boiler replacement.' },
+      { id: 'p013', address: '52 Knowle Road', postcode: 'BS4 2DX', phase: 'Bristol P3', stage: 'MemorandumOfSale', beds: 2, type: 'End-Terrace', epcBefore: { r: 'F', s: 32 }, financial: { ap: 220000, capex: 52000, tc: 4200, yield: 5.6 }, agreedPrice: 215000, status: 'active', tenure: 'Freehold', floodRisk: 'Low', daysOnMarket: 41, description: 'Two-bedroom end-terrace in Knowle, Bristol. Requires full insulation and heating upgrade to reach EPC C. Good rental demand in area — strong yield potential post-refurb.' },
+    ];
+    const existing = new Set(this._props().map(p => p.id));
+    const toAdd = BACKFILL.filter(p => !existing.has(p.id));
+    if (toAdd.length) {
+      this._props.update(list => [...list, ...toAdd]);
+      this._saveToStorage();
+    }
   }
 
   addProperty(p: Omit<Property, 'id' | 'stage' | 'status'>): void {
