@@ -301,6 +301,11 @@
                             <i class="ti ti-paperclip" style="font-size:11px;"></i> Annexure
                           </button>
                         </div>
+                      } @else if (item.key === 'rot_query_addressed') {
+                        <button class="lg-btn-outline" style="font-size:11px; padding:3px 9px; display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:auto;"
+                                (click)="uploadDocType.set('Report on Title'); showUploadModal.set(true); $event.stopPropagation()">
+                          <i class="ti ti-upload" style="font-size:11px;"></i> Upload final RoT
+                        </button>
                       } @else if (itemDocs.length > 0) {
                         <button class="lg-doc-chip" (click)="openReview(p.id, item.key, item.label, itemDocs)"
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
