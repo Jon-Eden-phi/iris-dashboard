@@ -938,9 +938,8 @@
                                    || (action.key === 'survey_report_received' && _surveyDoc)
                                    || (action.key === 'searches_received' && txHasAllSearches(p.id));
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
-                  @let _isQueryRow = p.stage === 'Legals' && action.key === 'enquiries_raised' && !_checked;
                   <div
-                    (click)="!_autoChecked && (_isQueryRow ? openRaiseQueryModal(p.id) : toggleChecklist(p.id, action.key, action.label))"
+                    (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
                     style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:var(--surface); font-size:13px; transition:.12s;"
                     [style.cursor]="_autoChecked ? 'default' : 'pointer'"
                     [style.background]="_checked ? 'rgba(22,163,74,0.04)' : 'var(--surface)'">
@@ -958,12 +957,6 @@
                                 (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : action.key === 'searches_received' ? ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
-                      } @else if (action.key === 'enquiries_raised') {
-                        @if (legalCheck(p.id, 'rot_query_addressed')) {
-                          <span style="font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Addressed by lawyers</span>
-                        } @else {
-                          <span style="font-size:11px; color:#b45309; font-weight:500;">Awaiting lawyers' response</span>
-                        }
                       } @else {
                         <span style="font-size:11px; color:#16a34a; font-weight:600;">
                           @if (_autoChecked) { Confirmed by solicitor } @else { Done }
@@ -1020,10 +1013,6 @@
                     } @else if (p.stage === 'Refurbishment' && action.key === 'surveys_ordered') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order surveys
-                      </button>
-                    } @else if (p.stage === 'Legals' && action.key === 'enquiries_raised') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openRaiseQueryModal(p.id); $event.stopPropagation()">
-                        <i class="ti ti-message-question" style="font-size:11px;"></i> Raise query
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_received') {
                       @if (txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
@@ -2560,31 +2549,6 @@
           <i class="ti ti-scale" style="font-size:13px;"></i> Instruct solicitor
         </button>
       }
-    </div>
-  </div>
-}
-
-@if (showRaiseQueryModal()) {
-  <div class="tx-modal-backdrop" (click)="showRaiseQueryModal.set(false)"></div>
-  <div class="tx-modal" (click)="$event.stopPropagation()">
-    <div class="tx-modal-header">
-      <span class="tx-modal-title"><i class="ti ti-message-question" style="font-size:14px; margin-right:6px;"></i>Query on Draft RoT</span>
-      <button class="tx-modal-close" (click)="showRaiseQueryModal.set(false)"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="tx-modal-body">
-      <p style="font-size:13px; color:var(--text2); margin-bottom:14px;">Your query will be visible to the instructed solicitor so they can address it before uploading the final Report on Title.</p>
-      <label class="form-label">Query</label>
-      <textarea class="form-input" rows="5" placeholder="Describe your query on the draft Report on Title…"
-                style="resize:vertical; min-height:100px; width:100%;"
-                [value]="rotQueryText()"
-                (input)="rotQueryText.set($any($event.target).value)"></textarea>
-    </div>
-    <div class="tx-modal-footer">
-      <button class="btn-ghost" style="margin-right:auto;" (click)="submitRaiseQuery(false)">No queries — mark done</button>
-      <button class="btn-ghost" (click)="showRaiseQueryModal.set(false); rotQueryText.set('')">Cancel</button>
-      <button class="btn-primary" [disabled]="!rotQueryText().trim()" (click)="submitRaiseQuery(true)">
-        <i class="ti ti-send" style="font-size:13px;"></i> Send to lawyers
-      </button>
     </div>
   </div>
 }

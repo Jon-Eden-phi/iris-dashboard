@@ -296,9 +296,6 @@ export class TransactionsPortalComponent {
   showInstructSolicitorModal  = signal(false);
   instructSolicitorName       = signal('');
   showReviewDocModal          = signal(false);
-  showRaiseQueryModal         = signal(false);
-  rotQueryText                = signal('');
-  raiseQueryPropId            = signal<string | null>(null);
   showRequestFundsModal           = signal(false);
   showAuthorityModal              = signal(false);
   showInvestorAuthorityModal      = signal(false);
@@ -606,7 +603,6 @@ export class TransactionsPortalComponent {
       { key: 'survey_report_received', label: 'Survey report received' },
       { key: 'searches_received',      label: 'Search results received' },
       { key: 'draft_rot_received',     label: 'Draft RoT received from lawyers' },
-      { key: 'enquiries_raised',       label: 'Query raised on draft RoT' },
       { key: 'final_rot_received',     label: 'Final RoT received from lawyers' },
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
     ],
@@ -752,7 +748,6 @@ export class TransactionsPortalComponent {
       if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
       if (!cl['searches_received'])         return { label: 'Searches in Progress', done: false };
       if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
-      if (!cl['enquiries_raised'])           return { label: 'Raise Query on Draft RoT', done: false };
       if (!done('final_rot_received'))       return { label: 'Final RoT Awaited from Lawyers', done: false };
       if (!cl['final_rot_approved'])        return { label: 'Final RoT – Pending Approval', done: false };
       return { label: 'Conveyancing Complete', done: true };
@@ -945,6 +940,9 @@ export class TransactionsPortalComponent {
     const ctx = this.reviewDocContext();
     const note = this.requestChangesNote().trim();
     if (!ctx || !note) return;
+    if (ctx.checklistKey === 'draft_rot_received') {
+      this.setTxData(ctx.propId, { rotQuery: note });
+    }
     this.data.addActivity(ctx.propId, {
       id: 'changes_' + Date.now(),
       text: `Changes requested on ${ctx.title}: ${note}`,
@@ -1089,28 +1087,6 @@ export class TransactionsPortalComponent {
 
   solicitorNameFor(propId: string): string {
     return this.getTxData(propId)?.solicitorName ?? '';
-  }
-
-  openRaiseQueryModal(propId: string): void {
-    this.rotQueryText.set(this.getTxData(propId).rotQuery ?? '');
-    this.raiseQueryPropId.set(propId);
-    this.showRaiseQueryModal.set(true);
-  }
-
-  submitRaiseQuery(withText: boolean): void {
-    const propId = this.raiseQueryPropId();
-    if (!propId) return;
-    const text = withText ? this.rotQueryText().trim() : '';
-    if (withText && !text) return;
-    if (text) this.setTxData(propId, { rotQuery: text });
-    const existing = this.getTxData(propId);
-    const label = 'Query raised on draft RoT';
-    const newLog = [{ text: label, ts: new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }), author: this.auth.currentUser()?.name ?? 'TX Team' }, ...existing.txLog];
-    this.setTxData(propId, { checklist: { ...existing.checklist, enquiries_raised: true }, txLog: newLog });
-    this.showRaiseQueryModal.set(false);
-    this.rotQueryText.set('');
-    this.raiseQueryPropId.set(null);
-    this.showToast(label, 'ti-message-question');
   }
 
   openSearchesModal(propId: string): void {
