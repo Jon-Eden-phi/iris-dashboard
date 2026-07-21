@@ -957,6 +957,12 @@
                                 (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : action.key === 'searches_received' ? ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
+                      } @else if (action.key === 'enquiries_raised') {
+                        @if (legalCheck(p.id, 'rot_query_addressed')) {
+                          <span style="font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Addressed by lawyers</span>
+                        } @else {
+                          <span style="font-size:11px; color:#b45309; font-weight:500;">Awaiting lawyers' response</span>
+                        }
                       } @else {
                         <span style="font-size:11px; color:#16a34a; font-weight:600;">
                           @if (_autoChecked) { Confirmed by solicitor } @else { Done }

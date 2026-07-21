@@ -90,8 +90,9 @@ const CHECKLIST_GROUPS = [
     label: 'Report on Title',
     icon: 'ti-certificate',
     items: [
-      { key: 'title_report', label: 'Report on title prepared' },
-      { key: 'title_sent',   label: 'Report sent to client' },
+      { key: 'title_report',        label: 'Report on title prepared' },
+      { key: 'rot_query_addressed', label: 'TX query on draft RoT addressed' },
+      { key: 'title_sent',          label: 'Report sent to client' },
     ],
   },
   {

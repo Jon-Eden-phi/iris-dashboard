@@ -241,6 +241,12 @@
                       <span><strong>TX team has instructed searches</strong> — please order local authority, water &amp; drainage, and environmental searches.</span>
                     </div>
                   }
+                  @if (group.label === 'Report on Title' && txCheck(p.id, 'enquiries_raised') && !getMatter(p.id).checklist['rot_query_addressed']) {
+                    <div style="background:rgba(180,83,9,0.07); border:1px solid rgba(180,83,9,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#b45309; display:flex; align-items:flex-start; gap:7px;">
+                      <i class="ti ti-alert-circle" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                      <span><strong>Query raised by TX team</strong> — please address before uploading the final Report on Title.</span>
+                    </div>
+                  }
                   @if (group.label === 'Exchange & Completion' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {
                     <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
                       <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
