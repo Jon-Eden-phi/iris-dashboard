@@ -740,7 +740,10 @@
                                 [style.color]="_sv2HasDoc ? 'var(--text3)' : 'var(--text1)'"
                                 [style.text-decoration]="_sv2HasDoc ? 'line-through' : 'none'">{{ sv2.type }} report received</span>
                           @if (_sv2HasDoc) {
-                            <span style="font-size:11px; color:#16a34a; font-weight:600;">Done</span>
+                            <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
+                                    (click)="openReviewModal(p.id, action.key, sv2.type + ' report', sv2.type + ' report', [surveyReportDocType(sv2.type)]); $event.stopPropagation()">
+                              <i class="ti ti-eye" style="font-size:11px;"></i> View doc
+                            </button>
                           } @else if (!svSurveysOrdered) {
                             <span style="font-size:11px; color:var(--text3);">Survey required first</span>
                           } @else {
@@ -769,7 +772,15 @@
                           <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order survey
                         </button>
                       } @else if (svChecked) {
-                        <span style="font-size:11px; color:#16a34a; font-weight:600;">Done</span>
+                        @let _svItemDocs = txItemDocTypes(action.key);
+                        @if (_svItemDocs.length && txHasDocs(p.id, _svItemDocs)) {
+                          <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
+                                  (click)="openReviewModal(p.id, action.key, action.label, action.label, txItemDocTypes(action.key)); $event.stopPropagation()">
+                            <i class="ti ti-eye" style="font-size:11px;"></i> View doc
+                          </button>
+                        } @else {
+                          <span style="font-size:11px; color:#16a34a; font-weight:600;">Done</span>
+                        }
                       }
                     </div>
                     } <!-- close @else -->

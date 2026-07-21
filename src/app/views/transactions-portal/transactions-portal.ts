@@ -1108,6 +1108,21 @@ export class TransactionsPortalComponent {
     return 'Survey Report - ' + surveyType;
   }
 
+  txItemDocTypes(key: string): string[] {
+    switch (key) {
+      case 'mos_received':
+      case 'sols_confirmed':     return ['Memorandum of Sale', 'MoS'];
+      case 'contract_pack_received':
+      case 'contract_pack':      return ['Contract Pack', 'Draft Contract'];
+      case 'draft_rot_received': return ['Draft Report on Title', 'Report on Title'];
+      case 'final_rot_received': return ['Final Report on Title', 'Report on Title'];
+      case 'searches_received':  return ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'];
+      case 'survey_report_received':
+      case 'survey_reports_received': return ['Survey Report', 'HomeBuyer Report', 'Structural Survey'];
+      default:                   return [];
+    }
+  }
+
   txHasAllSearches(propId: string): boolean {
     return this.txHasDocs(propId, ['Local Authority Search']) &&
            this.txHasDocs(propId, ['Water & Drainage Search']) &&
