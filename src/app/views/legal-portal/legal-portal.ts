@@ -110,6 +110,7 @@ const TX_UPLOADED_ITEMS: ReadonlySet<string> = new Set(['search_la_r', 'search_w
 const LEGAL_DATA_KEY = 'iris_legal_data';
 const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
+const SURVEYS_KEY = 'iris_surveys';
 
 @Component({
   selector: 'app-legal-portal',
@@ -151,6 +152,11 @@ export class LegalPortalComponent {
     JSON.parse(localStorage.getItem(DR_KEY) ?? '[]')
   );
 
+  // Ordered surveys from TX portal
+  private surveysData = signal<{ propertyId: string; type: string }[]>(
+    JSON.parse(localStorage.getItem(SURVEYS_KEY) ?? '[]')
+  );
+
   private rotApprovalsSig = signal<Record<string, { status: string; approvedBy?: string }>>(
     this._loadRotApprovals()
   );
@@ -190,6 +196,9 @@ export class LegalPortalComponent {
         }
         if (e.key === ROT_APPROVALS_KEY) {
           try { this.rotApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
+        if (e.key === SURVEYS_KEY) {
+          try { this.surveysData.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
         }
       });
     }
@@ -313,6 +322,15 @@ export class LegalPortalComponent {
   // ── Document room ──────────────────────────────────────
   docsForProperty(propId: string): DataRoomFile[] {
     return this.dataRoom().filter(f => f.propertyId === propId);
+  }
+
+  surveysForProp(propId: string): { propertyId: string; type: string }[] {
+    return this.surveysData().filter(s => s.propertyId === propId);
+  }
+
+  docsForSurveyType(propId: string, surveyType: string): DataRoomFile[] {
+    const docType = 'Survey Report — ' + surveyType;
+    return this.dataRoom().filter(f => f.propertyId === propId && f.docType === docType);
   }
 
   docsForItem(propId: string, itemKey: string): DataRoomFile[] {

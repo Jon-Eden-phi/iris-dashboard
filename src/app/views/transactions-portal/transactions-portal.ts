@@ -9,6 +9,8 @@ import { Property } from '../../models/property.model';
 
 type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record' | 'pipeline';
 
+const SURVEYS_KEY = 'iris_surveys';
+
 const TX_STAGES = new Set(['MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings']);
 const ACQ_STAGES = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiations']);
 
@@ -28,6 +30,7 @@ const ALL_STAGES = ['Draft','ClientApproval','Viewing','Negotiations','Memorandu
 
 interface Survey {
   property: string;
+  propertyId: string;
   type: string;
   provider: string;
   instructed: string;
@@ -118,6 +121,9 @@ export class TransactionsPortalComponent {
     });
     effect(() => {
       localStorage.setItem(this.DR_KEY, JSON.stringify(this.dataRoom()));
+    });
+    effect(() => {
+      localStorage.setItem(SURVEYS_KEY, JSON.stringify(this.surveys()));
     });
     const win = this.doc.defaultView;
     if (win) {
@@ -433,14 +439,17 @@ export class TransactionsPortalComponent {
     { id: 'Hastings ESPH', label: 'Hastings ESPH',      color: '#E8601C' },
   ];
 
-  surveys = signal<Survey[]>([
-    { property: '19 Beaumont Road',   type: 'Electrical (EICR)',    provider: 'Aziza Surveys', instructed: '23/06/2026', siteVisit: '27/06/2026', returned: null,          status: 'Booked',          cost: 180 },
-    { property: '19 Beaumont Road',   type: 'Gas safety',           provider: 'Aziza Surveys', instructed: '23/06/2026', siteVisit: '27/06/2026', returned: null,          status: 'Booked',          cost: 90  },
-    { property: '675 Whitchurch Lane',type: 'Condition survey',     provider: 'BRE',           instructed: '14/06/2026', siteVisit: '18/06/2026', returned: '24/06/2026',  status: 'Returned',        cost: 420 },
-    { property: '675 Whitchurch Lane',type: 'Roof condition',       provider: 'BRE',           instructed: '25/06/2026', siteVisit: null,          returned: null,          status: 'Instructed',      cost: 240 },
-    { property: '14 Lanercost Road',  type: 'Valuation',            provider: 'Savills',       instructed: '10/06/2026', siteVisit: '13/06/2026', returned: '17/06/2026',  status: 'Returned',        cost: 350 },
-    { property: '14 Lanercost Road',  type: 'Structural',           provider: 'BRE',           instructed: '18/06/2026', siteVisit: '22/06/2026', returned: null,          status: 'Awaiting report', cost: 580 },
-  ]);
+  private readonly _surveySeed: Survey[] = [
+    { property: '19 Beaumont Road',   propertyId: '', type: 'Electrical (EICR)',    provider: 'Aziza Surveys', instructed: '23/06/2026', siteVisit: '27/06/2026', returned: null,          status: 'Booked',          cost: 180 },
+    { property: '19 Beaumont Road',   propertyId: '', type: 'Gas safety',           provider: 'Aziza Surveys', instructed: '23/06/2026', siteVisit: '27/06/2026', returned: null,          status: 'Booked',          cost: 90  },
+    { property: '675 Whitchurch Lane',propertyId: '', type: 'Condition survey',     provider: 'BRE',           instructed: '14/06/2026', siteVisit: '18/06/2026', returned: '24/06/2026',  status: 'Returned',        cost: 420 },
+    { property: '675 Whitchurch Lane',propertyId: '', type: 'Roof condition',       provider: 'BRE',           instructed: '25/06/2026', siteVisit: null,          returned: null,          status: 'Instructed',      cost: 240 },
+    { property: '14 Lanercost Road',  propertyId: '', type: 'Valuation',            provider: 'Savills',       instructed: '10/06/2026', siteVisit: '13/06/2026', returned: '17/06/2026',  status: 'Returned',        cost: 350 },
+    { property: '14 Lanercost Road',  propertyId: '', type: 'Structural',           provider: 'BRE',           instructed: '18/06/2026', siteVisit: '22/06/2026', returned: null,          status: 'Awaiting report', cost: 580 },
+  ];
+  surveys = signal<Survey[]>(
+    JSON.parse(localStorage.getItem(SURVEYS_KEY) ?? 'null') ?? this._surveySeed
+  );
 
   queries = signal<Query[]>([
     { id: 'q1', property: '19 Beaumont Road',    doc: 'EPC certificate',           text: 'EPC shows expiry 2034 but the uploaded scan shows 2033 — please confirm which is correct.',                raisedBy: 'Jiya Chowdhury', assignedTo: 'Hayley Briggs (Winkworth Sherwood)',  status: 'Open', date: '21/06/2026', direction: 'raised' },
@@ -734,8 +743,11 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Contract Pack', 'Draft Contract']);
     if (key === 'red_flag_cleared')
       return this.legalCheck(propId, 'contract_rev');
-    if (key === 'survey_report_received')
+    if (key === 'survey_report_received') {
+      const ordered = this.surveysForProp(propId);
+      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, ['Survey Report — ' + s.type]));
       return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
+    }
     if (key === 'draft_rot_received')
       return this.txHasDocs(propId, ['Draft Report on Title', 'Report on Title']) || this.legalCheck(propId, 'title_report');
     if (key === 'final_rot_received')
@@ -744,8 +756,11 @@ export class TransactionsPortalComponent {
       return this.rotApprovalsSig()[propId]?.status === 'approved';
     if (key === 'searches_received')
       return this.txHasAllSearches(propId);
-    if (key === 'survey_reports_received')
+    if (key === 'survey_reports_received') {
+      const ordered = this.surveysForProp(propId);
+      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, ['Survey Report — ' + s.type]));
       return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
+    }
     return false;
   }
 
@@ -1026,6 +1041,7 @@ export class TransactionsPortalComponent {
       ...list,
       ...surveyTypes.map(type => ({
         property: p.address,
+        propertyId: p.id,
         type,
         provider: assignee,
         instructed: today,
@@ -1082,6 +1098,10 @@ export class TransactionsPortalComponent {
 
   txHasDocs(propId: string, docTypes: string[]): boolean {
     return this.dataRoom().some(f => f.propertyId === propId && docTypes.includes(f.docType));
+  }
+
+  surveysForProp(propId: string): Survey[] {
+    return this.surveys().filter(s => s.propertyId === propId);
   }
 
   txHasAllSearches(propId: string): boolean {
@@ -1395,6 +1415,7 @@ export class TransactionsPortalComponent {
 
     this.surveys.update(list => [...list, {
       property: this.selectedProperty()?.address ?? 'Unknown',
+      propertyId: this.selectedProperty()?.id ?? '',
       type, provider,
       instructed: new Date().toLocaleDateString('en-GB'),
       siteVisit, returned: null, status, cost,

@@ -268,6 +268,10 @@
                   }
 
                   @for (item of group.items; track item.key) {
+                    @let _lgSurveysOrdered = surveysForProp(p.id);
+                    @if (item.key === 'survey_report' && _lgSurveysOrdered.length) {
+                      <!-- skip generic survey_report row — per-survey rows injected after survey_instructed -->
+                    } @else {
                     @let itemDocs = docsForItem(p.id, item.key);
                     @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || item.key === 'rot_query_addressed' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
                     @let _txAuto = (item.key === 'search_la' || item.key === 'survey_instructed') && txCheck(p.id, 'searches_ordered');
@@ -336,6 +340,28 @@
                         </button>
                       }
                     </div>
+                    } <!-- close @else (skip survey_report) -->
+                    <!-- per-survey rows injected after survey_instructed -->
+                    @if (item.key === 'survey_instructed' && _lgSurveysOrdered.length) {
+                      @for (sv of _lgSurveysOrdered; track sv.type) {
+                        @let _svDocs = docsForSurveyType(p.id, sv.type);
+                        @let _svChecked = _svDocs.length > 0;
+                        <div class="lg-check-row" [class.checked]="_svChecked" style="margin-bottom:6px; padding-left:28px;">
+                          <div class="lg-check-box" [class.checked]="_svChecked" style="cursor:default;">
+                            @if (_svChecked) { <i class="ti ti-check" style="font-size:11px;"></i> }
+                          </div>
+                          <span style="cursor:default;">{{ sv.type }} report received</span>
+                          @if (_svChecked) {
+                            <button class="lg-doc-chip" (click)="openReview(p.id, 'survey_report', sv.type + ' report', _svDocs)"
+                                    title="Review {{ _svDocs.length }} document{{ _svDocs.length > 1 ? 's' : '' }}">
+                              <i class="ti ti-file-text" style="font-size:10px;"></i> {{ _svDocs.length }} doc{{ _svDocs.length > 1 ? 's' : '' }}
+                            </button>
+                          } @else {
+                            <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting TX team</span>
+                          }
+                        </div>
+                      }
+                    }
                   }
                 </div>
 
