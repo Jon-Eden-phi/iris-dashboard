@@ -264,6 +264,24 @@
                             (click)="!_isAuto && toggleCheck(p.id, item.key)">{{ item.label }}</span>
                       @if (_txAuto && !itemDocs.length) {
                         <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">Confirmed by TX team</span>
+                      } @else if (item.key === 'title_report') {
+                        <div style="display:flex; align-items:center; gap:6px; margin-left:auto;" (click)="$event.stopPropagation()">
+                          @if (itemDocs.length > 0) {
+                            <button class="lg-doc-chip" (click)="openReview(p.id, item.key, item.label, itemDocs)"
+                                    title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
+                              <i class="ti ti-file-text" style="font-size:10px;"></i> {{ itemDocs.length }} doc{{ itemDocs.length > 1 ? 's' : '' }}
+                            </button>
+                          } @else {
+                            <button class="lg-btn-outline" style="font-size:11px; padding:3px 9px; display:flex; align-items:center; gap:4px; flex-shrink:0;"
+                                    (click)="uploadDocType.set('Draft Report on Title'); showUploadModal.set(true)">
+                              <i class="ti ti-upload" style="font-size:11px;"></i> Upload
+                            </button>
+                          }
+                          <button class="lg-btn-outline" style="font-size:11px; padding:3px 9px; display:flex; align-items:center; gap:4px; flex-shrink:0;"
+                                  (click)="uploadDocType.set('Annexure'); showUploadModal.set(true)">
+                            <i class="ti ti-paperclip" style="font-size:11px;"></i> Annexure
+                          </button>
+                        </div>
                       } @else if (itemDocs.length > 0) {
                         <button class="lg-doc-chip" (click)="openReview(p.id, item.key, item.label, itemDocs)"
                                 title="Review {{ itemDocs.length }} document{{ itemDocs.length > 1 ? 's' : '' }}">
@@ -449,7 +467,9 @@
               <option>Contract Pack</option>
               <option>Enquiries</option>
               <option>Replies to Enquiries</option>
+              <option>Draft Report on Title</option>
               <option>Report on Title</option>
+              <option>Annexure</option>
               <option>Funds Confirmation</option>
               <option>Transfer Deed</option>
               <option>Completion Statement</option>

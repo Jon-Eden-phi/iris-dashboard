@@ -1006,9 +1006,6 @@
                           <button class="btn-ghost" style="font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Draft Report on Title', ['Report on Title', 'Draft Report on Title'])">
                             <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
                           </button>
-                          <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Annexure'); uploadDocTypeFilter.set(['Annexure']); showUploadModal.set(true)">
-                            <i class="ti ti-paperclip" style="font-size:11px;"></i> Upload annexures
-                          </button>
                         </div>
                       } @else {
                         <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting from lawyers</span>
