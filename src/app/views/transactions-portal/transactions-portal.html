@@ -526,91 +526,57 @@
 
           @if (recordTab() === 'dataroom') {
             <!-- Data Room view -->
-            <div class="card">
-              <div class="tx-section-header" style="margin-bottom:14px;">
-                <span class="tx-section-title"><i class="ti ti-folders"></i> Data Room — {{ p.address }}</span>
-                <div style="display:flex; gap:8px; align-items:center;">
-                  <input class="form-input" style="font-size:12px; padding:6px 10px; width:180px;" placeholder="Search files…"
+            <div style="padding:0;">
+              <!-- Toolbar -->
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                <div style="flex:1; position:relative;">
+                  <i class="ti ti-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:14px; color:var(--text3); pointer-events:none;"></i>
+                  <input class="form-input" style="padding-left:32px;" placeholder="Search documents…"
                          [value]="drSearch()" (input)="drSearch.set($any($event.target).value)">
-                  <button class="btn-primary" style="font-size:12px; padding:6px 14px;" (click)="showUploadModal.set(true)">
-                    <i class="ti ti-upload" style="font-size:12px;"></i> Upload
-                  </button>
                 </div>
+                <button class="btn-primary" style="font-size:12px; display:inline-flex; align-items:center; gap:6px; flex-shrink:0;" (click)="showUploadModal.set(true)">
+                  <i class="ti ti-upload"></i> Upload
+                </button>
               </div>
 
-              <div style="display:flex; flex-direction:column; gap:8px;">
-                @for (section of dataRoomSections; track section.stage) {
-                  @let sectionFiles = filesForStageSection(p.id, section.stage);
-                  @let isOpen = drExpandedStages().has(section.stage);
-                  <!-- Section header -->
-                  <div (click)="toggleDrStage(section.stage)"
-                       style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; cursor:pointer; border:1px solid var(--border); background:var(--bg); user-select:none;"
-                       [style.border-color]="isOpen ? 'var(--accent)' : 'var(--border)'"
-                       [style.background]="isOpen ? 'rgba(232,96,28,0.03)' : 'var(--bg)'">
-                    <i [class]="isOpen ? 'ti ti-chevron-down' : 'ti ti-chevron-right'" style="font-size:12px; color:var(--text3); flex-shrink:0;"></i>
-                    <i class="ti ti-folder-filled" style="font-size:15px; color:#f59e0b; flex-shrink:0;"></i>
-                    <span style="font-size:13px; font-weight:700; flex:1;">{{ section.label }}</span>
-                    @if (sectionFiles.length > 0) {
-                      <span class="badge badge-gray">{{ sectionFiles.length }} {{ sectionFiles.length === 1 ? 'file' : 'files' }}</span>
-                    } @else {
-                      <span style="font-size:11px; color:var(--text3);">No documents</span>
-                    }
-                    @if (section.stage === p.stage) {
-                      <span class="tx-badge tx-badge-amber" style="font-size:10px;">Current stage</span>
-                    }
-                  </div>
-                  <!-- Section content -->
-                  @if (isOpen) {
-                    <div style="border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:4px;">
-                      @if (sectionFiles.length === 0) {
-                        <div class="tx-empty" style="padding:20px 0;">
-                          <i class="ti ti-folder-open" style="font-size:22px;"></i>
-                          No documents uploaded for this stage yet
+              @let allFiles = filesForProperty(p.id);
+              @if (filesForProperty(p.id).length === 0 && !drSearch()) {
+                <div style="text-align:center; padding:40px 20px; color:var(--text3); font-size:13px;">
+                  <i class="ti ti-folder-open" style="display:block; font-size:32px; margin-bottom:10px; opacity:.5;"></i>
+                  <div style="font-weight:600; color:var(--text2); margin-bottom:6px;">No documents yet</div>
+                  <div style="font-size:12px;">Click Upload to add documents.</div>
+                </div>
+              } @else if (allFiles.length === 0) {
+                <div style="text-align:center; padding:32px 20px; color:var(--text3); font-size:13px;">
+                  <i class="ti ti-search-off" style="display:block; font-size:28px; margin-bottom:8px; opacity:.5;"></i>
+                  No documents match "{{ drSearch() }}"
+                </div>
+              } @else {
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  @for (file of allFiles; track file.id) {
+                    <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--bg); border-radius:8px;">
+                      <i class="ti ti-file-description" style="font-size:18px; color:var(--text3); flex-shrink:0;"></i>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-size:13px; font-weight:600; color:var(--text1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ file.fileName }}</div>
+                        <div style="font-size:11px; color:var(--text3); margin-top:2px;">
+                          {{ file.docType }} · {{ file.uploadedBy }} · {{ file.uploadedAt }}
+                          @if (file.note) { · {{ file.note }} }
                         </div>
-                      } @else {
-                        <table>
-                          <thead>
-                            <tr>
-                              <th style="width:35%;">File name</th>
-                              <th>Document type</th>
-                              <th>Uploaded</th>
-                              <th>Uploaded by</th>
-                              <th>Note</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @for (file of sectionFiles; track file.id) {
-                              <tr>
-                                <td>
-                                  <i class="ti ti-file-description" style="font-size:13px; color:var(--accent); margin-right:6px;"></i>
-                                  <span style="font-size:13px;">{{ file.fileName }}</span>
-                                </td>
-                                <td><span class="badge badge-gray">{{ file.docType }}</span></td>
-                                <td style="font-size:12px; color:var(--text3);">{{ file.uploadedAt }}</td>
-                                <td style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</td>
-                                <td style="font-size:12px; color:var(--text3); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.note || '—' }}</td>
-                                <td>
-                                  <div style="display:flex; align-items:center; gap:6px;">
-                                    @if (file.url) {
-                                      <button class="btn-ghost" style="font-size:11px; padding:3px 8px;" (click)="previewFile(file)">
-                                        <i class="ti ti-external-link" style="font-size:12px;"></i>
-                                      </button>
-                                    }
-                                    <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#dc2626; border-color:rgba(220,38,38,0.2);" (click)="deleteFile(file.id)">
-                                      <i class="ti ti-trash" style="font-size:12px;"></i>
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            }
-                          </tbody>
-                        </table>
-                      }
+                      </div>
+                      <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                        @if (file.url) {
+                          <button style="width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text3);" (click)="previewFile(file)" title="Preview">
+                            <i class="ti ti-external-link" style="font-size:13px;"></i>
+                          </button>
+                        }
+                        <button style="width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text3);" (click)="deleteFile(file.id)" title="Delete">
+                          <i class="ti ti-trash" style="font-size:13px;"></i>
+                        </button>
+                      </div>
                     </div>
                   }
-                }
-              </div>
+                </div>
+              }
             </div>
           }
 
