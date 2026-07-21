@@ -744,6 +744,8 @@ export class TransactionsPortalComponent {
       return this.rotApprovalsSig()[propId]?.status === 'approved';
     if (key === 'searches_received')
       return this.txHasAllSearches(propId);
+    if (key === 'survey_reports_received')
+      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
     return false;
   }
 
@@ -771,7 +773,7 @@ export class TransactionsPortalComponent {
     if (stage === 'Refurbishment') {
       if (!cl['surveys_ordered'])         return { label: 'Surveys to Order', done: false };
       if (!cl['site_visits_booked'])      return { label: 'Site Visits to Book', done: false };
-      if (!cl['survey_reports_received']) return { label: 'Survey Reports Pending', done: false };
+      if (!done('survey_reports_received')) return { label: 'Survey Reports Pending', done: false };
       if (!cl['scope_prepared'])          return { label: 'Scope of Works Pending', done: false };
       return { label: 'Surveys Complete', done: true };
     }
