@@ -89,6 +89,7 @@ interface TxPropertyData {
   solicitorName?: string;
   authorityToExchange?: boolean;
   rotQuery?: string;
+  rotQueryResponse?: string;
 }
 
 interface DataRoomFile {
