@@ -135,43 +135,52 @@
 .lg-matter-card {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-left: 3px solid #0f7c6b;
   border-radius: var(--radius);
   padding: 18px 20px;
   box-shadow: var(--shadow);
   cursor: pointer;
-  transition: border-color .15s, box-shadow .15s;
+  transition: border-color .15s, box-shadow .15s, transform .12s;
   &:hover {
     border-color: #0f7c6b;
-    box-shadow: 0 2px 10px rgba(15,124,107,0.1);
+    box-shadow: 0 4px 14px rgba(15,124,107,0.12);
+    transform: translateY(-1px);
   }
 }
 .lg-matter-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .lg-matter-ref     { font-size: 10px; font-weight: 700; color: #0f7c6b; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
-.lg-matter-address { font-size: 15px; font-weight: 700; color: var(--text1); }
+.lg-matter-address { font-size: 16px; font-weight: 700; color: var(--text1); letter-spacing: -0.01em; }
 .lg-matter-sub     { font-size: 12px; color: var(--text3); margin-top: 2px; }
 
 /* ── Progress ────────────────────────────────────────── */
 .lg-progress-track {
-  height: 6px;
-  background: var(--border);
-  border-radius: 3px;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 99px;
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 .lg-progress-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width .3s;
+  background: linear-gradient(90deg, #0f7c6b, #14a99a);
+  border-radius: 99px;
+  transition: width .35s ease;
 }
 
 .lg-group-pill {
   font-size: 11px; font-weight: 600;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 20px;
   background: var(--bg);
   color: var(--text3);
   border: 1px solid var(--border);
-  &.complete { background: rgba(15,124,107,0.08); color: #0f7c6b; border-color: rgba(15,124,107,0.2); }
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: background .12s;
+  &.complete {
+    background: rgba(15,124,107,0.1);
+    color: #0f7c6b;
+    border-color: rgba(15,124,107,0.25);
+  }
 }
 
 /* ── Badges ──────────────────────────────────────────── */
