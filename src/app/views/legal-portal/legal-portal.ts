@@ -46,8 +46,8 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
   survey_report:   ['Survey Report', 'HomeBuyer Report', 'Structural Survey'],
   contract_rx:     ['Draft Contract', 'Contract Pack'],
   contract_rev:    ['Draft Contract', 'Contract Pack'],
-  enquiries_in:    ['Enquiries', 'Replies to Enquiries'],
-  title_report:    ['Report on Title', 'Draft Report on Title'],
+  title_report:         ['Draft Report on Title'],
+  rot_query_addressed:  ['Report on Title'],
 };
 
 const CHECKLIST_GROUPS = [
@@ -79,19 +79,11 @@ const CHECKLIST_GROUPS = [
     ],
   },
   {
-    label: 'Enquiries',
-    icon: 'ti-message-question',
-    items: [
-      { key: 'enquiries_out', label: 'Enquiries raised' },
-      { key: 'enquiries_in',  label: 'Enquiries answered' },
-    ],
-  },
-  {
     label: 'Report on Title',
     icon: 'ti-certificate',
     items: [
       { key: 'title_report',        label: 'Report on title prepared' },
-      { key: 'rot_query_addressed', label: 'TX query on draft RoT addressed' },
+      { key: 'rot_query_addressed', label: 'Upload final RoT' },
       { key: 'title_sent',          label: 'Report sent to client' },
     ],
   },
@@ -257,7 +249,7 @@ export class LegalPortalComponent {
     if (this.getMatter(propId).checklist[itemKey]) return true;
     // Auto-check from data room docs
     const types = ITEM_DOC_TYPES[itemKey] ?? [];
-    if (types.length && (itemKey === 'mos_received' || itemKey === 'contract_rx' || TX_UPLOADED_ITEMS.has(itemKey))) {
+    if (types.length && (itemKey === 'mos_received' || itemKey === 'contract_rx' || itemKey === 'rot_query_addressed' || TX_UPLOADED_ITEMS.has(itemKey))) {
       if (this.dataRoom().some(f => f.propertyId === propId && types.some(t => f.docType.toLowerCase().includes(t.toLowerCase())))) return true;
     }
     // Auto-check from TX portal actions
@@ -291,7 +283,7 @@ export class LegalPortalComponent {
 
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
-    return ['search_la_r','search_water','search_env','survey_report','contract_rev','enquiries_in','title_sent','funds']
+    return ['search_la_r','search_water','search_env','survey_report','contract_rev','rot_query_addressed','title_sent','funds']
       .every(k => m.checklist[k]);
   }
 
