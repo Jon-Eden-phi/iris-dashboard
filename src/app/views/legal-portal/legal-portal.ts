@@ -329,7 +329,7 @@ export class LegalPortalComponent {
   }
 
   docsForSurveyType(propId: string, surveyType: string): DataRoomFile[] {
-    const docType = 'Survey Report — ' + surveyType;
+    const docType = 'Survey Report - ' + surveyType;
     return this.dataRoom().filter(f => f.propertyId === propId && f.docType === docType);
   }
 

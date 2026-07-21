@@ -745,7 +745,7 @@ export class TransactionsPortalComponent {
       return this.legalCheck(propId, 'contract_rev');
     if (key === 'survey_report_received') {
       const ordered = this.surveysForProp(propId);
-      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, ['Survey Report — ' + s.type]));
+      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, [this.surveyReportDocType(s.type)]));
       return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
     }
     if (key === 'draft_rot_received')
@@ -758,7 +758,7 @@ export class TransactionsPortalComponent {
       return this.txHasAllSearches(propId);
     if (key === 'survey_reports_received') {
       const ordered = this.surveysForProp(propId);
-      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, ['Survey Report — ' + s.type]));
+      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, [this.surveyReportDocType(s.type)]));
       return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
     }
     return false;
@@ -1102,6 +1102,10 @@ export class TransactionsPortalComponent {
 
   surveysForProp(propId: string): Survey[] {
     return this.surveys().filter(s => s.propertyId === propId);
+  }
+
+  surveyReportDocType(surveyType: string): string {
+    return 'Survey Report - ' + surveyType;
   }
 
   txHasAllSearches(propId: string): boolean {
