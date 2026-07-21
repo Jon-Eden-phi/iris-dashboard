@@ -149,7 +149,8 @@ export class LegalPortalComponent {
 
   // Shared data room with transactions portal
   private dataRoom = signal<DataRoomFile[]>(
-    JSON.parse(localStorage.getItem(DR_KEY) ?? '[]')
+    (JSON.parse(localStorage.getItem(DR_KEY) ?? '[]') as DataRoomFile[])
+      .map(f => ({ ...f, docType: f.docType.replace('Survey Report — ', 'Survey Report - ') }))
   );
 
   // Ordered surveys from TX portal

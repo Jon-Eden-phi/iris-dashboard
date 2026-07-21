@@ -389,7 +389,8 @@ export class TransactionsPortalComponent {
   );
 
   dataRoom = signal<DataRoomFile[]>(
-    JSON.parse(localStorage.getItem('iris_data_room') ?? '[]')
+    (JSON.parse(localStorage.getItem('iris_data_room') ?? '[]') as DataRoomFile[])
+      .map(f => ({ ...f, docType: f.docType.replace('Survey Report — ', 'Survey Report - ') }))
   );
 
   private rotApprovalsSig = signal<Record<string, { status: string }>>(
