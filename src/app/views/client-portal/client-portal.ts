@@ -163,7 +163,7 @@ export class ClientPortalComponent {
     this.activeProperties().filter(p =>
       p.stage === 'ClientApproval' ||
       (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') ||
-      (p.stage === 'Legals' && this.rotApprovals()[p.id]?.status === 'pending')
+      this.rotApprovals()[p.id]?.status === 'pending'
     )
   );
 
@@ -327,7 +327,7 @@ export class ClientPortalComponent {
   actionType(p: Property): 'property-approval' | 'viewing-review' | 'rot-approval' | null {
     if (p.stage === 'ClientApproval') return 'property-approval';
     if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') return 'viewing-review';
-    if (p.stage === 'Legals' && this.rotApprovals()[p.id]?.status === 'pending') return 'rot-approval';
+    if (this.rotApprovals()[p.id]?.status === 'pending') return 'rot-approval';
     return null;
   }
 
@@ -378,9 +378,7 @@ export class ClientPortalComponent {
       case 'Viewing':           return p.viewing?.clientReview === 'pending' ? 'Viewing report sent — awaiting your decision' : 'Viewing being arranged';
       case 'Negotiations':      return 'Offer negotiations in progress';
       case 'MemorandumOfSale':  return 'Memorandum of Sale agreed';
-      case 'Legals':
-        if (this.rotApprovals()[p.id]?.status === 'approved') return 'Final Report on Title approved — conveyancing in progress';
-        return 'Legal conveyancing in progress';
+      case 'Legals':            return 'Legal conveyancing in progress';
       case 'Refurbishment':     return 'Refurbishment underway';
       case 'Lettings':          return 'Property in lettings';
       default: return p.stage;
