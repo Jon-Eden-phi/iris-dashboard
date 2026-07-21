@@ -1019,9 +1019,9 @@
                       } @else {
                         <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting from lawyers</span>
                       }
-                    } @else if (p.stage === 'Refurbishment' && action.key === 'surveys_ordered') {
+                    } @else if (p.stage === 'Legals' && action.key === 'surveys_ordered') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order surveys
+                        <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order survey
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_received') {
                       @if (txHasDocs(p.id, ['Final Report on Title'])) {

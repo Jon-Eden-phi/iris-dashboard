@@ -612,6 +612,7 @@ export class TransactionsPortalComponent {
       { key: 'contract_pack_received', label: 'Contract pack received' },
       { key: 'red_flag_cleared',       label: 'Red flag review cleared' },
       { key: 'searches_ordered',       label: 'Searches & survey instructed' },
+      { key: 'surveys_ordered',        label: 'Survey instructed' },
       { key: 'survey_report_received', label: 'Survey report received' },
       { key: 'searches_received',      label: 'Search results received' },
       { key: 'draft_rot_received',     label: 'Draft RoT received from lawyers' },
@@ -619,7 +620,6 @@ export class TransactionsPortalComponent {
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
     ],
     Refurbishment: [
-      { key: 'surveys_ordered',         label: 'Surveys ordered' },
       { key: 'site_visits_booked',      label: 'Site visits booked' },
       { key: 'survey_reports_received', label: 'Survey reports received' },
       { key: 'scope_prepared',          label: 'Scope of works prepared' },
@@ -763,6 +763,7 @@ export class TransactionsPortalComponent {
       if (!done('contract_pack_received'))  return { label: 'Contract Pack Pending', done: false };
       if (!done('red_flag_cleared'))         return { label: 'Red Flag Review Pending', done: false };
       if (!cl['searches_ordered'])          return { label: 'Searches & Survey to Instruct', done: false };
+      if (!cl['surveys_ordered'])           return { label: 'Survey to Instruct', done: false };
       if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
       if (!done('searches_received'))        return { label: 'Searches in Progress', done: false };
       if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
@@ -771,7 +772,6 @@ export class TransactionsPortalComponent {
       return { label: 'Conveyancing Complete', done: true };
     }
     if (stage === 'Refurbishment') {
-      if (!cl['surveys_ordered'])         return { label: 'Surveys to Order', done: false };
       if (!cl['site_visits_booked'])      return { label: 'Site Visits to Book', done: false };
       if (!done('survey_reports_received')) return { label: 'Survey Reports Pending', done: false };
       if (!cl['scope_prepared'])          return { label: 'Scope of Works Pending', done: false };
