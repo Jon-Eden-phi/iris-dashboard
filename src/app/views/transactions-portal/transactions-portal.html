@@ -746,7 +746,7 @@
                             <span style="font-size:11px; color:var(--text3);">Survey required first</span>
                           } @else {
                             <button class="btn-ghost" style="font-size:11px; padding:3px 10px;"
-                                    (click)="uploadDocType.set(_sv2DocType); uploadDocTypeFilter.set([_sv2DocType]); showUploadModal.set(true); $event.stopPropagation()">
+                                    (click)="uploadDocType.set('Survey Report — ' + sv2.type); uploadDocTypeFilter.set(['Survey Report — ' + sv2.type]); showUploadModal.set(true); $event.stopPropagation()">
                               <i class="ti ti-upload" style="font-size:11px;"></i> Upload
                             </button>
                           }
@@ -993,12 +993,12 @@
                               [style.text-decoration]="_svHasDoc ? 'line-through' : 'none'">{{ sv.type }} report received</span>
                         @if (_svHasDoc) {
                           <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
-                                  (click)="openReviewModal(p.id, action.key, sv.type + ' report', sv.type + ' report', [_svDocType]); $event.stopPropagation()">
+                                  (click)="openReviewModal(p.id, action.key, sv.type + ' report', sv.type + ' report', ['Survey Report — ' + sv.type]); $event.stopPropagation()">
                             <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                           </button>
                         } @else {
                           <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;"
-                                  (click)="uploadDocType.set(_svDocType); uploadDocTypeFilter.set([_svDocType]); showUploadModal.set(true); $event.stopPropagation()">
+                                  (click)="uploadDocType.set('Survey Report — ' + sv.type); uploadDocTypeFilter.set(['Survey Report — ' + sv.type]); showUploadModal.set(true); $event.stopPropagation()">
                             <i class="ti ti-upload" style="font-size:11px;"></i> Upload
                           </button>
                         }
@@ -2165,9 +2165,9 @@
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
         <div>
           <label class="form-label">Document type</label>
-          <select class="form-select" [value]="uploadDocType()" (change)="uploadDocType.set($any($event.target).value)">
+          <select class="form-select" (change)="uploadDocType.set($any($event.target).value)">
             @for (dt of (uploadDocTypeFilter() ?? docTypesForStage(selectedProperty()?.stage ?? '')); track dt) {
-              <option>{{ dt }}</option>
+              <option [selected]="dt === uploadDocType()">{{ dt }}</option>
             }
           </select>
         </div>
