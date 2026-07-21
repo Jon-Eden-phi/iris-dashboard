@@ -738,7 +738,7 @@ export class TransactionsPortalComponent {
     }
     if (stage === 'Legals') {
       if (!done('contract_pack_received'))  return { label: 'Contract Pack Pending', done: false };
-      if (!cl['red_flag_cleared'])          return { label: 'Red Flag Review Pending', done: false };
+      if (!done('red_flag_cleared'))         return { label: 'Red Flag Review Pending', done: false };
       if (!cl['searches_ordered'])          return { label: 'Searches & Survey to Instruct', done: false };
       if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
       if (!cl['searches_received'])         return { label: 'Searches in Progress', done: false };
