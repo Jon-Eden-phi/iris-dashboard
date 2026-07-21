@@ -318,7 +318,7 @@ export class TransactionsPortalComponent {
   additionalWorksCost         = signal('');
   requestChangesNote          = signal('');
   showRequestChangesInput     = signal(false);
-  reviewDocContext            = signal<{ propId: string; checklistKey: string; checklistLabel: string; title: string; docTypes: string[] } | null>(null);
+  reviewDocContext            = signal<{ propId: string; checklistKey: string; checklistLabel: string; title: string; docTypes: string[]; surveyType?: string } | null>(null);
   searchAssignee        = signal('');
   searchComments        = signal('');
   selectedSearches      = signal<Set<string>>(new Set());
@@ -951,11 +951,28 @@ export class TransactionsPortalComponent {
   reviewFiles(): DataRoomFile[] {
     const ctx = this.reviewDocContext();
     if (!ctx) return [];
+    if (ctx.surveyType) {
+      const exactType = this.surveyReportDocType(ctx.surveyType);
+      return this.dataRoom().filter(f => f.propertyId === ctx.propId && f.docType === exactType);
+    }
     return this.dataRoom().filter(f => f.propertyId === ctx.propId && ctx.docTypes.includes(f.docType));
   }
 
   openReviewModal(propId: string, checklistKey: string, checklistLabel: string, title: string, docTypes: string[]): void {
     this.reviewDocContext.set({ propId, checklistKey, checklistLabel, title, docTypes });
+    this.requestChangesNote.set('');
+    this.showRequestChangesInput.set(false);
+    this.showReviewDocModal.set(true);
+  }
+
+  openSurveyReviewModal(propId: string, checklistKey: string, surveyType: string): void {
+    this.reviewDocContext.set({
+      propId, checklistKey,
+      checklistLabel: surveyType + ' report',
+      title: surveyType + ' report',
+      docTypes: [this.surveyReportDocType(surveyType)],
+      surveyType,
+    });
     this.requestChangesNote.set('');
     this.showRequestChangesInput.set(false);
     this.showReviewDocModal.set(true);
