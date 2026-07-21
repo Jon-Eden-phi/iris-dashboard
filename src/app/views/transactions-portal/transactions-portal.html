@@ -718,14 +718,23 @@
                 </div>
               }
 
-              <!-- Legals / Refurbishment / Lettings — show checklist read-only -->
+              <!-- Legals / Refurbishment / Lettings — editable checklist -->
               @if (sv === 'Legals' || sv === 'Refurbishment' || sv === 'Lettings') {
-                @let svCl = getTxData(p.id).checklist;
-                <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; flex-direction:column; gap:1px; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
                   @for (action of stageActions[sv]; track action.key) {
-                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text2);">
-                      <i [class]="svCl[action.key] ? 'ti ti-circle-check' : 'ti ti-circle'" style="font-size:14px;" [style.color]="svCl[action.key] ? '#0f7c6b' : 'var(--border)'"></i>
-                      {{ action.label }}
+                    @let svChecked = _itemDone(p.id, action.key);
+                    <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; font-size:13px; cursor:pointer; transition:.12s;"
+                         [style.background]="svChecked ? 'rgba(22,163,74,0.04)' : 'var(--surface)'"
+                         (click)="toggleChecklist(p.id, action.key, action.label)">
+                      <i style="font-size:15px; flex-shrink:0; width:16px; text-align:center;"
+                         [class]="svChecked ? 'ti ti-circle-check' : 'ti ti-circle'"
+                         [style.color]="svChecked ? '#16a34a' : 'var(--border)'"></i>
+                      <span style="flex:1; font-weight:500;"
+                            [style.color]="svChecked ? 'var(--text3)' : 'var(--text1)'"
+                            [style.text-decoration]="svChecked ? 'line-through' : 'none'">{{ action.label }}</span>
+                      @if (svChecked) {
+                        <span style="font-size:11px; color:#16a34a; font-weight:600;">Done</span>
+                      }
                     </div>
                   }
                 </div>

@@ -726,7 +726,7 @@ export class TransactionsPortalComponent {
     this.txData.update(d => ({ ...d, [id]: { ...this.getTxData(id), ...patch } }));
   }
 
-  private _itemDone(propId: string, key: string): boolean {
+  _itemDone(propId: string, key: string): boolean {
     if (this.getTxData(propId).checklist[key]) return true;
     if (key === 'mos_received' || key === 'sols_confirmed')
       return this.txHasDocs(propId, ['Memorandum of Sale', 'MoS']);
