@@ -244,7 +244,12 @@
                   @if (group.label === 'Report on Title' && txCheck(p.id, 'enquiries_raised') && !getMatter(p.id).checklist['rot_query_addressed']) {
                     <div style="background:rgba(180,83,9,0.07); border:1px solid rgba(180,83,9,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#b45309; display:flex; align-items:flex-start; gap:7px;">
                       <i class="ti ti-alert-circle" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Query raised by TX team</strong> — please address before uploading the final Report on Title.</span>
+                      <div>
+                        <strong>Query raised by TX team</strong> — please address before uploading the final Report on Title.
+                        @if (txRotQuery(p.id)) {
+                          <div style="margin-top:6px; padding:7px 9px; background:rgba(180,83,9,0.08); border-radius:5px; font-style:italic; white-space:pre-wrap;">{{ txRotQuery(p.id) }}</div>
+                        }
+                      </div>
                     </div>
                   }
                   @if (group.label === 'Exchange & Completion' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {

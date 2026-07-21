@@ -281,6 +281,10 @@ export class LegalPortalComponent {
     return !!this.txDataSig()[propId]?.checklist?.[key];
   }
 
+  txRotQuery(propId: string): string {
+    return this.txDataSig()[propId]?.rotQuery ?? '';
+  }
+
   private _txRaw(): Record<string, any> {
     try { return JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}'); } catch { return {}; }
   }

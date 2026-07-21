@@ -85,6 +85,7 @@ interface TxPropertyData {
   solicitorInstructed?: boolean;
   solicitorName?: string;
   authorityToExchange?: boolean;
+  rotQuery?: string;
 }
 
 interface DataRoomFile {
@@ -295,6 +296,9 @@ export class TransactionsPortalComponent {
   showInstructSolicitorModal  = signal(false);
   instructSolicitorName       = signal('');
   showReviewDocModal          = signal(false);
+  showRaiseQueryModal         = signal(false);
+  rotQueryText                = signal('');
+  raiseQueryPropId            = signal<string | null>(null);
   showRequestFundsModal           = signal(false);
   showAuthorityModal              = signal(false);
   showInvestorAuthorityModal      = signal(false);
@@ -1085,6 +1089,28 @@ export class TransactionsPortalComponent {
 
   solicitorNameFor(propId: string): string {
     return this.getTxData(propId)?.solicitorName ?? '';
+  }
+
+  openRaiseQueryModal(propId: string): void {
+    this.rotQueryText.set(this.getTxData(propId).rotQuery ?? '');
+    this.raiseQueryPropId.set(propId);
+    this.showRaiseQueryModal.set(true);
+  }
+
+  submitRaiseQuery(withText: boolean): void {
+    const propId = this.raiseQueryPropId();
+    if (!propId) return;
+    const text = withText ? this.rotQueryText().trim() : '';
+    if (withText && !text) return;
+    if (text) this.setTxData(propId, { rotQuery: text });
+    const existing = this.getTxData(propId);
+    const label = 'Query raised on draft RoT';
+    const newLog = [{ text: label, ts: new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }), author: this.auth.currentUser()?.name ?? 'TX Team' }, ...existing.txLog];
+    this.setTxData(propId, { checklist: { ...existing.checklist, enquiries_raised: true }, txLog: newLog });
+    this.showRaiseQueryModal.set(false);
+    this.rotQueryText.set('');
+    this.raiseQueryPropId.set(null);
+    this.showToast(label, 'ti-message-question');
   }
 
   openSearchesModal(propId: string): void {
