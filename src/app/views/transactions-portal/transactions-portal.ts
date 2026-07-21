@@ -742,6 +742,8 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Final Report on Title', 'Report on Title']);
     if (key === 'final_rot_approved')
       return this.rotApprovalsSig()[propId]?.status === 'approved';
+    if (key === 'searches_received')
+      return this.txHasAllSearches(propId);
     return false;
   }
 
@@ -760,7 +762,7 @@ export class TransactionsPortalComponent {
       if (!done('red_flag_cleared'))         return { label: 'Red Flag Review Pending', done: false };
       if (!cl['searches_ordered'])          return { label: 'Searches & Survey to Instruct', done: false };
       if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
-      if (!cl['searches_received'])         return { label: 'Searches in Progress', done: false };
+      if (!done('searches_received'))        return { label: 'Searches in Progress', done: false };
       if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_received'))       return { label: 'Final RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_approved'))      return { label: 'Final RoT – Pending Approval', done: false };
