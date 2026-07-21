@@ -1015,8 +1015,8 @@
                         <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order surveys
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_received') {
-                      @if (txHasDocs(p.id, ['Report on Title', 'Draft Report on Title'])) {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Report on Title', ['Report on Title', 'Draft Report on Title']); $event.stopPropagation()">
+                      @if (txHasDocs(p.id, ['Final Report on Title', 'Report on Title'])) {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px; color:#0f7c6b; border-color:rgba(15,124,107,0.3);" (click)="openReviewModal(p.id, action.key, action.label, 'Final Report on Title', ['Final Report on Title', 'Report on Title']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View &amp; receive
                         </button>
                       } @else {

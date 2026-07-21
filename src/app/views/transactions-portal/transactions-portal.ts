@@ -727,7 +727,7 @@ export class TransactionsPortalComponent {
     if (key === 'draft_rot_received')
       return this.txHasDocs(propId, ['Draft Report on Title', 'Report on Title']) || this.legalCheck(propId, 'title_report');
     if (key === 'final_rot_received')
-      return this.txHasDocs(propId, ['Report on Title', 'Draft Report on Title']);
+      return this.txHasDocs(propId, ['Final Report on Title', 'Report on Title']);
     return false;
   }
 

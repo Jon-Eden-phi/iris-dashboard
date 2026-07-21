@@ -47,7 +47,7 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
   contract_rx:     ['Draft Contract', 'Contract Pack'],
   contract_rev:    ['Draft Contract', 'Contract Pack'],
   title_report:         ['Draft Report on Title'],
-  rot_query_addressed:  ['Report on Title'],
+  rot_query_addressed:  ['Final Report on Title'],
 };
 
 const CHECKLIST_GROUPS = [
