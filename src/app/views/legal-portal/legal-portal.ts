@@ -84,7 +84,6 @@ const CHECKLIST_GROUPS = [
     items: [
       { key: 'title_report',        label: 'Report on title prepared' },
       { key: 'rot_query_addressed', label: 'Upload final RoT' },
-      { key: 'title_sent',          label: 'Report sent to client' },
     ],
   },
   {
@@ -303,7 +302,7 @@ export class LegalPortalComponent {
 
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
-    return ['search_la_r','search_water','search_env','survey_report','contract_rev','rot_query_addressed','title_sent','funds']
+    return ['search_la_r','search_water','search_env','survey_report','contract_rev','rot_query_addressed','funds']
       .every(k => m.checklist[k]);
   }
 
