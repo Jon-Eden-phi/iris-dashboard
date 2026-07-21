@@ -1109,6 +1109,10 @@ export class TransactionsPortalComponent {
     return 'Survey Report - ' + surveyType;
   }
 
+  surveyReportDocTypes(surveyType: string): string[] {
+    return ['Survey Report - ' + surveyType];
+  }
+
   txItemDocTypes(key: string): string[] {
     switch (key) {
       case 'mos_received':

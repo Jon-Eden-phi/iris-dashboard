@@ -730,7 +730,7 @@
                     @if (svIsSurveyReport && svOrderedSurveys.length) {
                       <!-- per-survey report rows in history panel -->
                       @for (sv2 of svOrderedSurveys; track sv2.type) {
-                        @let _sv2HasDoc = txHasDocs(p.id, [surveyReportDocType(sv2.type)]);
+                        @let _sv2HasDoc = txHasDocs(p.id, surveyReportDocTypes(sv2.type));
                         <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; font-size:13px; cursor:default; transition:.12s;"
                              [style.background]="_sv2HasDoc ? 'rgba(22,163,74,0.04)' : 'var(--surface)'">
                           <i style="font-size:15px; flex-shrink:0; width:16px; text-align:center;"
@@ -741,14 +741,14 @@
                                 [style.text-decoration]="_sv2HasDoc ? 'line-through' : 'none'">{{ sv2.type }} report received</span>
                           @if (_sv2HasDoc) {
                             <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
-                                    (click)="openReviewModal(p.id, action.key, sv2.type + ' report', sv2.type + ' report', [surveyReportDocType(sv2.type)]); $event.stopPropagation()">
+                                    (click)="openReviewModal(p.id, action.key, sv2.type + ' report', sv2.type + ' report', surveyReportDocTypes(sv2.type)); $event.stopPropagation()">
                               <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                             </button>
                           } @else if (!svSurveysOrdered) {
                             <span style="font-size:11px; color:var(--text3);">Survey required first</span>
                           } @else {
                             <button class="btn-ghost" style="font-size:11px; padding:3px 10px;"
-                                    (click)="uploadDocType.set(surveyReportDocType(sv2.type)); uploadDocTypeFilter.set([surveyReportDocType(sv2.type)]); showUploadModal.set(true); $event.stopPropagation()">
+                                    (click)="uploadDocType.set(surveyReportDocType(sv2.type)); uploadDocTypeFilter.set(surveyReportDocTypes(sv2.type)); showUploadModal.set(true); $event.stopPropagation()">
                               <i class="ti ti-upload" style="font-size:11px;"></i> Upload
                             </button>
                           }
@@ -991,7 +991,7 @@
                   @if (_isSurveyReportRow && _orderedSurveys.length) {
                     <!-- per-survey report rows -->
                     @for (sv of _orderedSurveys; track sv.type) {
-                      @let _svHasDoc = txHasDocs(p.id, [surveyReportDocType(sv.type)]);
+                      @let _svHasDoc = txHasDocs(p.id, surveyReportDocTypes(sv.type));
                       <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; font-size:13px; cursor:default; transition:.12s;"
                            [style.background]="_svHasDoc ? 'rgba(22,163,74,0.04)' : 'var(--surface)'">
                         <i style="font-size:15px; flex-shrink:0; width:16px; text-align:center;"
@@ -1002,12 +1002,12 @@
                               [style.text-decoration]="_svHasDoc ? 'line-through' : 'none'">{{ sv.type }} report received</span>
                         @if (_svHasDoc) {
                           <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
-                                  (click)="openReviewModal(p.id, action.key, sv.type + ' report', sv.type + ' report', [surveyReportDocType(sv.type)]); $event.stopPropagation()">
+                                  (click)="openReviewModal(p.id, action.key, sv.type + ' report', sv.type + ' report', surveyReportDocTypes(sv.type)); $event.stopPropagation()">
                             <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                           </button>
                         } @else {
                           <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;"
-                                  (click)="uploadDocType.set(surveyReportDocType(sv.type)); uploadDocTypeFilter.set([surveyReportDocType(sv.type)]); showUploadModal.set(true); $event.stopPropagation()">
+                                  (click)="uploadDocType.set(surveyReportDocType(sv.type)); uploadDocTypeFilter.set(surveyReportDocTypes(sv.type)); showUploadModal.set(true); $event.stopPropagation()">
                             <i class="ti ti-upload" style="font-size:11px;"></i> Upload
                           </button>
                         }
