@@ -723,16 +723,25 @@
                 <div style="display:flex; flex-direction:column; gap:1px; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
                   @for (action of stageActions[sv]; track action.key) {
                     @let svChecked = _itemDone(p.id, action.key);
-                    <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; font-size:13px; cursor:pointer; transition:.12s;"
+                    @let svSurveysOrdered = _itemDone(p.id, 'surveys_ordered');
+                    @let svBlocked = (action.key === 'survey_report_received' || action.key === 'survey_reports_received') && !svSurveysOrdered;
+                    @let svIsOrderBtn = sv === 'Legals' && action.key === 'surveys_ordered' && !svChecked;
+                    <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; font-size:13px; transition:.12s;"
                          [style.background]="svChecked ? 'rgba(22,163,74,0.04)' : 'var(--surface)'"
-                         (click)="toggleChecklist(p.id, action.key, action.label)">
+                         [style.cursor]="svBlocked || svIsOrderBtn ? 'default' : 'pointer'"
+                         [style.opacity]="svBlocked ? '0.45' : '1'"
+                         (click)="!svBlocked && !svIsOrderBtn && toggleChecklist(p.id, action.key, action.label)">
                       <i style="font-size:15px; flex-shrink:0; width:16px; text-align:center;"
                          [class]="svChecked ? 'ti ti-circle-check' : 'ti ti-circle'"
                          [style.color]="svChecked ? '#16a34a' : 'var(--border)'"></i>
                       <span style="flex:1; font-weight:500;"
                             [style.color]="svChecked ? 'var(--text3)' : 'var(--text1)'"
                             [style.text-decoration]="svChecked ? 'line-through' : 'none'">{{ action.label }}</span>
-                      @if (svChecked) {
+                      @if (svIsOrderBtn) {
+                        <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
+                          <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order survey
+                        </button>
+                      } @else if (svChecked) {
                         <span style="font-size:11px; color:#16a34a; font-weight:600;">Done</span>
                       }
                     </div>
