@@ -374,7 +374,7 @@ export class ClientPortalComponent {
   }
 
   txApprovedComplStatement(propId: string): boolean {
-    return !!this.txData()[propId]?.checklist?.['compl_statement_appr'];
+    return !!this.txData()[propId]?.complStatementSentToClient;
   }
 
   complStatementDocForProp(propId: string): DataRoomFile | undefined {

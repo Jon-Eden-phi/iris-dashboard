@@ -91,6 +91,7 @@ interface TxPropertyData {
   rotQuery?: string;
   rotQueryResponse?: string;
   complStatementQuery?: string;
+  complStatementSentToClient?: boolean;
 }
 
 interface DataRoomFile {
@@ -141,6 +142,9 @@ export class TransactionsPortalComponent {
         }
         if (e.key === this.LEGAL_DATA_KEY) {
           try { this.legalDataSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
+        if (e.key === this.COMPL_APPROVALS_KEY) {
+          try { this.complApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
       });
     }
@@ -393,6 +397,7 @@ export class TransactionsPortalComponent {
   private readonly ROT_APPROVALS_KEY = 'iris_rot_approvals';
   private readonly CONTRACT_SIGNS_KEY = 'iris_contract_signs';
   private readonly LEGAL_DATA_KEY = 'iris_legal_data';
+  private readonly COMPL_APPROVALS_KEY = 'iris_compl_approvals';
 
   txData = signal<Record<string, TxPropertyData>>(
     JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
@@ -413,6 +418,10 @@ export class TransactionsPortalComponent {
 
   private legalDataSig = signal<Record<string, any>>(
     JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}')
+  );
+
+  complApprovalsSig = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem('iris_compl_approvals') ?? '{}')
   );
 
   isRotApproved(propId: string): boolean {
@@ -779,6 +788,8 @@ export class TransactionsPortalComponent {
       return this.txHasAllSearches(propId);
     if (key === 'compl_statement_recv')
       return this.txHasDocs(propId, ['Completion Statement']) || this.legalCheck(propId, 'compl_statement');
+    if (key === 'compl_statement_appr')
+      return !!this.complApprovalsSig()[propId];
     if (key === 'exchange_completed')
       return this.legalCheck(propId, 'exchanged');
     if (key === 'survey_reports_received') {
@@ -823,7 +834,7 @@ export class TransactionsPortalComponent {
       if (this.data.getProperty(propId)?.isInvestorDeal && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
       if (!done('exchange_completed'))          return { label: 'Exchange Pending', done: false };
       if (!done('compl_statement_recv'))        return { label: 'Completion Statement Pending', done: false };
-      if (!cl['compl_statement_appr'])         return { label: 'Completion Statement – Pending Approval', done: false };
+      if (!done('compl_statement_appr'))       return { label: 'Completion Statement – Pending Client Approval', done: false };
       if (!cl['funds_requested'])              return { label: 'Funds to Request', done: false };
       if (!cl['funds_received'])               return { label: 'Funds Pending', done: false };
       if (!cl['completion_confirmed'])         return { label: 'Completion Pending', done: false };
@@ -1004,9 +1015,10 @@ export class TransactionsPortalComponent {
   approveDocument(): void {
     const ctx = this.reviewDocContext();
     if (!ctx) return;
-    this.toggleChecklist(ctx.propId, ctx.checklistKey, ctx.checklistLabel);
     if (ctx.checklistKey === 'compl_statement_appr') {
-      this.setTxData(ctx.propId, { complStatementQuery: undefined });
+      this.setTxData(ctx.propId, { complStatementSentToClient: true, complStatementQuery: undefined });
+    } else {
+      this.toggleChecklist(ctx.propId, ctx.checklistKey, ctx.checklistLabel);
     }
     this.showReviewDocModal.set(false);
     this.reviewDocContext.set(null);

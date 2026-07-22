@@ -112,6 +112,7 @@ const CHECKLIST_GROUPS = [
     items: [
       { key: 'compl_statement',         label: 'Completion statement prepared' },
       { key: 'compl_statement_revised', label: 'Revised completion statement uploaded' },
+      { key: 'client_compl_appr',       label: 'Completion statement approved by client' },
       { key: 'funds',                   label: 'Funds confirmed' },
       { key: 'completed',               label: 'Completed' },
     ],
@@ -125,6 +126,7 @@ const LEGAL_DATA_KEY = 'iris_legal_data';
 const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const SURVEYS_KEY = 'iris_surveys';
+const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
 
 @Component({
   selector: 'app-legal-portal',
@@ -164,6 +166,9 @@ export class LegalPortalComponent {
 
   private legalData  = signal<Record<string, LegalMatterData>>(this._loadLegal());
   private txDataSig  = signal<Record<string, any>>(this._txRaw());
+  complApprovalsSig  = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem(COMPL_APPROVALS_KEY) ?? '{}')
+  );
 
   // Shared data room with transactions portal
   private dataRoom = signal<DataRoomFile[]>(
@@ -218,6 +223,9 @@ export class LegalPortalComponent {
         }
         if (e.key === SURVEYS_KEY) {
           try { this.surveysData.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
+        }
+        if (e.key === COMPL_APPROVALS_KEY) {
+          try { this.complApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
       });
     }
@@ -306,11 +314,15 @@ export class LegalPortalComponent {
     if (itemKey === 'search_la' || itemKey === 'survey_instructed') {
       return !!this.txDataSig()[propId]?.checklist?.['searches_ordered'];
     }
+    if (itemKey === 'client_compl_appr') {
+      return !!this.complApprovalsSig()[propId];
+    }
     return false;
   }
 
   private _isItemVisible(propId: string, key: string): boolean {
     if (key === 'compl_statement_revised') return !!this.txComplStatementQuery(propId);
+    if (key === 'client_compl_appr') return !!this.legalData()[propId]?.checklist?.['compl_statement'] || this._autoDoc(propId, 'compl_statement');
     return true;
   }
 
