@@ -135,6 +135,9 @@ export class TransactionsPortalComponent {
         if (e.key === this.ROT_APPROVALS_KEY) {
           try { this.rotApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
+        if (e.key === this.CONTRACT_SIGNS_KEY) {
+          try { this.contractSignsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
       });
     }
 
@@ -384,6 +387,7 @@ export class TransactionsPortalComponent {
   private readonly TX_DATA_KEY = 'iris_tx_data';
   private readonly DR_KEY = 'iris_data_room';
   private readonly ROT_APPROVALS_KEY = 'iris_rot_approvals';
+  private readonly CONTRACT_SIGNS_KEY = 'iris_contract_signs';
 
   txData = signal<Record<string, TxPropertyData>>(
     JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
@@ -398,8 +402,16 @@ export class TransactionsPortalComponent {
     JSON.parse(localStorage.getItem('iris_rot_approvals') ?? '{}')
   );
 
+  private contractSignsSig = signal<Record<string, { signedAt: string }>>(
+    JSON.parse(localStorage.getItem('iris_contract_signs') ?? '{}')
+  );
+
   isRotApproved(propId: string): boolean {
     return this.rotApprovalsSig()[propId]?.status === 'approved';
+  }
+
+  isContractSigned(propId: string): boolean {
+    return !!this.contractSignsSig()[propId];
   }
 
   pipelineSearch = signal('');

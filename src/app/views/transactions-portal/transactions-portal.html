@@ -1025,7 +1025,8 @@
                                    || (action.key === 'final_rot_approved' && isRotApproved(p.id))
                                    || (action.key === 'survey_reports_received' && _surveyDoc)
                                    || (action.key === 'contract_pack' && legalCheck(p.id, 'contract_transfer'))
-                                   || (action.key === 'compl_statement_recv' && legalCheck(p.id, 'compl_statement'));
+                                   || (action.key === 'compl_statement_recv' && legalCheck(p.id, 'compl_statement'))
+                                   || (action.key === 'authority_to_exchange' && isContractSigned(p.id));
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
                   <div
                     (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
@@ -1064,7 +1065,9 @@
                         </div>
                       } @else {
                         <span style="font-size:11px; color:#16a34a; font-weight:600;">
-                          @if (_autoChecked) { Confirmed by solicitor } @else { Done }
+                          @if (_autoChecked && action.key === 'authority_to_exchange') { Confirmed by client }
+                          @else if (_autoChecked) { Confirmed by solicitor }
+                          @else { Done }
                         </span>
                       }
                     } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_received') {
