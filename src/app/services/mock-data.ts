@@ -52,6 +52,7 @@ export class MockDataService {
       this._seedDemoData();
     }
     this._backfillProperties();
+    this._backfillDataRoom();
 
     // Sync across browser tabs — when one tab mutates, all others update instantly
     window.addEventListener('storage', e => {
@@ -555,6 +556,30 @@ export class MockDataService {
       lostDate: new Date().toISOString().split('T')[0],
       activityLog: [...(p.activityLog ?? []), this._logEntry(`Property marked as lost. Reason: ${reason}.`, author, 'warning')],
     }));
+  }
+
+  private _backfillDataRoom(): void {
+    const DR_KEY = 'iris_data_room';
+    const CONTRACT_DOC_TYPES = ['Signed Contract', 'Transfer Deed', 'TR1'];
+    const existing: any[] = JSON.parse(localStorage.getItem(DR_KEY) ?? '[]');
+    const existingContractProps = new Set(
+      existing.filter(f => CONTRACT_DOC_TYPES.includes(f.docType)).map((f: any) => f.propertyId)
+    );
+    const lettingsProps = this._props().filter(p => p.stage === 'Lettings');
+    const toAdd = lettingsProps
+      .filter(p => !existingContractProps.has(p.id))
+      .map(p => ({
+        id: 'contract-seed-' + p.id,
+        propertyId: p.id,
+        docType: 'Transfer Deed',
+        fileName: 'Contract_Transfer_' + p.address.replace(/\s+/g, '_') + '.pdf',
+        uploadedBy: 'Solicitor',
+        uploadedAt: '22/07/2026',
+        url: null,
+      }));
+    if (toAdd.length) {
+      localStorage.setItem(DR_KEY, JSON.stringify([...existing, ...toAdd]));
+    }
   }
 
   private _backfillProperties(): void {

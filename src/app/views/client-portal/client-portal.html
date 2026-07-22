@@ -572,15 +572,22 @@
               </button>
             </div>
 
-          } @else if (rotApprovalStatus(p.id) === 'approved') {
+          } @else if (p.stage === 'Lettings' && isContractSigned(p.id)) {
+            <!-- Contract already signed — show this first -->
             <div class="status-card">
               <i class="ti ti-circle-check status-icon" style="color:#16a34a;"></i>
-              <div class="status-msg">Final RoT approved</div>
-              <div class="status-sub">{{ statusMsg(p) }}</div>
+              <div class="status-msg">Contract signed</div>
+              <div class="status-sub">Signed electronically on {{ contractSignedAt(p.id) }}</div>
             </div>
             <div class="detail-section" style="margin-top:14px; background:rgba(22,163,74,.04); border-color:rgba(22,163,74,.18);">
-              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-certificate" style="color:#16a34a;"></i> Report on Title approved</div>
-              <div style="font-size:13px; color:#374151;">Your approval of the Final Report on Title has been recorded. The legal team will proceed to exchange.</div>
+              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-pen" style="color:#16a34a;"></i> Contract & Transfer signed</div>
+              @if (contractSignature(p.id)) {
+                <div style="margin-bottom:10px; padding:10px 12px; background:var(--surface); border:1px solid rgba(22,163,74,.2); border-radius:8px;">
+                  <div style="font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">Signature on file</div>
+                  <img [src]="contractSignature(p.id)" style="max-width:220px; height:55px; object-fit:contain; display:block;" alt="Your signature">
+                </div>
+              }
+              <div style="font-size:13px; color:#374151;">Authority to exchange has been granted. The legal team will proceed to exchange.</div>
             </div>
 
           } @else if (p.stage === 'Lettings' && contractDocForProp(p.id) && !isContractSigned(p.id)) {
@@ -683,21 +690,15 @@
               </button>
             </div>
 
-          } @else if (p.stage === 'Lettings' && isContractSigned(p.id)) {
+          } @else if (rotApprovalStatus(p.id) === 'approved') {
             <div class="status-card">
               <i class="ti ti-circle-check status-icon" style="color:#16a34a;"></i>
-              <div class="status-msg">Contract signed</div>
-              <div class="status-sub">Signed electronically on {{ contractSignedAt(p.id) }}</div>
+              <div class="status-msg">Final RoT approved</div>
+              <div class="status-sub">{{ statusMsg(p) }}</div>
             </div>
             <div class="detail-section" style="margin-top:14px; background:rgba(22,163,74,.04); border-color:rgba(22,163,74,.18);">
-              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-pen" style="color:#16a34a;"></i> Contract & Transfer signed</div>
-              @if (contractSignature(p.id)) {
-                <div style="margin-bottom:10px; padding:10px 12px; background:var(--surface); border:1px solid rgba(22,163,74,.2); border-radius:8px;">
-                  <div style="font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">Signature on file</div>
-                  <img [src]="contractSignature(p.id)" style="max-width:220px; height:55px; object-fit:contain; display:block;" alt="Your signature">
-                </div>
-              }
-              <div style="font-size:13px; color:#374151;">Authority to exchange has been granted. The legal team will proceed to exchange.</div>
+              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-certificate" style="color:#16a34a;"></i> Report on Title approved</div>
+              <div style="font-size:13px; color:#374151;">Your approval of the Final Report on Title has been recorded. The legal team will proceed to exchange.</div>
             </div>
 
           } @else {
