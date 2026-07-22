@@ -339,9 +339,11 @@
                         </div>
                       } @else if (item.key === 'exchanged' && !_isChecked) {
                         <button class="lg-btn-primary" style="margin-left:auto; font-size:11px; padding:4px 12px; display:flex; align-items:center; gap:5px;"
-                                (click)="toggleCheck(p.id, item.key); $event.stopPropagation()">
+                                (click)="showExchangeModal.set(p.id); exchangeDateDraft.set(''); $event.stopPropagation()">
                           <i class="ti ti-exchange" style="font-size:11px;"></i> Record exchange
                         </button>
+                      } @else if (item.key === 'exchanged' && _isChecked && exchangedDateFor(p.id)) {
+                        <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">{{ exchangedDateFor(p.id) }}</span>
                       } @else if (item.key === 'rot_query_addressed') {
                         <div style="display:flex; align-items:center; gap:6px; margin-left:auto;" (click)="$event.stopPropagation()">
                           @if (itemDocs.length > 0) {
@@ -532,6 +534,36 @@
         </div>
         <div style="padding:0 20px 20px;">
           <button class="lg-btn-primary" style="width:100%;" (click)="doneReviewing()">Done reviewing</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── EXCHANGE DATE MODAL ──────────────────────────── -->
+  @if (showExchangeModal(); as propId) {
+    <div class="lg-modal-backdrop" (click)="showExchangeModal.set(null)">
+      <div class="lg-modal" style="max-width:400px;" (click)="$event.stopPropagation()">
+        <div class="lg-modal-header">
+          <div>
+            <div class="lg-modal-title"><i class="ti ti-exchange" style="font-size:14px; margin-right:6px;"></i>Record exchange</div>
+            <div class="lg-modal-sub">Enter the date contracts were exchanged</div>
+          </div>
+          <button class="lg-modal-close" (click)="showExchangeModal.set(null)"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+          <div>
+            <div class="lg-field-label">Exchange date <span style="color:#dc2626;">*</span></div>
+            <input type="date" class="lg-input" style="width:100%;"
+                   [value]="exchangeDateDraft()"
+                   (input)="exchangeDateDraft.set($any($event.target).value)">
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button class="lg-btn-outline" (click)="showExchangeModal.set(null)">Cancel</button>
+            <button class="lg-btn-primary" [disabled]="!exchangeDateDraft()"
+                    (click)="recordExchange(propId, exchangeDateDraft())">
+              <i class="ti ti-circle-check" style="font-size:13px;"></i> Confirm exchange
+            </button>
+          </div>
         </div>
       </div>
     </div>

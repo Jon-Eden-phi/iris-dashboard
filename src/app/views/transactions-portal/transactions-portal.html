@@ -1061,6 +1061,12 @@
                       } @else {
                         <span style="font-size:11px; color:#16a34a; font-weight:600;">
                           @if (_autoChecked && action.key === 'authority_to_exchange') { Confirmed by client }
+                          @else if (_autoChecked && action.key === 'exchange_completed') {
+                            Exchanged
+                            @if (legalExchangedDate(p.id)) {
+                              · <span style="font-weight:400;">{{ legalExchangedDate(p.id) | date:'d MMM y' }}</span>
+                            }
+                          }
                           @else if (_autoChecked) { Confirmed by solicitor }
                           @else { Done }
                         </span>

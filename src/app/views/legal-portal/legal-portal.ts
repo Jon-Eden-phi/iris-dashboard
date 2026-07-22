@@ -22,6 +22,7 @@ interface LegalMatterData {
   targetExchange: string;
   targetCompletion: string;
   rotQueryResponse?: string;
+  exchangedDate?: string;
 }
 
 interface DataRoomFile {
@@ -150,6 +151,10 @@ export class LegalPortalComponent {
   uploadNote      = signal('');
   selectedFile    = signal<File | null>(null);
 
+  // Exchange date modal
+  showExchangeModal = signal<string | null>(null);
+  exchangeDateDraft = signal('');
+
 
   readonly checklistGroups  = CHECKLIST_GROUPS;
   readonly itemDocTypes     = ITEM_DOC_TYPES;
@@ -271,6 +276,21 @@ export class LegalPortalComponent {
       m.checklist = { ...m.checklist, [key]: !m.checklist[key] };
       return { ...all, [propId]: m };
     });
+  }
+
+  recordExchange(propId: string, date: string): void {
+    this.legalData.update(all => {
+      const m = { ...(all[propId] ?? this._defaultMatter()) };
+      m.checklist = { ...m.checklist, exchanged: true };
+      m.exchangedDate = date;
+      return { ...all, [propId]: m };
+    });
+    this.showExchangeModal.set(null);
+    this.exchangeDateDraft.set('');
+  }
+
+  exchangedDateFor(propId: string): string | undefined {
+    return this.legalData()[propId]?.exchangedDate;
   }
 
   isItemDone(propId: string, itemKey: string): boolean {

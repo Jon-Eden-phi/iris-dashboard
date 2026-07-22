@@ -1121,6 +1121,10 @@ export class TransactionsPortalComponent {
     return !!this.legalDataSig()[propId]?.checklist?.[key];
   }
 
+  legalExchangedDate(propId: string): string | undefined {
+    return this.legalDataSig()[propId]?.exchangedDate;
+  }
+
   legalAllSearchesDone(propId: string): boolean {
     const cl = this.legalDataSig()[propId]?.checklist ?? {};
     return !!(cl['search_la_r'] && cl['search_water'] && cl['search_env']);
