@@ -350,7 +350,7 @@ export class TransactionsPortalComponent {
     MemorandumOfSale: ['MoS', 'Offer Letter', 'ID Verification', 'Property Information Form', 'Other'],
     Legals:           ['Contract Pack', 'Draft Report on Title', 'Report on Title', 'Annexure', 'Searches', 'Transfer Deed', 'Enquiries', 'Replies to Enquiries', 'Other'],
     Refurbishment:    ['Survey Report', 'Scope of Works', 'Contractor Quote', 'EPC', 'Building Regulations', 'Other'],
-    Lettings:         ['Contract', 'Transfer Deed', 'TR1', 'Completion Statement', 'Land Registry', 'Tenancy Agreement', 'Inventory', 'Other'],
+    Lettings:         ['Signed Contract', 'Transfer Deed', 'TR1', 'Completion Statement', 'Land Registry', 'Tenancy Agreement', 'Inventory', 'Other'],
   };
 
   docTypesForStage(stage: string): string[] {
@@ -1133,7 +1133,7 @@ export class TransactionsPortalComponent {
       case 'mos_received':
       case 'sols_confirmed':     return ['Memorandum of Sale', 'MoS'];
       case 'contract_pack_received':
-      case 'contract_pack':      return ['Contract', 'Transfer Deed', 'TR1'];
+      case 'contract_pack':      return ['Signed Contract', 'Transfer Deed', 'TR1'];
       case 'draft_rot_received': return ['Draft Report on Title', 'Report on Title'];
       case 'final_rot_received': return ['Final Report on Title', 'Report on Title'];
       case 'searches_received':  return ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'];

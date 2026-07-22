@@ -49,7 +49,7 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
   contract_rev:    ['Draft Contract', 'Contract Pack'],
   title_report:         ['Draft Report on Title', 'Report on Title'],
   rot_query_addressed:  ['Final Report on Title'],
-  contract_transfer:    ['Contract', 'Transfer Deed', 'TR1'],
+  contract_transfer:    ['Signed Contract', 'Transfer Deed', 'TR1'],
   compl_statement:      ['Completion Statement'],
 };
 
