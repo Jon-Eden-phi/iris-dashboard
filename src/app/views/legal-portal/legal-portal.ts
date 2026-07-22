@@ -322,7 +322,7 @@ export class LegalPortalComponent {
 
   private _isItemVisible(propId: string, key: string): boolean {
     if (key === 'compl_statement_revised') return !!this.txComplStatementQuery(propId);
-    if (key === 'client_compl_appr') return !!this.legalData()[propId]?.checklist?.['compl_statement'] || this._autoDoc(propId, 'compl_statement');
+    if (key === 'client_compl_appr') return !!this.legalData()[propId]?.checklist?.['compl_statement'] || this.dataRoom().some(f => f.propertyId === propId && f.docType === 'Completion Statement');
     return true;
   }
 
