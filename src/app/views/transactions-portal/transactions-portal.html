@@ -2239,7 +2239,7 @@
     </div>
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showUploadModal.set(false); uploadDocTypeFilter.set(null)">Cancel</button>
-      <button class="btn-primary" (click)="uploadDocument()"><i class="ti ti-upload" style="font-size:13px;"></i> Save</button>
+      <button class="btn-primary" [disabled]="!selectedFile()" (click)="uploadDocument()"><i class="ti ti-upload" style="font-size:13px;"></i> Save</button>
     </div>
   </div>
 }
@@ -2299,7 +2299,9 @@
                 <span style="font-size:12px; color:var(--text2);">{{ file.uploadedBy }}</span>
                 <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                   @if (file.url) {
-                    <i class="ti ti-external-link" style="font-size:14px; color:var(--text3); cursor:pointer;" (click)="previewFile(file)"></i>
+                    <i class="ti ti-external-link" style="font-size:14px; color:var(--text3); cursor:pointer;" title="Open document" (click)="previewFile(file)"></i>
+                  } @else {
+                    <span style="font-size:10px; color:var(--text3); font-style:italic;">No file</span>
                   }
                   <i class="ti ti-trash" style="font-size:14px; color:#dc2626; cursor:pointer;" (click)="deleteFile(file.id)"></i>
                 </div>
