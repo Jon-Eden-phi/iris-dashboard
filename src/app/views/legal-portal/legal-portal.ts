@@ -237,7 +237,7 @@ export class LegalPortalComponent {
     if (!userProjectIds.length) return [];
     return this.data.properties.filter((p: Property) =>
       p.status === 'active' &&
-      (p.stage === 'Legals' || tx[p.id]?.solicitorInstructed) &&
+      (p.stage === 'Legals' || p.stage === 'Lettings' || tx[p.id]?.solicitorInstructed) &&
       assignedPhases.has(p.phase)
     );
   });

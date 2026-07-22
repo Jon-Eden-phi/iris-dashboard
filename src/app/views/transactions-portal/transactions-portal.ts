@@ -138,6 +138,9 @@ export class TransactionsPortalComponent {
         if (e.key === this.CONTRACT_SIGNS_KEY) {
           try { this.contractSignsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
+        if (e.key === this.LEGAL_DATA_KEY) {
+          try { this.legalDataSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
       });
     }
 
@@ -388,6 +391,7 @@ export class TransactionsPortalComponent {
   private readonly DR_KEY = 'iris_data_room';
   private readonly ROT_APPROVALS_KEY = 'iris_rot_approvals';
   private readonly CONTRACT_SIGNS_KEY = 'iris_contract_signs';
+  private readonly LEGAL_DATA_KEY = 'iris_legal_data';
 
   txData = signal<Record<string, TxPropertyData>>(
     JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
@@ -404,6 +408,10 @@ export class TransactionsPortalComponent {
 
   private contractSignsSig = signal<Record<string, { signedAt: string }>>(
     JSON.parse(localStorage.getItem('iris_contract_signs') ?? '{}')
+  );
+
+  private legalDataSig = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}')
   );
 
   isRotApproved(propId: string): boolean {
@@ -768,6 +776,8 @@ export class TransactionsPortalComponent {
       return this.rotApprovalsSig()[propId]?.status === 'approved';
     if (key === 'searches_received')
       return this.txHasAllSearches(propId);
+    if (key === 'exchange_completed')
+      return this.legalCheck(propId, 'exchanged');
     if (key === 'survey_reports_received') {
       const ordered = this.surveysForProp(propId);
       if (ordered.length) return ordered.every(s => this.txHasDocs(propId, [this.surveyReportDocType(s.type)]));
@@ -808,7 +818,7 @@ export class TransactionsPortalComponent {
       if (!cl['contract_pack'])                return { label: 'Contract & Transfer Pending', done: false };
       if (!cl['authority_to_exchange'])        return { label: 'Authority to Exchange – Pending Client', done: false };
       if (this.data.getProperty(propId)?.isInvestorDeal && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
-      if (!cl['exchange_completed'])           return { label: 'Exchange Pending', done: false };
+      if (!done('exchange_completed'))          return { label: 'Exchange Pending', done: false };
       if (!cl['compl_statement_recv'])         return { label: 'Completion Statement Pending', done: false };
       if (!cl['compl_statement_appr'])         return { label: 'Completion Statement – Pending Approval', done: false };
       if (!cl['funds_requested'])              return { label: 'Funds to Request', done: false };
@@ -1107,16 +1117,12 @@ export class TransactionsPortalComponent {
     this.showToast('Fee earner added', 'ti-user-check');
   }
 
-  private _legalData(): Record<string, any> {
-    try { return JSON.parse(localStorage.getItem('iris_legal_data') ?? '{}'); } catch { return {}; }
-  }
-
   legalCheck(propId: string, key: string): boolean {
-    return !!this._legalData()[propId]?.checklist?.[key];
+    return !!this.legalDataSig()[propId]?.checklist?.[key];
   }
 
   legalAllSearchesDone(propId: string): boolean {
-    const cl = this._legalData()[propId]?.checklist ?? {};
+    const cl = this.legalDataSig()[propId]?.checklist ?? {};
     return !!(cl['search_la_r'] && cl['search_water'] && cl['search_env']);
   }
 

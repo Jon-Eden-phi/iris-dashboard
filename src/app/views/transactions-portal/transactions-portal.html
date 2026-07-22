@@ -972,12 +972,6 @@
                       <span><strong>Solicitor has received the MoS</strong> — the matter is now open.</span>
                     </div>
                   }
-                  @if (action.key === 'exchange_completed' && !getTxData(p.id).checklist['exchange_completed'] && legalCheck(p.id, 'exchanged')) {
-                    <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
-                      <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Solicitor confirms contracts exchanged</strong> — mark as exchanged.</span>
-                    </div>
-                  }
                   @if (action.key === 'completion_confirmed' && !getTxData(p.id).checklist['completion_confirmed'] && legalCheck(p.id, 'completed')) {
                     <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 14px; background:rgba(22,163,74,0.06); border-bottom:1px solid rgba(22,163,74,0.15); font-size:12px; color:#15803d;">
                       <i class="ti ti-circle-check" style="font-size:13px; flex-shrink:0; margin-top:1px;"></i>
@@ -1026,7 +1020,8 @@
                                    || (action.key === 'survey_reports_received' && _surveyDoc)
                                    || (action.key === 'contract_pack' && legalCheck(p.id, 'contract_transfer'))
                                    || (action.key === 'compl_statement_recv' && legalCheck(p.id, 'compl_statement'))
-                                   || (action.key === 'authority_to_exchange' && isContractSigned(p.id));
+                                   || (action.key === 'authority_to_exchange' && isContractSigned(p.id))
+                                   || (action.key === 'exchange_completed' && legalCheck(p.id, 'exchanged'));
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
                   <div
                     (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
