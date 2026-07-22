@@ -367,6 +367,8 @@ export class ClientPortalComponent {
     return this.contractSigns()[propId]?.signature;
   }
 
+  readonly todayStr = new Date().toLocaleDateString('en-GB');
+
   private _sigPoint(event: MouseEvent | TouchEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;

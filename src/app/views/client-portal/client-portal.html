@@ -585,54 +585,101 @@
 
           } @else if (p.stage === 'Lettings' && contractDocForProp(p.id) && !isContractSigned(p.id)) {
             <div class="action-panel">
-              <div class="action-panel-title">Contract ready to sign</div>
-              <p class="action-panel-desc">Your solicitor has prepared the Contract & Transfer document. Please review it and confirm that you have signed it to authorise exchange of contracts.</p>
+              <div class="action-panel-title">Sign the Contract & Transfer</div>
+              <p class="action-panel-desc">Your solicitor has prepared the contract. Review the document below, then draw your signature to authorise exchange of contracts.</p>
+
               @let contractDoc = contractDocForProp(p.id);
-              @if (contractDoc) {
-                <div style="background:#f0fdf4; border-radius:8px; padding:11px 13px; margin-bottom:14px; border:1px solid #bbf7d0;">
-                  <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#15803d; font-weight:700; margin-bottom:7px;">Document</div>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="ti ti-file-text" style="font-size:22px; color:#15803d; flex-shrink:0;"></i>
+
+              <!-- Step 1: Document -->
+              <div style="margin-bottom:18px;">
+                <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:8px; display:flex; align-items:center; gap:5px;">
+                  <span style="width:18px; height:18px; border-radius:50%; background:#0f7c6b; color:#fff; font-size:9px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800;">1</span>
+                  Review the document
+                </div>
+                @if (contractDoc) {
+                  <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:var(--surface);">
+                    <div style="width:40px; height:48px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                      <i class="ti ti-file-text" style="font-size:20px; color:#15803d;"></i>
+                    </div>
                     <div style="flex:1; min-width:0;">
-                      <div style="font-size:13px; font-weight:600; color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ contractDoc.fileName }}</div>
-                      <div style="font-size:11px; color:#9ca3af; margin-top:2px;">{{ contractDoc.docType }} · Uploaded {{ contractDoc.uploadedAt }}</div>
+                      <div style="font-size:13px; font-weight:700; color:var(--text1); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ contractDoc.fileName }}</div>
+                      <div style="font-size:11px; color:var(--text3); margin-top:2px;">{{ contractDoc.docType }} · Uploaded {{ contractDoc.uploadedAt }} by {{ contractDoc.uploadedBy }}</div>
+                    </div>
+                    <span style="flex-shrink:0; font-size:11px; font-weight:700; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; border-radius:20px; padding:3px 9px;">
+                      Ready to sign
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <!-- Step 2: Signature block -->
+              <div>
+                <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:10px; display:flex; align-items:center; gap:5px;">
+                  <span style="width:18px; height:18px; border-radius:50%; background:#0f7c6b; color:#fff; font-size:9px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800;">2</span>
+                  Sign below
+                </div>
+
+                <!-- Document-style signature block -->
+                <div style="border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+                  <!-- Declaration text -->
+                  <div style="padding:14px 16px; border-bottom:1px solid var(--border); background:var(--bg); font-size:12px; color:var(--text2); line-height:1.6;">
+                    By signing below, I confirm I have read and agree to the terms of the <strong>Contract & Transfer</strong> prepared by the solicitor, and I authorise SimplyPhi to proceed to exchange of contracts.
+                  </div>
+
+                  <!-- Signature canvas area -->
+                  <div style="padding:14px 16px; background:var(--surface);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <span style="font-size:11px; font-weight:700; color:var(--text1);">Signature</span>
+                      <button style="font-size:11px; color:var(--text3); background:none; border:1px solid var(--border); border-radius:5px; cursor:pointer; padding:2px 9px; font-family:inherit; display:flex; align-items:center; gap:4px; transition:background .12s;"
+                              (click)="clearSig(p.id)">
+                        <i class="ti ti-rotate-clockwise-2" style="font-size:11px;"></i> Clear
+                      </button>
+                    </div>
+
+                    <div style="position:relative; background:#fffffe; border:1.5px dashed #d1d5db; border-radius:6px; overflow:hidden;">
+                      <canvas [id]="'sig-' + p.id" width="560" height="120"
+                              style="display:block; width:100%; height:120px; cursor:crosshair; touch-action:none;"
+                              (mousedown)="startSig($event, p.id)"
+                              (mousemove)="drawSig($event, p.id)"
+                              (mouseup)="endSig()"
+                              (mouseleave)="endSig()"
+                              (touchstart)="startSig($event, p.id)"
+                              (touchmove)="drawSig($event, p.id)"
+                              (touchend)="endSig()">
+                      </canvas>
+                      <!-- X marker + signature line -->
+                      <div style="position:absolute; bottom:18px; left:14px; right:14px; pointer-events:none;">
+                        <div style="display:flex; align-items:flex-end; gap:6px;">
+                          <span style="font-size:18px; font-weight:900; color:#9ca3af; line-height:1; flex-shrink:0;">✕</span>
+                          <div style="flex:1; height:1.5px; background:#9ca3af;"></div>
+                        </div>
+                      </div>
+                      @if (!sigHasContent()) {
+                        <div style="position:absolute; top:0; left:0; right:0; bottom:28px; display:flex; align-items:center; justify-content:center; pointer-events:none;">
+                          <span style="font-size:12px; color:#9ca3af; font-style:italic;">Draw your signature above the line</span>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Signatory + date row -->
+                    <div style="display:flex; gap:16px; margin-top:12px;">
+                      <div style="flex:1;">
+                        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Signatory</div>
+                        <div style="font-size:13px; font-weight:600; color:var(--text1); padding:5px 0; border-bottom:1px solid var(--border);">{{ auth.currentUser()?.name }}</div>
+                      </div>
+                      <div style="width:140px; flex-shrink:0;">
+                        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:3px;">Date</div>
+                        <div style="font-size:13px; font-weight:600; color:var(--text1); padding:5px 0; border-bottom:1px solid var(--border);">{{ todayStr }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              }
-              <!-- Signature pad -->
-              <div style="margin-bottom:16px;">
-                <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                  <span>Electronic signature</span>
-                  <button style="font-size:11px; color:var(--text3); background:none; border:1px solid var(--border); border-radius:5px; cursor:pointer; padding:2px 9px; font-family:inherit; display:flex; align-items:center; gap:4px;"
-                          (click)="clearSig(p.id)">
-                    <i class="ti ti-rotate-clockwise-2" style="font-size:11px;"></i> Clear
-                  </button>
-                </div>
-                <div style="position:relative; border:1.5px solid var(--border); border-radius:8px; background:var(--bg); overflow:hidden;">
-                  <canvas [id]="'sig-' + p.id" width="560" height="130"
-                          style="display:block; width:100%; height:130px; cursor:crosshair; touch-action:none;"
-                          (mousedown)="startSig($event, p.id)"
-                          (mousemove)="drawSig($event, p.id)"
-                          (mouseup)="endSig()"
-                          (mouseleave)="endSig()"
-                          (touchstart)="startSig($event, p.id)"
-                          (touchmove)="drawSig($event, p.id)"
-                          (touchend)="endSig()">
-                  </canvas>
-                  @if (!sigHasContent()) {
-                    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;">
-                      <span style="font-size:13px; color:var(--text3); font-style:italic;">Draw your signature here</span>
-                    </div>
-                  }
-                  <div style="position:absolute; bottom:8px; left:12px; right:12px; height:1px; background:var(--border); pointer-events:none;"></div>
-                </div>
               </div>
 
-              <button class="btn-approve" [disabled]="!sigHasContent()" [style.opacity]="sigHasContent() ? '1' : '.45'"
+              <button class="btn-approve" style="margin-top:16px;" [disabled]="!sigHasContent()" [style.opacity]="sigHasContent() ? '1' : '.4'"
                       (click)="sigHasContent() && signContract(p.id)">
                 <i class="ti ti-pen"></i>
-                Sign contract
+                Confirm &amp; sign contract
               </button>
             </div>
 
