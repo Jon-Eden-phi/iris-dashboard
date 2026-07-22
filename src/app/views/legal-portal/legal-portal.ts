@@ -309,9 +309,14 @@ export class LegalPortalComponent {
     return false;
   }
 
+  private _isItemVisible(propId: string, key: string): boolean {
+    if (key === 'compl_statement_revised') return !!this.txComplStatementQuery(propId);
+    return true;
+  }
+
   checkProgress(propId: string): { done: number; total: number } {
-    const total = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.length, 0);
-    const done  = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.filter(i => this.isItemDone(propId, i.key)).length, 0);
+    const total = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.filter(i => this._isItemVisible(propId, i.key)).length, 0);
+    const done  = CHECKLIST_GROUPS.reduce((s, g) => s + g.items.filter(i => this._isItemVisible(propId, i.key) && this.isItemDone(propId, i.key)).length, 0);
     return { done, total };
   }
 
@@ -328,7 +333,7 @@ export class LegalPortalComponent {
   }
 
   txComplStatementQuery(propId: string): string {
-    return this.txDataSig()[propId]?.complStatementQuery ?? '';
+    return this.txDataSig()[propId]?.complStatementQuery ?? this._txRaw()[propId]?.complStatementQuery ?? '';
   }
 
   private _txRaw(): Record<string, any> {
@@ -354,7 +359,11 @@ export class LegalPortalComponent {
   }
 
   groupProgress(propId: string, group: typeof CHECKLIST_GROUPS[0]): number {
-    return group.items.filter(i => this.isItemDone(propId, i.key)).length;
+    return group.items.filter(i => this._isItemVisible(propId, i.key) && this.isItemDone(propId, i.key)).length;
+  }
+
+  groupTotal(propId: string, group: typeof CHECKLIST_GROUPS[0]): number {
+    return group.items.filter(i => this._isItemVisible(propId, i.key)).length;
   }
 
   // ── Document room ──────────────────────────────────────

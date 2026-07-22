@@ -222,7 +222,8 @@
 
             @for (group of checklistGroups; track group.label) {
               @let gp = groupProgress(p.id, group);
-              @let isComplete = gp === group.items.length;
+              @let _gt = groupTotal(p.id, group);
+              @let isComplete = gp === _gt;
               @let isLast = $last;
               <div style="display:flex; gap:14px;">
 
@@ -248,7 +249,7 @@
                     @if (isComplete) {
                       <span style="font-size:10.5px; background:#dcfce7; color:#16a34a; padding:1.5px 7px; border-radius:99px; font-weight:600; flex-shrink:0;">Complete</span>
                     } @else if (gp > 0) {
-                      <span style="font-size:10.5px; background:rgba(234,179,8,0.12); color:#a16207; padding:1.5px 7px; border-radius:99px; font-weight:600; flex-shrink:0;">{{ gp }}/{{ group.items.length }}</span>
+                      <span style="font-size:10.5px; background:rgba(234,179,8,0.12); color:#a16207; padding:1.5px 7px; border-radius:99px; font-weight:600; flex-shrink:0;">{{ gp }}/{{ _gt }}</span>
                     }
                   </div>
 
