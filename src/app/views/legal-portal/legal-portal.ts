@@ -113,6 +113,7 @@ const CHECKLIST_GROUPS = [
       { key: 'compl_statement',         label: 'Completion statement prepared' },
       { key: 'compl_statement_revised', label: 'Revised completion statement uploaded' },
       { key: 'client_compl_appr',       label: 'Completion statement approved by client' },
+      { key: 'client_funds_transferred', label: 'Funds transferred by client' },
       { key: 'funds',                   label: 'Funds confirmed' },
       { key: 'completed',               label: 'Completed' },
     ],
@@ -127,6 +128,7 @@ const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const SURVEYS_KEY = 'iris_surveys';
 const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
+const FUNDS_TRANSFERS_KEY = 'iris_funds_transfers';
 
 @Component({
   selector: 'app-legal-portal',
@@ -168,6 +170,10 @@ export class LegalPortalComponent {
   private txDataSig  = signal<Record<string, any>>(this._txRaw());
   complApprovalsSig  = signal<Record<string, any>>(
     JSON.parse(localStorage.getItem(COMPL_APPROVALS_KEY) ?? '{}')
+  );
+
+  fundTransfersSig = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem(FUNDS_TRANSFERS_KEY) ?? '{}')
   );
 
   // Shared data room with transactions portal
@@ -226,6 +232,9 @@ export class LegalPortalComponent {
         }
         if (e.key === COMPL_APPROVALS_KEY) {
           try { this.complApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
+        if (e.key === FUNDS_TRANSFERS_KEY) {
+          try { this.fundTransfersSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
       });
     }
@@ -317,12 +326,16 @@ export class LegalPortalComponent {
     if (itemKey === 'client_compl_appr') {
       return !!this.complApprovalsSig()[propId];
     }
+    if (itemKey === 'client_funds_transferred') {
+      return !!this.fundTransfersSig()[propId];
+    }
     return false;
   }
 
   private _isItemVisible(propId: string, key: string): boolean {
     if (key === 'compl_statement_revised') return !!this.txComplStatementQuery(propId);
     if (key === 'client_compl_appr') return !!this.legalData()[propId]?.checklist?.['compl_statement'] || this.dataRoom().some(f => f.propertyId === propId && f.docType === 'Completion Statement');
+    if (key === 'client_funds_transferred') return !!this.legalData()[propId]?.checklist?.['compl_statement'] || this.dataRoom().some(f => f.propertyId === propId && f.docType === 'Completion Statement');
     return true;
   }
 

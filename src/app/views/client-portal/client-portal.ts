@@ -11,6 +11,7 @@ const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const CONTRACT_SIGNS_KEY = 'iris_contract_signs';
 const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
 const TX_DATA_KEY = 'iris_tx_data';
+const FUNDS_TRANSFERS_KEY = 'iris_funds_transfers';
 
 interface DataRoomFile {
   id: string;
@@ -64,6 +65,10 @@ export class ClientPortalComponent {
 
   private txData = signal<Record<string, any>>(
     JSON.parse(localStorage.getItem(TX_DATA_KEY) ?? '{}')
+  );
+
+  private fundTransfers = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem(FUNDS_TRANSFERS_KEY) ?? '{}')
   );
 
   sigHasContent = signal(false);
@@ -126,6 +131,9 @@ export class ClientPortalComponent {
       }
       if (e.key === TX_DATA_KEY) {
         try { this.txData.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+      }
+      if (e.key === FUNDS_TRANSFERS_KEY) {
+        try { this.fundTransfers.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
       }
     });
   }
@@ -192,7 +200,8 @@ export class ClientPortalComponent {
       (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') ||
       this.rotApprovals()[p.id]?.status === 'pending' ||
       (p.stage === 'Lettings' && this.contractDocForProp(p.id) !== undefined && !this.contractSigns()[p.id]) ||
-      (p.stage === 'Lettings' && this.complStatementDocForProp(p.id) !== undefined && !this.complStatementApproved(p.id))
+      (p.stage === 'Lettings' && this.complStatementDocForProp(p.id) !== undefined && !this.complStatementApproved(p.id)) ||
+      (p.stage === 'Lettings' && !!this.txData()[p.id]?.fundsRequest && !this.fundTransfers()[p.id])
     )
   );
 
@@ -353,12 +362,13 @@ export class ClientPortalComponent {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }
 
-  actionType(p: Property): 'property-approval' | 'viewing-review' | 'rot-approval' | 'contract-sign' | 'compl-statement' | null {
+  actionType(p: Property): 'property-approval' | 'viewing-review' | 'rot-approval' | 'contract-sign' | 'compl-statement' | 'funds-transfer' | null {
     if (p.stage === 'ClientApproval') return 'property-approval';
     if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') return 'viewing-review';
     if (this.rotApprovals()[p.id]?.status === 'pending') return 'rot-approval';
     if (p.stage === 'Lettings' && this.contractDocForProp(p.id) !== undefined && !this.contractSigns()[p.id]) return 'contract-sign';
     if (p.stage === 'Lettings' && this.complStatementDocForProp(p.id) !== undefined && !this.complStatementApproved(p.id)) return 'compl-statement';
+    if (p.stage === 'Lettings' && !!this.txData()[p.id]?.fundsRequest && !this.fundTransfers()[p.id]) return 'funds-transfer';
     return null;
   }
 
@@ -397,6 +407,24 @@ export class ClientPortalComponent {
     const approvals = { ...this.complApprovals(), [propId]: { approvedAt: this.todayStr, approvedBy: this._userName } };
     localStorage.setItem(COMPL_APPROVALS_KEY, JSON.stringify(approvals));
     this.complApprovals.set(approvals);
+  }
+
+  fundsRequestFor(propId: string): { amount: number; requestedAt: string; note?: string } | undefined {
+    return this.txData()[propId]?.fundsRequest;
+  }
+
+  fundsTransferred(propId: string): boolean {
+    return !!this.fundTransfers()[propId];
+  }
+
+  fundsTransferredAt(propId: string): string | undefined {
+    return this.fundTransfers()[propId]?.transferredAt;
+  }
+
+  confirmFundsTransfer(propId: string): void {
+    const transfers = { ...this.fundTransfers(), [propId]: { transferredAt: this.todayStr, transferredBy: this._userName } };
+    localStorage.setItem(FUNDS_TRANSFERS_KEY, JSON.stringify(transfers));
+    this.fundTransfers.set(transfers);
   }
 
   previewComplStatementFile(propId: string): void {

@@ -1022,7 +1022,9 @@
                                    || (action.key === 'compl_statement_recv' && (legalCheck(p.id, 'compl_statement') || txHasDocs(p.id, ['Completion Statement'])))
                                    || (action.key === 'authority_to_exchange' && isContractSigned(p.id))
                                    || (action.key === 'exchange_completed' && legalCheck(p.id, 'exchanged'))
-                                   || (action.key === 'compl_statement_appr' && !!complApprovalsSig()[p.id]);
+                                   || (action.key === 'compl_statement_appr' && !!complApprovalsSig()[p.id])
+                                   || (action.key === 'funds_requested' && !!getTxData(p.id).fundsRequest)
+                                   || (action.key === 'funds_received' && !!fundTransfersSig()[p.id]);
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
                   <div
                     (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
@@ -1075,6 +1077,10 @@
                             }
                           }
                           @else if (_autoChecked && action.key === 'compl_statement_appr') { Approved by client }
+                          @else if (_autoChecked && action.key === 'funds_requested') {
+                            Requested · <span style="font-weight:400;">£{{ getTxData(p.id).fundsRequest!.amount.toLocaleString('en-GB') }}</span>
+                          }
+                          @else if (_autoChecked && action.key === 'funds_received') { Confirmed by client }
                           @else if (_autoChecked) { Confirmed by solicitor }
                           @else { Done }
                         </span>
@@ -1173,9 +1179,11 @@
                         <i class="ti ti-cash" style="font-size:11px;"></i> Request funds
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'funds_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="toggleChecklist(p.id, action.key, action.label); $event.stopPropagation()">
-                        <i class="ti ti-circle-check" style="font-size:11px;"></i> Confirm received
-                      </button>
+                      @if (getTxData(p.id).fundsRequest) {
+                        <span style="margin-left:auto; font-size:11px; color:#b45309; font-style:italic;">Awaiting client transfer confirmation</span>
+                      } @else {
+                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Request funds first</span>
+                      }
                     } @else if (p.stage === 'Lettings' && action.key === 'authority_to_exchange') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAuthorityModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-writing" style="font-size:11px;"></i> Approve — client
@@ -2387,7 +2395,13 @@
       <button class="tx-modal-close" (click)="showRequestFundsModal.set(false)"><i class="ti ti-x"></i></button>
     </div>
     <div class="tx-modal-body" style="display:flex; flex-direction:column; gap:14px;">
-      <p style="font-size:13px; color:var(--text2); margin:0;">This will log a funds request to the activity feed and mark the checklist item as complete.</p>
+      <p style="font-size:13px; color:var(--text2); margin:0;">This will log a funds request to the activity feed and notify the client.</p>
+      <div>
+        <label class="tx-form-label">Amount requested (£) <span style="color:#dc2626;">*</span></label>
+        <input class="form-control" type="number" min="0" placeholder="e.g. 185000"
+               style="width:100%;"
+               [value]="requestFundsAmount()" (input)="requestFundsAmount.set($any($event.target).value)">
+      </div>
       <div>
         <label class="tx-form-label">Note (optional)</label>
         <textarea class="form-control tx-textarea" placeholder="e.g. Requested via email, awaiting bank transfer…" [value]="requestFundsNote()" (input)="requestFundsNote.set($any($event.target).value)"></textarea>
@@ -2395,7 +2409,7 @@
     </div>
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showRequestFundsModal.set(false)">Cancel</button>
-      <button class="btn-primary" (click)="requestFunds()">
+      <button class="btn-primary" [disabled]="!requestFundsAmount()" (click)="requestFunds()">
         <i class="ti ti-send" style="font-size:13px;"></i> Send request
       </button>
     </div>

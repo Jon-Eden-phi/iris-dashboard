@@ -164,6 +164,10 @@
             <span class="action-badge" style="background:#fefce8; color:#854d0e; border-color:#fde68a;">
               <i class="ti ti-file-check"></i> Completion statement to approve
             </span>
+          } @else if (actionType(p) === 'funds-transfer') {
+            <span class="action-badge" style="background:#f0fdf4; color:#15803d; border-color:#bbf7d0;">
+              <i class="ti ti-cash"></i> Funds transfer needed
+            </span>
           } @else {
             <span class="action-badge">
               <i class="ti ti-clock"></i> Awaiting approval
@@ -354,6 +358,18 @@
             <div style="font-size:12px; color:#9a3412; margin-top:2px;">Your solicitor has prepared the completion statement. Review and approve it in the panel on the right to proceed to completion.</div>
           </div>
           <i class="ti ti-arrow-right" style="font-size:18px; color:#f97316; flex-shrink:0;"></i>
+        </div>
+      }
+
+      @if (fundsRequestFor(p.id) && !fundsTransferred(p.id)) {
+        <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; background:#f0fdf4; border:2px solid #16a34a; border-radius:12px; margin-bottom:16px;">
+          <span style="width:36px; height:36px; border-radius:50%; background:#16a34a; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="ti ti-cash" style="font-size:18px;"></i>
+          </span>
+          <div style="flex:1;">
+            <div style="font-size:14px; font-weight:800; color:#15803d;">Funds transfer required</div>
+            <div style="font-size:12px; color:#166534; margin-top:2px;">Please transfer £{{ fundsRequestFor(p.id)!.amount.toLocaleString('en-GB') }} to your solicitor and confirm in the panel on the right.</div>
+          </div>
         </div>
       }
 
@@ -587,6 +603,53 @@
               <button class="btn-approve" (click)="approveRot(p.id)">
                 <i class="ti ti-circle-check"></i>
                 Approve Final Report on Title
+              </button>
+            </div>
+
+          } @else if (p.stage === 'Lettings' && fundsTransferred(p.id)) {
+            <div class="status-card">
+              <i class="ti ti-circle-check status-icon" style="color:#16a34a;"></i>
+              <div class="status-msg">Funds transferred</div>
+              <div class="status-sub">Confirmed on {{ fundsTransferredAt(p.id) }}</div>
+            </div>
+            <div class="detail-section" style="margin-top:14px; background:rgba(22,163,74,.04); border-color:rgba(22,163,74,.18);">
+              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-cash" style="color:#16a34a;"></i> Funds transfer confirmed</div>
+              <div style="font-size:13px; color:#374151;">Your confirmation has been sent to the solicitor. They will confirm receipt and proceed to completion.</div>
+            </div>
+
+          } @else if (p.stage === 'Lettings' && fundsRequestFor(p.id) && !fundsTransferred(p.id)) {
+            @let fr = fundsRequestFor(p.id);
+            <div class="action-panel" style="border-color:#16a34a; border-width:1.5px;">
+              <div style="margin:-20px -20px 18px; padding:16px 20px; background:linear-gradient(135deg,#f0fdf4,#dcfce7); border-bottom:1px solid #bbf7d0; border-radius:11px 11px 0 0; display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:#16a34a; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <i class="ti ti-cash" style="font-size:20px; color:#fff;"></i>
+                </div>
+                <div>
+                  <div style="font-size:15px; font-weight:800; color:#14532d; line-height:1.2;">Transfer funds to your solicitor</div>
+                  <div style="font-size:11px; font-weight:600; color:#15803d; margin-top:2px; text-transform:uppercase; letter-spacing:.05em;">Action required</div>
+                </div>
+              </div>
+
+              <p class="action-panel-desc" style="margin-bottom:16px;">Your transaction manager has requested a funds transfer. Please transfer the amount below directly to your solicitor, then confirm below.</p>
+
+              @if (fr) {
+                <div style="padding:16px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:8px; margin-bottom:16px; text-align:center;">
+                  <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#16a34a; margin-bottom:6px;">Amount to transfer</div>
+                  <div style="font-size:28px; font-weight:900; color:#14532d; letter-spacing:-0.02em;">£{{ fr.amount.toLocaleString('en-GB') }}</div>
+                  @if (fr.note) {
+                    <div style="font-size:12px; color:#166534; margin-top:8px; font-style:italic;">Note: {{ fr.note }}</div>
+                  }
+                </div>
+              }
+
+              <div style="padding:12px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; font-size:13px; color:#78350f; line-height:1.6; margin-bottom:18px;">
+                <i class="ti ti-info-circle" style="margin-right:6px;"></i>
+                Transfer the funds directly to your solicitor's client account. Only confirm below once the transfer has been made.
+              </div>
+
+              <button class="btn-approve" style="background:#16a34a;" (click)="confirmFundsTransfer(p.id)">
+                <i class="ti ti-circle-check"></i>
+                I've transferred the funds
               </button>
             </div>
 

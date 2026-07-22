@@ -92,6 +92,7 @@ interface TxPropertyData {
   rotQueryResponse?: string;
   complStatementQuery?: string;
   complStatementSentToClient?: boolean;
+  fundsRequest?: { amount: number; requestedAt: string; note?: string };
 }
 
 interface DataRoomFile {
@@ -145,6 +146,9 @@ export class TransactionsPortalComponent {
         }
         if (e.key === this.COMPL_APPROVALS_KEY) {
           try { this.complApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+        }
+        if (e.key === this.FUNDS_TRANSFERS_KEY) {
+          try { this.fundTransfersSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
       });
     }
@@ -325,6 +329,7 @@ export class TransactionsPortalComponent {
   exchangeDateInput               = signal('');
   completionDateInput             = signal('');
   requestFundsNote                = signal('');
+  requestFundsAmount              = signal('');
   legalActionsOpen            = signal(false);
   additionalWorksDescription  = signal('');
   additionalWorksCost         = signal('');
@@ -398,6 +403,7 @@ export class TransactionsPortalComponent {
   private readonly CONTRACT_SIGNS_KEY = 'iris_contract_signs';
   private readonly LEGAL_DATA_KEY = 'iris_legal_data';
   private readonly COMPL_APPROVALS_KEY = 'iris_compl_approvals';
+  private readonly FUNDS_TRANSFERS_KEY = 'iris_funds_transfers';
 
   txData = signal<Record<string, TxPropertyData>>(
     JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
@@ -422,6 +428,10 @@ export class TransactionsPortalComponent {
 
   complApprovalsSig = signal<Record<string, any>>(
     JSON.parse(localStorage.getItem('iris_compl_approvals') ?? '{}')
+  );
+
+  fundTransfersSig = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem('iris_funds_transfers') ?? '{}')
   );
 
   isRotApproved(propId: string): boolean {
@@ -790,6 +800,8 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Completion Statement']) || this.legalCheck(propId, 'compl_statement');
     if (key === 'compl_statement_appr')
       return !!this.complApprovalsSig()[propId];
+    if (key === 'funds_requested') return !!this.getTxData(propId).fundsRequest;
+    if (key === 'funds_received')  return !!this.fundTransfersSig()[propId];
     if (key === 'exchange_completed')
       return this.legalCheck(propId, 'exchanged');
     if (key === 'survey_reports_received') {
@@ -835,8 +847,8 @@ export class TransactionsPortalComponent {
       if (!done('exchange_completed'))          return { label: 'Exchange Pending', done: false };
       if (!done('compl_statement_recv'))        return { label: 'Completion Statement Pending', done: false };
       if (!done('compl_statement_appr'))       return { label: 'Completion Statement – Pending Client Approval', done: false };
-      if (!cl['funds_requested'])              return { label: 'Funds to Request', done: false };
-      if (!cl['funds_received'])               return { label: 'Funds Pending', done: false };
+      if (!done('funds_requested'))  return { label: 'Funds to Request', done: false };
+      if (!done('funds_received'))   return { label: 'Funds Pending – Awaiting Client Transfer', done: false };
       if (!cl['completion_confirmed'])         return { label: 'Completion Pending', done: false };
       return { label: 'Ready for Completion', done: true };
     }
@@ -1318,18 +1330,20 @@ export class TransactionsPortalComponent {
   requestFunds(): void {
     const p = this.selectedProperty();
     if (!p) return;
+    const amount = this.requestFundsAmount().trim();
+    if (!amount) return;
     const note = this.requestFundsNote().trim();
+    const today = new Date().toLocaleDateString('en-GB');
+    this.setTxData(p.id, { fundsRequest: { amount: parseFloat(amount), requestedAt: today, note: note || undefined } });
     this.data.addActivity(p.id, {
       id: 'funds_req_' + Date.now(),
-      text: `Funds requested from client${note ? '. Note: ' + note : ''}`,
+      text: `Funds requested from client — £${parseFloat(amount).toLocaleString('en-GB')}${note ? '. Note: ' + note : ''}`,
       author: this.auth.currentUser()?.name ?? 'TX Team',
       timestamp: new Date().toISOString(),
       label: 'action',
     });
-    if (!this.getTxData(p.id).checklist['funds_requested']) {
-      this.toggleChecklist(p.id, 'funds_requested', 'Funds requested from client');
-    }
     this.showRequestFundsModal.set(false);
+    this.requestFundsAmount.set('');
     this.requestFundsNote.set('');
     this.showToast('Funds requested — client notified', 'ti-cash');
   }

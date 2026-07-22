@@ -319,13 +319,16 @@
                       <!-- hidden until TX requests changes on completion statement -->
                     } @else if (item.key === 'client_compl_appr' && !docsForItem(p.id, 'compl_statement').length && !m.checklist['compl_statement']) {
                       <!-- hidden until completion statement has been prepared -->
+                    } @else if (item.key === 'client_funds_transferred' && !docsForItem(p.id, 'compl_statement').length && !m.checklist['compl_statement']) {
+                      <!-- hidden until completion statement has been prepared -->
                     } @else {
                     @let itemDocs = docsForItem(p.id, item.key);
                     @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || item.key === 'rot_query_addressed' || item.key === 'contract_transfer' || item.key === 'compl_statement' || item.key === 'compl_statement_revised' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
                     @let _txAuto = (item.key === 'search_la' || item.key === 'survey_instructed') && txCheck(p.id, 'searches_ordered');
                     @let _clientAppr = item.key === 'client_compl_appr' && !!complApprovalsSig()[p.id];
-                    @let _isChecked = _autoDoc || _txAuto || _clientAppr || m.checklist[item.key];
-                    @let _isAuto = _autoDoc || _txAuto || _clientAppr;
+                    @let _clientFunds = item.key === 'client_funds_transferred' && !!fundTransfersSig()[p.id];
+                    @let _isChecked = _autoDoc || _txAuto || _clientAppr || _clientFunds || m.checklist[item.key];
+                    @let _isAuto = _autoDoc || _txAuto || _clientAppr || _clientFunds;
                     <div class="lg-check-row" [class.checked]="_isChecked" style="margin-bottom:6px;">
                       <div class="lg-check-box" [class.checked]="_isChecked"
                            (click)="!_isAuto && toggleCheck(p.id, item.key)"
