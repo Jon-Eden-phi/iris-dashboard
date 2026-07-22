@@ -589,35 +589,49 @@
 
           } @else if (p.stage === 'Lettings' && complStatementDocForProp(p.id) && !complStatementApproved(p.id)) {
             @let csDoc = complStatementDocForProp(p.id);
-            <div class="action-panel">
-              <div class="action-panel-title">Review &amp; approve completion statement</div>
-              <p class="action-panel-desc">Your solicitor has prepared the completion statement. Review the document below and approve it to confirm you are ready to complete.</p>
+            <!-- Urgent attention banner -->
+            <div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#fff7ed; border:1.5px solid #f97316; border-radius:10px; margin-bottom:14px;">
+              <span style="width:32px; height:32px; border-radius:50%; background:#f97316; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i class="ti ti-alert-triangle" style="font-size:16px;"></i>
+              </span>
+              <div>
+                <div style="font-size:13px; font-weight:800; color:#c2410c;">Action needed</div>
+                <div style="font-size:12px; color:#9a3412; margin-top:1px;">Your completion statement is ready — review and approve to proceed.</div>
+              </div>
+            </div>
 
-              <div style="margin-bottom:18px;">
-                <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--text3); margin-bottom:8px; display:flex; align-items:center; gap:5px;">
-                  <span style="width:18px; height:18px; border-radius:50%; background:#92400e; color:#fff; font-size:9px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800;">1</span>
-                  Review the document
+            <div class="action-panel" style="border-color:#f97316; border-width:1.5px;">
+              <!-- Header band -->
+              <div style="margin:-20px -20px 18px; padding:16px 20px; background:linear-gradient(135deg,#fff7ed,#ffedd5); border-bottom:1px solid #fed7aa; border-radius:11px 11px 0 0; display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:#f97316; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <i class="ti ti-file-check" style="font-size:20px; color:#fff;"></i>
                 </div>
-                @if (csDoc) {
-                  <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid #fde68a; border-radius:8px; background:#fffbeb;">
-                    <div style="width:40px; height:48px; background:#fef9c3; border:1px solid #fde68a; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                      <i class="ti ti-file-description" style="font-size:20px; color:#92400e;"></i>
-                    </div>
-                    <div style="flex:1; min-width:0;">
-                      <div style="font-size:13px; font-weight:700; color:var(--text1); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ csDoc.fileName }}</div>
-                      <div style="font-size:11px; color:var(--text3); margin-top:2px;">{{ csDoc.docType }} · Uploaded {{ csDoc.uploadedAt }} by {{ csDoc.uploadedBy }}</div>
-                    </div>
-                    <span style="flex-shrink:0; font-size:11px; font-weight:700; background:#fef9c3; color:#92400e; border:1px solid #fde68a; border-radius:20px; padding:3px 9px;">
-                      Awaiting approval
-                    </span>
-                  </div>
-                }
+                <div>
+                  <div style="font-size:15px; font-weight:800; color:#7c2d12; line-height:1.2;">Completion statement</div>
+                  <div style="font-size:11px; font-weight:600; color:#c2410c; margin-top:2px; text-transform:uppercase; letter-spacing:.05em;">Review &amp; approve required</div>
+                </div>
               </div>
 
-              <div style="padding:12px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; font-size:13px; color:#78350f; line-height:1.6; margin-bottom:18px;">
-                <i class="ti ti-info-circle" style="margin-right:6px;"></i>
-                By approving, you confirm you have reviewed the completion statement and are ready to proceed to completion.
-              </div>
+              <p class="action-panel-desc" style="margin-bottom:16px;">Your solicitor has prepared the completion statement. Open the document, review it, then approve below to confirm you are ready to complete.</p>
+
+              <!-- Document row -->
+              @if (csDoc) {
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; border:1.5px solid #fed7aa; border-radius:8px; background:#fff7ed; margin-bottom:16px;">
+                  <div style="width:40px; height:48px; background:#ffedd5; border:1px solid #fed7aa; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="ti ti-file-description" style="font-size:20px; color:#c2410c;"></i>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:13px; font-weight:700; color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ csDoc.fileName }}</div>
+                    <div style="font-size:11px; color:#9a3412; margin-top:2px;">{{ csDoc.docType }} · Uploaded {{ csDoc.uploadedAt }} by {{ csDoc.uploadedBy }}</div>
+                  </div>
+                  @if (csDoc.url) {
+                    <button style="flex-shrink:0; padding:6px 12px; border-radius:7px; border:1.5px solid #f97316; background:#fff; font-size:12px; font-weight:700; color:#c2410c; cursor:pointer; display:flex; align-items:center; gap:5px; transition:background .12s;"
+                            (click)="previewComplStatementFile(p.id); $event.stopPropagation()">
+                      <i class="ti ti-external-link" style="font-size:12px;"></i> Open
+                    </button>
+                  }
+                </div>
+              }
 
               <button class="btn-approve" (click)="approveComplStatement(p.id)">
                 <i class="ti ti-circle-check"></i>

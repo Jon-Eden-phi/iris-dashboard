@@ -399,6 +399,14 @@ export class ClientPortalComponent {
     this.complApprovals.set(approvals);
   }
 
+  previewComplStatementFile(propId: string): void {
+    const file = this.complStatementDocForProp(propId);
+    if (!file?.url) return;
+    fetch(file.url)
+      .then(r => r.blob())
+      .then(blob => { window.open(URL.createObjectURL(blob), '_blank'); });
+  }
+
   isContractSigned(propId: string): boolean {
     return !!this.contractSigns()[propId];
   }
