@@ -1147,9 +1147,13 @@
                     } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_recv') {
                       <span style="margin-left:auto; font-size:11px; color:var(--text3);">Uploaded by solicitor when ready</span>
                     } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_appr') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Completion Statement', ['Completion Statement']); $event.stopPropagation()">
-                        <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
-                      </button>
+                      @if (getTxData(p.id).complStatementQuery && !txHasDocs(p.id, ['Revised Completion Statement'])) {
+                        <span style="margin-left:auto; font-size:11px; color:#b45309; font-style:italic;">Changes requested — awaiting revised statement</span>
+                      } @else {
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Completion Statement', ['Completion Statement', 'Revised Completion Statement']); $event.stopPropagation()">
+                          <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
+                        </button>
+                      }
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_approved') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Final Report on Title', ['Report on Title', 'Draft Report on Title']); $event.stopPropagation()">
                         <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve

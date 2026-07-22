@@ -292,6 +292,17 @@
                       </div>
                     </div>
                   }
+                  @if (group.label === 'Completion' && txComplStatementQuery(p.id)) {
+                    <div style="background:rgba(180,83,9,0.07); border:1px solid rgba(180,83,9,0.25); border-radius:6px; padding:10px 12px; margin-bottom:8px; font-size:12px; color:#b45309;">
+                      <div style="display:flex; align-items:flex-start; gap:7px;">
+                        <i class="ti ti-alert-circle" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                        <div style="flex:1; min-width:0;">
+                          <strong>Changes requested by TX team</strong> — please upload a revised completion statement.
+                          <div style="margin-top:6px; padding:7px 9px; background:rgba(180,83,9,0.08); border-radius:5px; font-style:italic; white-space:pre-wrap; color:#92400e;">{{ txComplStatementQuery(p.id) }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  }
                   @if (group.label === 'Exchange & Completion' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {
                     <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
                       <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
@@ -303,9 +314,11 @@
                     @let _lgSurveysOrdered = surveysForProp(p.id);
                     @if (item.key === 'survey_report' && _lgSurveysOrdered.length) {
                       <!-- skip generic survey_report row — per-survey rows injected after survey_instructed -->
+                    } @else if (item.key === 'compl_statement_revised' && !txComplStatementQuery(p.id)) {
+                      <!-- hidden until TX requests changes on completion statement -->
                     } @else {
                     @let itemDocs = docsForItem(p.id, item.key);
-                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || item.key === 'rot_query_addressed' || item.key === 'contract_transfer' || item.key === 'compl_statement' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
+                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || item.key === 'rot_query_addressed' || item.key === 'contract_transfer' || item.key === 'compl_statement' || item.key === 'compl_statement_revised' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
                     @let _txAuto = (item.key === 'search_la' || item.key === 'survey_instructed') && txCheck(p.id, 'searches_ordered');
                     @let _isChecked = _autoDoc || _txAuto || m.checklist[item.key];
                     @let _isAuto = _autoDoc || _txAuto;

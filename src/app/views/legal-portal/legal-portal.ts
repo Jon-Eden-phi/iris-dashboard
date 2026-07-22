@@ -51,7 +51,8 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
   title_report:         ['Draft Report on Title', 'Report on Title'],
   rot_query_addressed:  ['Final Report on Title'],
   contract_transfer:    ['Signed Contract', 'Transfer Deed', 'TR1'],
-  compl_statement:      ['Completion Statement'],
+  compl_statement:         ['Completion Statement'],
+  compl_statement_revised: ['Revised Completion Statement'],
 };
 
 const CHECKLIST_GROUPS = [
@@ -109,9 +110,10 @@ const CHECKLIST_GROUPS = [
     label: 'Completion',
     icon: 'ti-home-check',
     items: [
-      { key: 'compl_statement', label: 'Completion statement prepared' },
-      { key: 'funds',           label: 'Funds confirmed' },
-      { key: 'completed',       label: 'Completed' },
+      { key: 'compl_statement',         label: 'Completion statement prepared' },
+      { key: 'compl_statement_revised', label: 'Revised completion statement uploaded' },
+      { key: 'funds',                   label: 'Funds confirmed' },
+      { key: 'completed',               label: 'Completed' },
     ],
   },
 ];
@@ -323,6 +325,10 @@ export class LegalPortalComponent {
 
   txRotQuery(propId: string): string {
     return this.txDataSig()[propId]?.rotQuery ?? '';
+  }
+
+  txComplStatementQuery(propId: string): string {
+    return this.txDataSig()[propId]?.complStatementQuery ?? '';
   }
 
   private _txRaw(): Record<string, any> {
