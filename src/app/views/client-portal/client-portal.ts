@@ -9,6 +9,7 @@ import { Property } from '../../models/property.model';
 const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const CONTRACT_SIGNS_KEY = 'iris_contract_signs';
+const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
 
 interface DataRoomFile {
   id: string;
@@ -54,6 +55,10 @@ export class ClientPortalComponent {
 
   private contractSigns = signal<Record<string, { signedAt: string; signature?: string }>>(
     JSON.parse(localStorage.getItem(CONTRACT_SIGNS_KEY) ?? '{}')
+  );
+
+  private complApprovals = signal<Record<string, { approvedAt: string; approvedBy: string }>>(
+    JSON.parse(localStorage.getItem(COMPL_APPROVALS_KEY) ?? '{}')
   );
 
   sigHasContent = signal(false);
@@ -110,6 +115,9 @@ export class ClientPortalComponent {
       }
       if (e.key === CONTRACT_SIGNS_KEY) {
         try { this.contractSigns.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+      }
+      if (e.key === COMPL_APPROVALS_KEY) {
+        try { this.complApprovals.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
       }
     });
   }
@@ -175,7 +183,8 @@ export class ClientPortalComponent {
       p.stage === 'ClientApproval' ||
       (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') ||
       this.rotApprovals()[p.id]?.status === 'pending' ||
-      (p.stage === 'Lettings' && this.contractDocForProp(p.id) !== undefined && !this.contractSigns()[p.id])
+      (p.stage === 'Lettings' && this.contractDocForProp(p.id) !== undefined && !this.contractSigns()[p.id]) ||
+      (p.stage === 'Lettings' && this.complStatementDocForProp(p.id) !== undefined && !this.complStatementApproved(p.id))
     )
   );
 
@@ -336,11 +345,12 @@ export class ClientPortalComponent {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }
 
-  actionType(p: Property): 'property-approval' | 'viewing-review' | 'rot-approval' | 'contract-sign' | null {
+  actionType(p: Property): 'property-approval' | 'viewing-review' | 'rot-approval' | 'contract-sign' | 'compl-statement' | null {
     if (p.stage === 'ClientApproval') return 'property-approval';
     if (p.stage === 'Viewing' && p.viewing?.clientReview === 'pending') return 'viewing-review';
     if (this.rotApprovals()[p.id]?.status === 'pending') return 'rot-approval';
     if (p.stage === 'Lettings' && this.contractDocForProp(p.id) !== undefined && !this.contractSigns()[p.id]) return 'contract-sign';
+    if (p.stage === 'Lettings' && this.complStatementDocForProp(p.id) !== undefined && !this.complStatementApproved(p.id)) return 'compl-statement';
     return null;
   }
 
@@ -353,6 +363,27 @@ export class ClientPortalComponent {
       f.propertyId === propId &&
       ['Signed Contract', 'Transfer Deed', 'TR1'].includes(f.docType)
     );
+  }
+
+  complStatementDocForProp(propId: string): DataRoomFile | undefined {
+    return (
+      this.dataRoom().find(f => f.propertyId === propId && f.docType === 'Revised Completion Statement') ??
+      this.dataRoom().find(f => f.propertyId === propId && f.docType === 'Completion Statement')
+    );
+  }
+
+  complStatementApproved(propId: string): boolean {
+    return !!this.complApprovals()[propId];
+  }
+
+  complStatementApprovedAt(propId: string): string | undefined {
+    return this.complApprovals()[propId]?.approvedAt;
+  }
+
+  approveComplStatement(propId: string): void {
+    const approvals = { ...this.complApprovals(), [propId]: { approvedAt: this.todayStr, approvedBy: this._userName } };
+    localStorage.setItem(COMPL_APPROVALS_KEY, JSON.stringify(approvals));
+    this.complApprovals.set(approvals);
   }
 
   isContractSigned(propId: string): boolean {
