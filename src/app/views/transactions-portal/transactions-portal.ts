@@ -350,7 +350,7 @@ export class TransactionsPortalComponent {
     MemorandumOfSale: ['MoS', 'Offer Letter', 'ID Verification', 'Property Information Form', 'Other'],
     Legals:           ['Contract Pack', 'Draft Report on Title', 'Report on Title', 'Annexure', 'Searches', 'Transfer Deed', 'Enquiries', 'Replies to Enquiries', 'Other'],
     Refurbishment:    ['Survey Report', 'Scope of Works', 'Contractor Quote', 'EPC', 'Building Regulations', 'Other'],
-    Lettings:         ['Completion Statement', 'Transfer Deed', 'Land Registry', 'Tenancy Agreement', 'Inventory', 'Other'],
+    Lettings:         ['Contract', 'Transfer Deed', 'TR1', 'Completion Statement', 'Land Registry', 'Tenancy Agreement', 'Inventory', 'Other'],
   };
 
   docTypesForStage(stage: string): string[] {
@@ -635,15 +635,14 @@ export class TransactionsPortalComponent {
       { key: 'scope_prepared',     label: 'Scope of works prepared' },
     ],
     Lettings: [
-      { key: 'contract_pack',          label: 'Contract pack received' },
-      { key: 'transfer_circulated',    label: 'Transfer circulated for signing' },
-      { key: 'compl_statement_recv',   label: 'Completion statement received' },
-      { key: 'compl_statement_appr',   label: 'Completion statement approved' },
-      { key: 'funds_requested',        label: 'Funds requested from client' },
-      { key: 'funds_received',         label: 'Funds received' },
+      { key: 'contract_pack',                  label: 'Contract & Transfer prepared' },
       { key: 'authority_to_exchange',          label: 'Authority to exchange — client signed' },
       { key: 'investor_authority_to_exchange', label: 'Authority to exchange — investor approved' },
       { key: 'exchange_completed',             label: 'Contracts exchanged' },
+      { key: 'compl_statement_recv',           label: 'Completion statement received' },
+      { key: 'compl_statement_appr',           label: 'Completion statement approved' },
+      { key: 'funds_requested',                label: 'Funds requested from client' },
+      { key: 'funds_received',                 label: 'Funds received' },
       { key: 'completion_confirmed',           label: 'Completion confirmed' },
     ],
   };
@@ -794,16 +793,15 @@ export class TransactionsPortalComponent {
       return { label: 'Surveys Complete', done: true };
     }
     if (stage === 'Lettings') {
-      if (!cl['contract_pack'])          return { label: 'Contract Pack Pending', done: false };
-      if (!cl['transfer_circulated'])    return { label: 'Transfer to Circulate', done: false };
-      if (!cl['compl_statement_recv'])   return { label: 'Completion Statement Pending', done: false };
-      if (!cl['compl_statement_appr'])   return { label: 'Completion Statement – Pending Approval', done: false };
-      if (!cl['funds_requested'])        return { label: 'Funds to Request', done: false };
-      if (!cl['funds_received'])         return { label: 'Funds Pending', done: false };
-      if (!cl['authority_to_exchange'])          return { label: 'Authority to Exchange – Pending Client', done: false };
+      if (!cl['contract_pack'])                return { label: 'Contract & Transfer Pending', done: false };
+      if (!cl['authority_to_exchange'])        return { label: 'Authority to Exchange – Pending Client', done: false };
       if (this.data.getProperty(propId)?.isInvestorDeal && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
-      if (!cl['exchange_completed'])             return { label: 'Exchange Pending', done: false };
-      if (!cl['completion_confirmed'])           return { label: 'Completion Pending', done: false };
+      if (!cl['exchange_completed'])           return { label: 'Exchange Pending', done: false };
+      if (!cl['compl_statement_recv'])         return { label: 'Completion Statement Pending', done: false };
+      if (!cl['compl_statement_appr'])         return { label: 'Completion Statement – Pending Approval', done: false };
+      if (!cl['funds_requested'])              return { label: 'Funds to Request', done: false };
+      if (!cl['funds_received'])               return { label: 'Funds Pending', done: false };
+      if (!cl['completion_confirmed'])         return { label: 'Completion Pending', done: false };
       return { label: 'Ready for Completion', done: true };
     }
     return { label: '', done: false };
@@ -1135,12 +1133,13 @@ export class TransactionsPortalComponent {
       case 'mos_received':
       case 'sols_confirmed':     return ['Memorandum of Sale', 'MoS'];
       case 'contract_pack_received':
-      case 'contract_pack':      return ['Contract Pack', 'Draft Contract'];
+      case 'contract_pack':      return ['Contract', 'Transfer Deed', 'TR1'];
       case 'draft_rot_received': return ['Draft Report on Title', 'Report on Title'];
       case 'final_rot_received': return ['Final Report on Title', 'Report on Title'];
       case 'searches_received':  return ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'];
       case 'survey_report_received':
       case 'survey_reports_received': return ['Survey Report', 'HomeBuyer Report', 'Structural Survey'];
+      case 'compl_statement_recv': return ['Completion Statement'];
       default:                   return [];
     }
   }
