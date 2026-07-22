@@ -904,14 +904,13 @@ export class TransactionsPortalComponent {
 
   uploadDocument(): void {
     const p = this.currentProperty();
-    if (!p) return;
+    const file = this.selectedFile();
+    if (!p || !file) return;
     const docType = this.uploadDocType();
     const note = this.uploadNote().trim();
-    const file = this.selectedFile();
-    const fileName = this.uploadFileName().trim() || file?.name || docType + '_document.pdf';
-    const entryId = 'dr_' + Date.now();
+    const fileName = this.uploadFileName().trim() || file.name;
     const newFile: DataRoomFile = {
-      id: entryId,
+      id: 'dr_' + Date.now(),
       propertyId: p.id,
       stage: p.stage,
       docType,
@@ -920,37 +919,6 @@ export class TransactionsPortalComponent {
       uploadedAt: new Date().toLocaleDateString('en-GB'),
       note,
     };
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.dataRoom.update(list =>
-          list.map(f => f.id === entryId ? { ...f, url: reader.result as string } : f)
-        );
-      };
-      reader.readAsDataURL(file);
-    }
-    this.dataRoom.update(list => [...list, newFile]);
-    // Expand that stage folder automatically
-    this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
-    // Log to activity
-    const logText = note ? `${docType} uploaded (${fileName}). Note: ${note}` : `${docType} uploaded (${fileName})`;
-    this.data.addActivity(p.id, {
-      id: 'upload_' + Date.now(),
-      text: logText,
-      author: this.auth.currentUser()?.name ?? 'TX Team',
-      timestamp: new Date().toISOString(),
-      label: 'action',
-    });
-    // Auto-tick matching checklist item
-    const keyMap: Record<string, string> = {
-      'MoS': 'mos_received', 'Contract Pack': 'contract_pack',
-      'Report on Title': 'final_rot_received', 'Searches': 'searches_received',
-      'Completion Statement': 'compl_statement_recv',
-    };
-    const key = keyMap[docType];
-    if (key && !this.getTxData(p.id).checklist[key]) {
-      this.toggleChecklist(p.id, key, docType + ' received');
-    }
     this.showUploadModal.set(false);
     this.uploadDocTypeFilter.set(null);
     this.uploadNote.set('');
@@ -958,7 +926,22 @@ export class TransactionsPortalComponent {
     this.selectedFile.set(null);
     const txInput = this.doc.getElementById('tx-file-input') as HTMLInputElement | null;
     if (txInput) txInput.value = '';
-    this.showToast(docType + ' uploaded — saved to Data Room', 'ti-upload');
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.dataRoom.update(list => [...list, { ...newFile, url: reader.result as string }]);
+      this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
+      const logText = note ? `${docType} uploaded (${fileName}). Note: ${note}` : `${docType} uploaded (${fileName})`;
+      this.data.addActivity(p.id, { id: 'upload_' + Date.now(), text: logText, author: this.auth.currentUser()?.name ?? 'TX Team', timestamp: new Date().toISOString(), label: 'action' });
+      const keyMap: Record<string, string> = {
+        'MoS': 'mos_received', 'Contract Pack': 'contract_pack',
+        'Report on Title': 'final_rot_received', 'Searches': 'searches_received',
+        'Completion Statement': 'compl_statement_recv',
+      };
+      const key = keyMap[docType];
+      if (key && !this.getTxData(p.id).checklist[key]) this.toggleChecklist(p.id, key, docType + ' received');
+      this.showToast(docType + ' uploaded — saved to Data Room', 'ti-upload');
+    };
+    reader.readAsDataURL(file);
   }
 
   toggleSearch(s: string): void {

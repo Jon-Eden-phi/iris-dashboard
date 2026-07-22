@@ -451,23 +451,6 @@ export class LegalPortalComponent {
       uploadedAt: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       note: this.uploadNote().trim(),
     };
-    // Read file as persistent data URL (survives localStorage round-trip)
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.dataRoom.update(list =>
-        list.map(f => f.id === entryId ? { ...f, url: reader.result as string } : f)
-      );
-    };
-    reader.readAsDataURL(file);
-    this.dataRoom.update(list => [...list, entry]);
-    if (docType === 'Final Report on Title') {
-      const current = { ...this.rotApprovalsSig() };
-      if (current[propId]?.status !== 'approved') {
-        current[propId] = { status: 'pending' };
-        localStorage.setItem(ROT_APPROVALS_KEY, JSON.stringify(current));
-        this.rotApprovalsSig.set(current);
-      }
-    }
     this.uploadDocType.set('');
     this.uploadFileName.set('');
     this.uploadNote.set('');
@@ -475,6 +458,19 @@ export class LegalPortalComponent {
     this.showUploadModal.set(false);
     const input = this.doc.getElementById('lg-file-input') as HTMLInputElement | null;
     if (input) input.value = '';
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.dataRoom.update(list => [...list, { ...entry, url: reader.result as string }]);
+      if (docType === 'Final Report on Title') {
+        const current = { ...this.rotApprovalsSig() };
+        if (current[propId]?.status !== 'approved') {
+          current[propId] = { status: 'pending' };
+          localStorage.setItem(ROT_APPROVALS_KEY, JSON.stringify(current));
+          this.rotApprovalsSig.set(current);
+        }
+      }
+    };
+    reader.readAsDataURL(file);
   }
 
   previewFile(file: DataRoomFile): void {
