@@ -430,9 +430,11 @@ export class ClientPortalComponent {
   previewComplStatementFile(propId: string): void {
     const file = this.complStatementDocForProp(propId);
     if (!file?.url) return;
+    const win = window.open('', '_blank');
+    if (!win) return;
     fetch(file.url)
       .then(r => r.blob())
-      .then(blob => { window.open(URL.createObjectURL(blob), '_blank'); });
+      .then(blob => { win.location.href = URL.createObjectURL(blob); });
   }
 
   isContractSigned(propId: string): boolean {
@@ -509,9 +511,11 @@ export class ClientPortalComponent {
   previewRotFile(propId: string): void {
     const file = this.rotDocForProp(propId);
     if (!file?.url) return;
+    const win = window.open('', '_blank');
+    if (!win) return;
     fetch(file.url)
       .then(r => r.blob())
-      .then(blob => { window.open(URL.createObjectURL(blob), '_blank'); });
+      .then(blob => { win.location.href = URL.createObjectURL(blob); });
   }
 
   approveRot(propId: string): void {
