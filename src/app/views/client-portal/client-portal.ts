@@ -1,12 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, WritableSignal } from '@angular/core';
 import { DatePipe, TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { AuthService } from '../../services/auth';
+import { DataRoomStore } from '../../services/data-room';
 import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
-const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const CONTRACT_SIGNS_KEY = 'iris_contract_signs';
 const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
@@ -37,6 +37,7 @@ export class ClientPortalComponent {
   auth     = inject(AuthService);
   router   = inject(Router);
   projects = inject(ProjectsService);
+  private drStore = inject(DataRoomStore);
   private get _userName(): string { return this.auth.currentUser()?.name ?? 'Client'; }
 
   view         = signal<PortalView>('dashboard');
@@ -48,9 +49,10 @@ export class ClientPortalComponent {
   filterStage  = signal('all');
   filterSort   = signal('newest');
 
-  private dataRoom = signal<DataRoomFile[]>(
-    JSON.parse(localStorage.getItem(DR_KEY) ?? '[]')
-  );
+  // Shared across all portals via IndexedDB + BroadcastChannel (see DataRoomStore).
+  private get dataRoom(): WritableSignal<DataRoomFile[]> {
+    return this.drStore.files as unknown as WritableSignal<DataRoomFile[]>;
+  }
 
   private rotApprovals = signal<Record<string, { status: string; approvedBy?: string }>>(
     JSON.parse(localStorage.getItem(ROT_APPROVALS_KEY) ?? '{}')
@@ -122,9 +124,6 @@ export class ClientPortalComponent {
 
   constructor() {
     window.addEventListener('storage', (e: StorageEvent) => {
-      if (e.key === DR_KEY) {
-        try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
-      }
       if (e.key === ROT_APPROVALS_KEY) {
         try { this.rotApprovals.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
       }

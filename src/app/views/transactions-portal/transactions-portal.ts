@@ -1,10 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, WritableSignal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, TitleCasePipe, DOCUMENT } from '@angular/common';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
+import { DataRoomStore } from '../../services/data-room';
 import { Property } from '../../models/property.model';
 
 type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record' | 'pipeline';
@@ -118,13 +119,11 @@ export class TransactionsPortalComponent {
   data   = inject(MockDataService);
   router = inject(Router);
   private doc = inject(DOCUMENT);
+  private drStore = inject(DataRoomStore);
 
   constructor() {
     effect(() => {
       localStorage.setItem(this.TX_DATA_KEY, JSON.stringify(this.txData()));
-    });
-    effect(() => {
-      localStorage.setItem(this.DR_KEY, JSON.stringify(this.dataRoom()));
     });
     effect(() => {
       localStorage.setItem(SURVEYS_KEY, JSON.stringify(this.surveys()));
@@ -132,9 +131,6 @@ export class TransactionsPortalComponent {
     const win = this.doc.defaultView;
     if (win) {
       win.addEventListener('storage', (e: StorageEvent) => {
-        if (e.key === this.DR_KEY) {
-          try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
-        }
         if (e.key === this.ROT_APPROVALS_KEY) {
           try { this.rotApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
@@ -398,7 +394,6 @@ export class TransactionsPortalComponent {
   toastVisible     = signal(false);
 
   private readonly TX_DATA_KEY = 'iris_tx_data';
-  private readonly DR_KEY = 'iris_data_room';
   private readonly ROT_APPROVALS_KEY = 'iris_rot_approvals';
   private readonly CONTRACT_SIGNS_KEY = 'iris_contract_signs';
   private readonly LEGAL_DATA_KEY = 'iris_legal_data';
@@ -409,10 +404,10 @@ export class TransactionsPortalComponent {
     JSON.parse(localStorage.getItem('iris_tx_data') ?? '{}')
   );
 
-  dataRoom = signal<DataRoomFile[]>(
-    (JSON.parse(localStorage.getItem('iris_data_room') ?? '[]') as DataRoomFile[])
-      .map(f => ({ ...f, docType: f.docType.replace('Survey Report — ', 'Survey Report - ') }))
-  );
+  // Shared across all portals via IndexedDB + BroadcastChannel (see DataRoomStore).
+  get dataRoom(): WritableSignal<DataRoomFile[]> {
+    return this.drStore.files as unknown as WritableSignal<DataRoomFile[]>;
+  }
 
   private rotApprovalsSig = signal<Record<string, { status: string }>>(
     JSON.parse(localStorage.getItem('iris_rot_approvals') ?? '{}')
@@ -929,9 +924,7 @@ export class TransactionsPortalComponent {
     const reader = new FileReader();
     reader.onload = () => {
       const entry = { ...newFile, url: reader.result as string };
-      const updated = [...this.dataRoom(), entry];
-      this.dataRoom.set(updated);
-      try { localStorage.setItem(this.DR_KEY, JSON.stringify(updated)); } catch { /* quota */ }
+      this.dataRoom.set([...this.dataRoom(), entry]);
       this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
       const logText = note ? `${docType} uploaded (${fileName}). Note: ${note}` : `${docType} uploaded (${fileName})`;
       this.data.addActivity(p.id, { id: 'upload_' + Date.now(), text: logText, author: this.auth.currentUser()?.name ?? 'TX Team', timestamp: new Date().toISOString(), label: 'action' });
@@ -1252,9 +1245,7 @@ export class TransactionsPortalComponent {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        const updated = this.dataRoom().map(f => f.id === entryId ? { ...f, url: reader.result as string } : f);
-        this.dataRoom.set(updated);
-        try { localStorage.setItem(this.DR_KEY, JSON.stringify(updated)); } catch { /* quota */ }
+        this.dataRoom.set(this.dataRoom().map(f => f.id === entryId ? { ...f, url: reader.result as string } : f));
       };
       reader.readAsDataURL(file);
     }

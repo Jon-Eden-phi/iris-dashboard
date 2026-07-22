@@ -1,8 +1,9 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, WritableSignal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
+import { DataRoomStore } from '../../services/data-room';
 import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
@@ -124,7 +125,6 @@ const CHECKLIST_GROUPS = [
 const TX_UPLOADED_ITEMS: ReadonlySet<string> = new Set(['search_la_r', 'search_water', 'search_env', 'survey_report']);
 
 const LEGAL_DATA_KEY = 'iris_legal_data';
-const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const SURVEYS_KEY = 'iris_surveys';
 const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
@@ -142,6 +142,7 @@ export class LegalPortalComponent {
   router   = inject(Router);
   projects = inject(ProjectsService);
   private doc = inject(DOCUMENT);
+  private drStore = inject(DataRoomStore);
 
   view       = signal<LegalView>('matters');
   selectedId = signal<string | null>(null);
@@ -176,11 +177,10 @@ export class LegalPortalComponent {
     JSON.parse(localStorage.getItem(FUNDS_TRANSFERS_KEY) ?? '{}')
   );
 
-  // Shared data room with transactions portal
-  private dataRoom = signal<DataRoomFile[]>(
-    (JSON.parse(localStorage.getItem(DR_KEY) ?? '[]') as DataRoomFile[])
-      .map(f => ({ ...f, docType: f.docType.replace('Survey Report — ', 'Survey Report - ') }))
-  );
+  // Shared across all portals via IndexedDB + BroadcastChannel (see DataRoomStore).
+  private get dataRoom(): WritableSignal<DataRoomFile[]> {
+    return this.drStore.files as unknown as WritableSignal<DataRoomFile[]>;
+  }
 
   // Ordered surveys from TX portal
   private surveysData = signal<{ propertyId: string; type: string }[]>(
@@ -214,16 +214,10 @@ export class LegalPortalComponent {
     effect(() => {
       localStorage.setItem(LEGAL_DATA_KEY, JSON.stringify(this.legalData()));
     });
-    effect(() => {
-      localStorage.setItem(DR_KEY, JSON.stringify(this.dataRoom()));
-    });
     const win = this.doc.defaultView;
     if (win) {
       win.addEventListener('storage', (e: StorageEvent) => {
         if (e.key === 'iris_tx_data') this.txDataSig.set(this._txRaw());
-        if (e.key === DR_KEY) {
-          try { this.dataRoom.set(JSON.parse(e.newValue ?? '[]')); } catch { /* ignore */ }
-        }
         if (e.key === ROT_APPROVALS_KEY) {
           try { this.rotApprovalsSig.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
         }
@@ -460,9 +454,7 @@ export class LegalPortalComponent {
     if (input) input.value = '';
     const reader = new FileReader();
     reader.onload = () => {
-      const updated = [...this.dataRoom(), { ...entry, url: reader.result as string }];
-      this.dataRoom.set(updated);
-      try { localStorage.setItem(DR_KEY, JSON.stringify(updated)); } catch { /* quota */ }
+      this.dataRoom.set([...this.dataRoom(), { ...entry, url: reader.result as string }]);
       if (docType === 'Final Report on Title') {
         const current = { ...this.rotApprovalsSig() };
         if (current[propId]?.status !== 'approved') {

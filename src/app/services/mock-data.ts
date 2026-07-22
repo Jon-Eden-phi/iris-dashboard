@@ -1,10 +1,12 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { ActivityNote, NoteLabel, Offer, Property, Stage, Viewing } from '../models/property.model';
 import { SocialProject, Supplier } from '../models/social.model';
 import { Agent } from '../models/agent.model';
+import { DataRoomStore, DataRoomFile } from './data-room';
 
 @Injectable({ providedIn: 'root' })
 export class MockDataService {
+  private drStore = inject(DataRoomStore);
 
   private readonly STORAGE_KEY = 'iris-props-v12';
 
@@ -560,16 +562,18 @@ export class MockDataService {
     }));
   }
 
-  private _backfillDataRoom(): void {
-    const DR_KEY = 'iris_data_room';
+  private async _backfillDataRoom(): Promise<void> {
+    // Seed a Transfer Deed for each Lettings property so the client portal has a
+    // contract to sign — unless that property already has a contract-type doc.
+    await this.drStore.ready;
     const CONTRACT_DOC_TYPES = ['Signed Contract', 'Transfer Deed', 'TR1'];
-    const existing: any[] = JSON.parse(localStorage.getItem(DR_KEY) ?? '[]');
-    const existingContractProps = new Set(
-      existing.filter(f => CONTRACT_DOC_TYPES.includes(f.docType)).map((f: any) => f.propertyId)
+    const propsWithContract = new Set(
+      this.drStore.files()
+        .filter(f => CONTRACT_DOC_TYPES.includes(f.docType))
+        .map(f => f.propertyId)
     );
-    const lettingsProps = this._props().filter(p => p.stage === 'Lettings');
-    const toAdd = lettingsProps
-      .filter(p => !existingContractProps.has(p.id))
+    const seeds: DataRoomFile[] = this._props()
+      .filter(p => p.stage === 'Lettings' && !propsWithContract.has(p.id))
       .map(p => ({
         id: 'contract-seed-' + p.id,
         propertyId: p.id,
@@ -579,9 +583,7 @@ export class MockDataService {
         uploadedAt: '22/07/2026',
         url: null,
       }));
-    if (toAdd.length) {
-      localStorage.setItem(DR_KEY, JSON.stringify([...existing, ...toAdd]));
-    }
+    if (seeds.length) this.drStore.files.update(list => [...list, ...seeds]);
   }
 
   private _backfillProperties(): void {
