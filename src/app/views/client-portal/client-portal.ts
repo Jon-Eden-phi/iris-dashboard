@@ -394,7 +394,7 @@ export class ClientPortalComponent {
   contractDocForProp(propId: string): DataRoomFile | undefined {
     return this.dataRoom().find(f =>
       f.propertyId === propId &&
-      ['Signed Contract', 'Transfer Deed', 'TR1'].includes(f.docType)
+      ['Contract', 'Signed Contract', 'Transfer Deed', 'TR1'].includes(f.docType)
     );
   }
 

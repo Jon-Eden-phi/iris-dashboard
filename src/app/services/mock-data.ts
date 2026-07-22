@@ -566,7 +566,7 @@ export class MockDataService {
     // Seed a Transfer Deed for each Lettings property so the client portal has a
     // contract to sign — unless that property already has a contract-type doc.
     await this.drStore.ready;
-    const CONTRACT_DOC_TYPES = ['Signed Contract', 'Transfer Deed', 'TR1'];
+    const CONTRACT_DOC_TYPES = ['Contract', 'Signed Contract', 'Transfer Deed', 'TR1'];
     const propsWithContract = new Set(
       this.drStore.files()
         .filter(f => CONTRACT_DOC_TYPES.includes(f.docType))

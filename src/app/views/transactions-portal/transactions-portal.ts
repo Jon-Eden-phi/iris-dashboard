@@ -1168,7 +1168,7 @@ export class TransactionsPortalComponent {
       case 'mos_received':
       case 'sols_confirmed':     return ['Memorandum of Sale', 'MoS'];
       case 'contract_pack_received':
-      case 'contract_pack':      return ['Signed Contract', 'Transfer Deed', 'TR1'];
+      case 'contract_pack':      return ['Contract', 'Signed Contract', 'Transfer Deed', 'TR1'];
       case 'draft_rot_received': return ['Draft Report on Title', 'Report on Title'];
       case 'final_rot_received': return ['Final Report on Title', 'Report on Title'];
       case 'searches_received':  return ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'];
