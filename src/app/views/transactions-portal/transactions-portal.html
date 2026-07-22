@@ -1166,9 +1166,7 @@
                         <i class="ti ti-building-bank" style="font-size:11px;"></i> Approve — investor
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'exchange_completed') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showExchangeDateModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-exchange" style="font-size:11px;"></i> Complete exchange
-                      </button>
+                      <span style="margin-left:auto; font-size:11px; color:var(--text3);">Confirmed by solicitor when done</span>
                     } @else if (p.stage === 'Lettings' && action.key === 'completion_confirmed') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showCompletionDateModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-flag-check" style="font-size:11px;"></i> Confirm completion
