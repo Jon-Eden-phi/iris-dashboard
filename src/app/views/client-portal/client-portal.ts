@@ -10,6 +10,7 @@ const DR_KEY = 'iris_data_room';
 const ROT_APPROVALS_KEY = 'iris_rot_approvals';
 const CONTRACT_SIGNS_KEY = 'iris_contract_signs';
 const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
+const TX_DATA_KEY = 'iris_tx_data';
 
 interface DataRoomFile {
   id: string;
@@ -59,6 +60,10 @@ export class ClientPortalComponent {
 
   private complApprovals = signal<Record<string, { approvedAt: string; approvedBy: string }>>(
     JSON.parse(localStorage.getItem(COMPL_APPROVALS_KEY) ?? '{}')
+  );
+
+  private txData = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem(TX_DATA_KEY) ?? '{}')
   );
 
   sigHasContent = signal(false);
@@ -118,6 +123,9 @@ export class ClientPortalComponent {
       }
       if (e.key === COMPL_APPROVALS_KEY) {
         try { this.complApprovals.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+      }
+      if (e.key === TX_DATA_KEY) {
+        try { this.txData.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
       }
     });
   }
@@ -365,7 +373,12 @@ export class ClientPortalComponent {
     );
   }
 
+  txApprovedComplStatement(propId: string): boolean {
+    return !!this.txData()[propId]?.checklist?.['compl_statement_appr'];
+  }
+
   complStatementDocForProp(propId: string): DataRoomFile | undefined {
+    if (!this.txApprovedComplStatement(propId)) return undefined;
     return (
       this.dataRoom().find(f => f.propertyId === propId && f.docType === 'Revised Completion Statement') ??
       this.dataRoom().find(f => f.propertyId === propId && f.docType === 'Completion Statement')
