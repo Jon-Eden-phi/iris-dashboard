@@ -94,17 +94,23 @@ const CHECKLIST_GROUPS = [
     icon: 'ti-coin',
     items: [
       { key: 'contract_transfer', label: 'Contract & Transfer prepared' },
-      { key: 'compl_statement',   label: 'Completion statement prepared' },
-      { key: 'funds',             label: 'Funds confirmed' },
     ],
   },
   {
-    label: 'Exchange & Completion',
-    icon: 'ti-home-check',
+    label: 'Exchange',
+    icon: 'ti-exchange',
     items: [
       { key: 'exchange_ready', label: 'Exchange sign-off given' },
       { key: 'exchanged',      label: 'Exchanged' },
-      { key: 'completed',      label: 'Completed' },
+    ],
+  },
+  {
+    label: 'Completion',
+    icon: 'ti-home-check',
+    items: [
+      { key: 'compl_statement', label: 'Completion statement prepared' },
+      { key: 'funds',           label: 'Funds confirmed' },
+      { key: 'completed',       label: 'Completed' },
     ],
   },
 ];

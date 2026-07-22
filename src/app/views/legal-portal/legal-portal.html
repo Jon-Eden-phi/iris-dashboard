@@ -337,6 +337,11 @@
                             <i class="ti ti-paperclip" style="font-size:11px;"></i> Annexure
                           </button>
                         </div>
+                      } @else if (item.key === 'exchanged' && !_isChecked) {
+                        <button class="lg-btn-primary" style="margin-left:auto; font-size:11px; padding:4px 12px; display:flex; align-items:center; gap:5px;"
+                                (click)="toggleCheck(p.id, item.key); $event.stopPropagation()">
+                          <i class="ti ti-exchange" style="font-size:11px;"></i> Record exchange
+                        </button>
                       } @else if (item.key === 'rot_query_addressed') {
                         <div style="display:flex; align-items:center; gap:6px; margin-left:auto;" (click)="$event.stopPropagation()">
                           @if (itemDocs.length > 0) {
