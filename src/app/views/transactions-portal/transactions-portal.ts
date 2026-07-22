@@ -776,6 +776,8 @@ export class TransactionsPortalComponent {
       return this.rotApprovalsSig()[propId]?.status === 'approved';
     if (key === 'searches_received')
       return this.txHasAllSearches(propId);
+    if (key === 'compl_statement_recv')
+      return this.txHasDocs(propId, ['Completion Statement']) || this.legalCheck(propId, 'compl_statement');
     if (key === 'exchange_completed')
       return this.legalCheck(propId, 'exchanged');
     if (key === 'survey_reports_received') {
@@ -819,7 +821,7 @@ export class TransactionsPortalComponent {
       if (!cl['authority_to_exchange'])        return { label: 'Authority to Exchange – Pending Client', done: false };
       if (this.data.getProperty(propId)?.isInvestorDeal && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
       if (!done('exchange_completed'))          return { label: 'Exchange Pending', done: false };
-      if (!cl['compl_statement_recv'])         return { label: 'Completion Statement Pending', done: false };
+      if (!done('compl_statement_recv'))        return { label: 'Completion Statement Pending', done: false };
       if (!cl['compl_statement_appr'])         return { label: 'Completion Statement – Pending Approval', done: false };
       if (!cl['funds_requested'])              return { label: 'Funds to Request', done: false };
       if (!cl['funds_received'])               return { label: 'Funds Pending', done: false };

@@ -1019,7 +1019,7 @@
                                    || (action.key === 'final_rot_approved' && isRotApproved(p.id))
                                    || (action.key === 'survey_reports_received' && _surveyDoc)
                                    || (action.key === 'contract_pack' && legalCheck(p.id, 'contract_transfer'))
-                                   || (action.key === 'compl_statement_recv' && legalCheck(p.id, 'compl_statement'))
+                                   || (action.key === 'compl_statement_recv' && (legalCheck(p.id, 'compl_statement') || txHasDocs(p.id, ['Completion Statement'])))
                                    || (action.key === 'authority_to_exchange' && isContractSigned(p.id))
                                    || (action.key === 'exchange_completed' && legalCheck(p.id, 'exchanged'));
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
@@ -1040,6 +1040,11 @@
                       @if (_autoChecked && (action.key === 'mos_received' || action.key === 'contract_pack_received' || action.key === 'survey_report_received' || action.key === 'searches_received' || action.key === 'survey_reports_received')) {
                         <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
                                 (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : action.key === 'searches_received' ? ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
+                          <i class="ti ti-eye" style="font-size:11px;"></i> View doc
+                        </button>
+                      } @else if (_autoChecked && action.key === 'compl_statement_recv') {
+                        <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
+                                (click)="openReviewModal(p.id, action.key, action.label, action.label, ['Completion Statement']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
                       } @else if (action.key === 'draft_rot_received' && getTxData(p.id).rotQuery) {
@@ -1140,9 +1145,7 @@
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey reports
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_recv') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Completion Statement'); showUploadModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload completion statement
-                      </button>
+                      <span style="margin-left:auto; font-size:11px; color:var(--text3);">Uploaded by solicitor when ready</span>
                     } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_appr') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Completion Statement', ['Completion Statement']); $event.stopPropagation()">
                         <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
