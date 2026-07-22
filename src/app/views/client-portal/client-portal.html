@@ -183,6 +183,32 @@
       </div>
     }
 
+    <!-- Completed properties -->
+    @if (completedProperties().length > 0) {
+      <div class="section-head" style="margin-top:28px; color:var(--accent);">
+        <i class="ti ti-rosette-discount-check"></i>
+        Completed ({{ completedProperties().length }})
+      </div>
+      @for (p of completedProperties(); track p.id) {
+        <div class="action-card" style="border-color:#bbf7d0; background:var(--card);" (click)="openDetail(p)">
+          <i class="ti ti-home-check" style="font-size:22px; color:#16a34a; flex-shrink:0;"></i>
+          <div class="action-card-info">
+            <div class="action-card-address">{{ p.address }}</div>
+            <div class="action-card-meta">
+              <span>{{ p.phase }}</span>
+              @if (p.beds) { <span>{{ p.beds }} bed</span> }
+              @if (p.type) { <span>{{ p.type }}</span> }
+              @if (p.agreedPrice ?? p.financial?.ap) { <span>{{ fmtFull((p.agreedPrice ?? p.financial!.ap)!) }}</span> }
+            </div>
+          </div>
+          <span class="action-badge" style="background:#f0fdf4; color:#15803d; border-color:#bbf7d0;">
+            <i class="ti ti-circle-check"></i> Completion confirmed
+          </span>
+          <i class="ti ti-chevron-right" style="color:#d1d5db;"></i>
+        </div>
+      }
+    }
+
     <!-- All properties -->
     <div class="section-head" style="margin-top:28px;">
       <i class="ti ti-building"></i>
@@ -636,6 +662,17 @@
                 <i class="ti ti-circle-check"></i>
                 Approve Final Report on Title
               </button>
+            </div>
+
+          } @else if (p.stage === 'Lettings' && isCompleted(p.id)) {
+            <div class="status-card" style="border-color:#bbf7d0; background:rgba(22,163,74,.05);">
+              <i class="ti ti-rosette-discount-check status-icon" style="color:#16a34a; font-size:32px;"></i>
+              <div class="status-msg" style="color:#15803d;">Completion confirmed</div>
+              <div class="status-sub">Your property has completed — congratulations!</div>
+            </div>
+            <div class="detail-section" style="margin-top:14px; background:rgba(22,163,74,.04); border-color:rgba(22,163,74,.18);">
+              <div class="detail-section-title" style="color:#16a34a;"><i class="ti ti-home-check" style="color:#16a34a;"></i> What happens next</div>
+              <div style="font-size:13px; color:#374151; line-height:1.6;">The legal team will now register the title with the Land Registry. You will receive copies of all completion documents. Your SimplyPhi team will be in touch shortly to confirm next steps for the property.</div>
             </div>
 
           } @else if (p.stage === 'Lettings' && fundsTransferred(p.id)) {

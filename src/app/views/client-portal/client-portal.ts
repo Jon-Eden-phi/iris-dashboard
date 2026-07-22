@@ -12,6 +12,7 @@ const CONTRACT_SIGNS_KEY = 'iris_contract_signs';
 const COMPL_APPROVALS_KEY = 'iris_compl_approvals';
 const TX_DATA_KEY = 'iris_tx_data';
 const FUNDS_TRANSFERS_KEY = 'iris_funds_transfers';
+const LEGAL_DATA_KEY = 'iris_legal_data';
 
 interface DataRoomFile {
   id: string;
@@ -69,6 +70,10 @@ export class ClientPortalComponent {
 
   private fundTransfers = signal<Record<string, any>>(
     JSON.parse(localStorage.getItem(FUNDS_TRANSFERS_KEY) ?? '{}')
+  );
+
+  private legalData = signal<Record<string, any>>(
+    JSON.parse(localStorage.getItem(LEGAL_DATA_KEY) ?? '{}')
   );
 
   sigHasContent = signal(false);
@@ -135,8 +140,19 @@ export class ClientPortalComponent {
       if (e.key === FUNDS_TRANSFERS_KEY) {
         try { this.fundTransfers.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
       }
+      if (e.key === LEGAL_DATA_KEY) {
+        try { this.legalData.set(JSON.parse(e.newValue ?? '{}')); } catch { /* ignore */ }
+      }
     });
   }
+
+  isCompleted(propId: string): boolean {
+    return !!this.legalData()[propId]?.checklist?.completed;
+  }
+
+  completedProperties = computed(() =>
+    this.activeProperties().filter(p => this.isCompleted(p.id))
+  );
 
   activeProperty = computed(() => {
     const id = this.selectedId();
