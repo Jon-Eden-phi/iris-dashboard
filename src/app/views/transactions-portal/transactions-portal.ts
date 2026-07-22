@@ -776,6 +776,8 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Memorandum of Sale', 'MoS']);
     if (key === 'contract_pack_received')
       return this.txHasDocs(propId, ['Contract Pack', 'Draft Contract']);
+    if (key === 'contract_pack')
+      return this.txHasDocs(propId, ['Contract', 'Signed Contract', 'Transfer Deed', 'TR1']) || this.legalCheck(propId, 'contract_transfer');
     if (key === 'red_flag_cleared')
       return this.legalCheck(propId, 'contract_rev');
     if (key === 'survey_report_received') {

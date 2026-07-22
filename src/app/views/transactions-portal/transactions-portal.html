@@ -1010,6 +1010,7 @@
                   } @else {
                   @let _mosDoc = txHasDocs(p.id, ['Memorandum of Sale', 'MoS']);
                   @let _contractDoc = txHasDocs(p.id, ['Contract Pack', 'Draft Contract']);
+                  @let _contractSignedDoc = txHasDocs(p.id, ['Contract', 'Signed Contract', 'Transfer Deed', 'TR1']);
                   @let _surveyDoc = txHasDocs(p.id, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
                   @let _autoChecked = ((action.key === 'mos_received' || action.key === 'sols_confirmed') && _mosDoc)
                                    || (action.key === 'contract_pack_received' && _contractDoc)
@@ -1018,7 +1019,7 @@
                                    || (action.key === 'searches_received' && txHasAllSearches(p.id))
                                    || (action.key === 'final_rot_approved' && isRotApproved(p.id))
                                    || (action.key === 'survey_reports_received' && _surveyDoc)
-                                   || (action.key === 'contract_pack' && legalCheck(p.id, 'contract_transfer'))
+                                   || (action.key === 'contract_pack' && (legalCheck(p.id, 'contract_transfer') || _contractSignedDoc))
                                    || (action.key === 'compl_statement_recv' && (legalCheck(p.id, 'compl_statement') || txHasDocs(p.id, ['Completion Statement'])))
                                    || (action.key === 'authority_to_exchange' && isContractSigned(p.id))
                                    || (action.key === 'exchange_completed' && legalCheck(p.id, 'exchanged'))
