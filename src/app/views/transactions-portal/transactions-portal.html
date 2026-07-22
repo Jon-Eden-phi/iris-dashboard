@@ -1043,8 +1043,9 @@
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
                       } @else if (_autoChecked && action.key === 'compl_statement_recv') {
+                        @let _hasRevised = txHasDocs(p.id, ['Revised Completion Statement']);
                         <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
-                                (click)="openReviewModal(p.id, action.key, action.label, action.label, ['Completion Statement']); $event.stopPropagation()">
+                                (click)="openReviewModal(p.id, action.key, action.label, _hasRevised ? 'Revised Completion Statement' : 'Completion Statement', _hasRevised ? ['Revised Completion Statement'] : ['Completion Statement']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
                         </button>
                       } @else if (action.key === 'draft_rot_received' && getTxData(p.id).rotQuery) {
@@ -1150,7 +1151,8 @@
                       @if (getTxData(p.id).complStatementQuery && !txHasDocs(p.id, ['Revised Completion Statement'])) {
                         <span style="margin-left:auto; font-size:11px; color:#b45309; font-style:italic;">Changes requested — awaiting revised statement</span>
                       } @else {
-                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, 'Completion Statement', ['Completion Statement', 'Revised Completion Statement']); $event.stopPropagation()">
+                        @let _hasRevisedAppr = txHasDocs(p.id, ['Revised Completion Statement']);
+                        <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openReviewModal(p.id, action.key, action.label, _hasRevisedAppr ? 'Revised Completion Statement' : 'Completion Statement', _hasRevisedAppr ? ['Revised Completion Statement'] : ['Completion Statement']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> Review &amp; approve
                         </button>
                       }
