@@ -427,14 +427,19 @@ export class ClientPortalComponent {
     this.fundTransfers.set(transfers);
   }
 
+  private _openDataUrl(dataUrl: string): void {
+    const [header, b64] = dataUrl.split(',');
+    const mime = (header.match(/:(.*?);/) ?? [])[1] ?? 'application/octet-stream';
+    const bytes = atob(b64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    window.open(URL.createObjectURL(new Blob([arr], { type: mime })), '_blank');
+  }
+
   previewComplStatementFile(propId: string): void {
     const file = this.complStatementDocForProp(propId);
     if (!file?.url) return;
-    const win = window.open('', '_blank');
-    if (!win) return;
-    fetch(file.url)
-      .then(r => r.blob())
-      .then(blob => { win.location.href = URL.createObjectURL(blob); });
+    this._openDataUrl(file.url);
   }
 
   isContractSigned(propId: string): boolean {
@@ -511,11 +516,7 @@ export class ClientPortalComponent {
   previewRotFile(propId: string): void {
     const file = this.rotDocForProp(propId);
     if (!file?.url) return;
-    const win = window.open('', '_blank');
-    if (!win) return;
-    fetch(file.url)
-      .then(r => r.blob())
-      .then(blob => { win.location.href = URL.createObjectURL(blob); });
+    this._openDataUrl(file.url);
   }
 
   approveRot(propId: string): void {

@@ -201,11 +201,12 @@ export class TransactionsPortalComponent {
 
   previewFile(file: DataRoomFile): void {
     if (!file.url) return;
-    const win = window.open('', '_blank');
-    if (!win) return;
-    fetch(file.url)
-      .then(r => r.blob())
-      .then(blob => { win.location.href = URL.createObjectURL(blob); });
+    const [header, b64] = file.url.split(',');
+    const mime = (header.match(/:(.*?);/) ?? [])[1] ?? 'application/octet-stream';
+    const bytes = atob(b64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    window.open(URL.createObjectURL(new Blob([arr], { type: mime })), '_blank');
   }
 
   drExpandedStages = signal<Set<string>>(new Set());
