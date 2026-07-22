@@ -52,9 +52,12 @@ export class ClientPortalComponent {
     JSON.parse(localStorage.getItem(ROT_APPROVALS_KEY) ?? '{}')
   );
 
-  private contractSigns = signal<Record<string, { signedAt: string }>>(
+  private contractSigns = signal<Record<string, { signedAt: string; signature?: string }>>(
     JSON.parse(localStorage.getItem(CONTRACT_SIGNS_KEY) ?? '{}')
   );
+
+  sigHasContent = signal(false);
+  private _sigDrawing = false;
 
   showApproveModal = signal(false);
   showRejectModal  = signal(false);
@@ -360,8 +363,59 @@ export class ClientPortalComponent {
     return this.contractSigns()[propId]?.signedAt;
   }
 
+  contractSignature(propId: string): string | undefined {
+    return this.contractSigns()[propId]?.signature;
+  }
+
+  private _sigPoint(event: MouseEvent | TouchEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const src = 'touches' in event ? event.touches[0] : event as MouseEvent;
+    return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+  }
+
+  startSig(event: MouseEvent | TouchEvent, propId: string): void {
+    const canvas = document.getElementById('sig-' + propId) as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const pt = this._sigPoint(event, canvas);
+    ctx.beginPath();
+    ctx.moveTo(pt.x, pt.y);
+    this._sigDrawing = true;
+  }
+
+  drawSig(event: MouseEvent | TouchEvent, propId: string): void {
+    if (!this._sigDrawing) return;
+    event.preventDefault();
+    const canvas = document.getElementById('sig-' + propId) as HTMLCanvasElement;
+    if (!canvas) return;
+    const pt = this._sigPoint(event, canvas);
+    const ctx = canvas.getContext('2d')!;
+    ctx.lineTo(pt.x, pt.y);
+    ctx.stroke();
+    this.sigHasContent.set(true);
+  }
+
+  endSig(): void {
+    this._sigDrawing = false;
+  }
+
+  clearSig(propId: string): void {
+    const canvas = document.getElementById('sig-' + propId) as HTMLCanvasElement;
+    if (!canvas) return;
+    canvas.getContext('2d')!.clearRect(0, 0, canvas.width, canvas.height);
+    this.sigHasContent.set(false);
+  }
+
   signContract(propId: string): void {
-    const signs = { ...this.contractSigns(), [propId]: { signedAt: new Date().toLocaleDateString('en-GB') } };
+    const canvas = document.getElementById('sig-' + propId) as HTMLCanvasElement;
+    const signature = canvas?.toDataURL('image/png');
+    const signs = { ...this.contractSigns(), [propId]: { signedAt: new Date().toLocaleDateString('en-GB'), signature } };
     localStorage.setItem(CONTRACT_SIGNS_KEY, JSON.stringify(signs));
     this.contractSigns.set(signs);
   }
