@@ -497,6 +497,38 @@
               }
             </div>
           }
+
+          <!-- Data Room -->
+          @let propDocs = dataRoomForProp(p.id);
+          <div class="detail-section">
+            <div class="detail-section-title"><i class="ti ti-folder"></i> Documents</div>
+            @if (propDocs.length === 0) {
+              <div style="text-align:center; padding:16px 0; color:var(--text3);">
+                <i class="ti ti-folder-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+                <div style="font-size:13px;">No documents uploaded yet</div>
+              </div>
+            } @else {
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                @for (file of propDocs; track file.id) {
+                  <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--surface);">
+                    <div style="width:34px; height:38px; background:var(--surface2, #f1f5f9); border:1px solid var(--border); border-radius:5px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                      <i class="ti ti-file-description" style="font-size:16px; color:var(--accent);"></i>
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ file.fileName }}</div>
+                      <div style="font-size:11px; color:var(--text3); margin-top:1px;">{{ file.docType }} · {{ file.uploadedAt }}</div>
+                    </div>
+                    @if (file.url) {
+                      <button style="flex-shrink:0; padding:5px 10px; border-radius:6px; border:1px solid var(--border); background:none; font-size:12px; font-weight:600; color:var(--text2); cursor:pointer; display:flex; align-items:center; gap:4px;"
+                              (click)="previewDataRoomFile(file); $event.stopPropagation()">
+                        <i class="ti ti-external-link" style="font-size:11px;"></i> Open
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
         </div>
 
         <!-- Right column: action panel -->

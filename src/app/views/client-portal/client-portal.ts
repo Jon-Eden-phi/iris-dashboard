@@ -427,6 +427,15 @@ export class ClientPortalComponent {
     this.fundTransfers.set(transfers);
   }
 
+  dataRoomForProp(propId: string): DataRoomFile[] {
+    return this.dataRoom().filter(f => f.propertyId === propId);
+  }
+
+  previewDataRoomFile(file: DataRoomFile): void {
+    if (!file.url) return;
+    this._openDataUrl(file.url);
+  }
+
   private _openDataUrl(dataUrl: string): void {
     const [header, b64] = dataUrl.split(',');
     const mime = (header.match(/:(.*?);/) ?? [])[1] ?? 'application/octet-stream';
