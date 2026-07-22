@@ -38,6 +38,13 @@ export class DataRoomStore {
   private _lastJson: string | null = null;
   private _db: Promise<IDBDatabase | null>;
   private _channel: BroadcastChannel | null = null;
+  /**
+   * Guards against the effect firing with the initial empty signal value
+   * before `_init()` has loaded from IndexedDB. Without it, a freshly-opened
+   * tab would persist `[]` and broadcast `[]` to other tabs, wiping their
+   * in-memory data room. Only local changes made after load should propagate.
+   */
+  private _initialized = false;
 
   constructor() {
     if (typeof BroadcastChannel !== 'undefined') {
@@ -50,7 +57,8 @@ export class DataRoomStore {
     // Persist + broadcast on every local change. Content-dedup (`_lastJson`)
     // stops remote updates from being re-saved or echoed back (no ping-pong).
     effect(() => {
-      const list = this.files();
+      const list = this.files();          // track dependency
+      if (!this._initialized) return;      // don't propagate pre-load empty state
       const json = JSON.stringify(list);
       if (json === this._lastJson) return;
       this._lastJson = json;
@@ -79,6 +87,7 @@ export class DataRoomStore {
     list = list.map(f => ({ ...f, docType: (f.docType ?? '').replace('Survey Report — ', 'Survey Report - ') }));
 
     this._lastJson = JSON.stringify(list);
+    this._initialized = true;
     this.files.set(list);
 
     // Free the localStorage slot now that data lives in IndexedDB.
