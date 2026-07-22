@@ -271,7 +271,7 @@ export class LegalPortalComponent {
     if (this.getMatter(propId).checklist[itemKey]) return true;
     // Auto-check from data room docs
     const types = ITEM_DOC_TYPES[itemKey] ?? [];
-    if (types.length && (itemKey === 'mos_received' || itemKey === 'contract_rx' || itemKey === 'rot_query_addressed' || TX_UPLOADED_ITEMS.has(itemKey))) {
+    if (types.length && (itemKey === 'mos_received' || itemKey === 'contract_rx' || itemKey === 'rot_query_addressed' || itemKey === 'contract_transfer' || itemKey === 'compl_statement' || TX_UPLOADED_ITEMS.has(itemKey))) {
       if (this.dataRoom().some(f => f.propertyId === propId && types.some(t => f.docType.toLowerCase().includes(t.toLowerCase())))) return true;
     }
     // Auto-check from TX portal actions
@@ -317,7 +317,7 @@ export class LegalPortalComponent {
 
   isExchangeReady(propId: string): boolean {
     const m = this.getMatter(propId);
-    return ['search_la_r','search_water','search_env','survey_report','contract_rev','rot_query_addressed','funds']
+    return ['search_la_r','search_water','search_env','survey_report','contract_rev','rot_query_addressed','contract_transfer','funds']
       .every(k => m.checklist[k]);
   }
 

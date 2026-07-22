@@ -305,7 +305,7 @@
                       <!-- skip generic survey_report row — per-survey rows injected after survey_instructed -->
                     } @else {
                     @let itemDocs = docsForItem(p.id, item.key);
-                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || item.key === 'rot_query_addressed' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
+                    @let _autoDoc = (item.key === 'mos_received' || item.key === 'contract_rx' || item.key === 'rot_query_addressed' || item.key === 'contract_transfer' || item.key === 'compl_statement' || txUploadedItems.has(item.key)) && itemDocs.length > 0;
                     @let _txAuto = (item.key === 'search_la' || item.key === 'survey_instructed') && txCheck(p.id, 'searches_ordered');
                     @let _isChecked = _autoDoc || _txAuto || m.checklist[item.key];
                     @let _isAuto = _autoDoc || _txAuto;
