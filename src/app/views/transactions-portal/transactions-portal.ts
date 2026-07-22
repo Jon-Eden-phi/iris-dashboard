@@ -928,7 +928,10 @@ export class TransactionsPortalComponent {
     if (txInput) txInput.value = '';
     const reader = new FileReader();
     reader.onload = () => {
-      this.dataRoom.update(list => [...list, { ...newFile, url: reader.result as string }]);
+      const entry = { ...newFile, url: reader.result as string };
+      const updated = [...this.dataRoom(), entry];
+      this.dataRoom.set(updated);
+      try { localStorage.setItem(this.DR_KEY, JSON.stringify(updated)); } catch { /* quota */ }
       this.drExpandedStages.update(s => { const n = new Set(s); n.add(p.stage); return n; });
       const logText = note ? `${docType} uploaded (${fileName}). Note: ${note}` : `${docType} uploaded (${fileName})`;
       this.data.addActivity(p.id, { id: 'upload_' + Date.now(), text: logText, author: this.auth.currentUser()?.name ?? 'TX Team', timestamp: new Date().toISOString(), label: 'action' });
@@ -1249,9 +1252,9 @@ export class TransactionsPortalComponent {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        this.dataRoom.update(list =>
-          list.map(f => f.id === entryId ? { ...f, url: reader.result as string } : f)
-        );
+        const updated = this.dataRoom().map(f => f.id === entryId ? { ...f, url: reader.result as string } : f);
+        this.dataRoom.set(updated);
+        try { localStorage.setItem(this.DR_KEY, JSON.stringify(updated)); } catch { /* quota */ }
       };
       reader.readAsDataURL(file);
     }

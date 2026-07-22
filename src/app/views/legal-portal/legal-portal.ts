@@ -460,7 +460,9 @@ export class LegalPortalComponent {
     if (input) input.value = '';
     const reader = new FileReader();
     reader.onload = () => {
-      this.dataRoom.update(list => [...list, { ...entry, url: reader.result as string }]);
+      const updated = [...this.dataRoom(), { ...entry, url: reader.result as string }];
+      this.dataRoom.set(updated);
+      try { localStorage.setItem(DR_KEY, JSON.stringify(updated)); } catch { /* quota */ }
       if (docType === 'Final Report on Title') {
         const current = { ...this.rotApprovalsSig() };
         if (current[propId]?.status !== 'approved') {
