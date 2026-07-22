@@ -343,6 +343,20 @@
         </div>
       </div>
 
+      <!-- Full-width action banner (shown above everything when action is pending) -->
+      @if (complStatementDocForProp(p.id) && !complStatementApproved(p.id)) {
+        <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; background:#fff7ed; border:2px solid #f97316; border-radius:12px; margin-bottom:16px; cursor:pointer;" (click)="view.set('detail')">
+          <span style="width:36px; height:36px; border-radius:50%; background:#f97316; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="ti ti-alert-triangle" style="font-size:18px;"></i>
+          </span>
+          <div style="flex:1;">
+            <div style="font-size:14px; font-weight:800; color:#c2410c;">Action required — completion statement</div>
+            <div style="font-size:12px; color:#9a3412; margin-top:2px;">Your solicitor has prepared the completion statement. Review and approve it in the panel on the right to proceed to completion.</div>
+          </div>
+          <i class="ti ti-arrow-right" style="font-size:18px; color:#f97316; flex-shrink:0;"></i>
+        </div>
+      }
+
       <!-- Two-column layout -->
       <div class="prop-layout">
 
@@ -589,17 +603,6 @@
 
           } @else if (p.stage === 'Lettings' && complStatementDocForProp(p.id) && !complStatementApproved(p.id)) {
             @let csDoc = complStatementDocForProp(p.id);
-            <!-- Urgent attention banner -->
-            <div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#fff7ed; border:1.5px solid #f97316; border-radius:10px; margin-bottom:14px;">
-              <span style="width:32px; height:32px; border-radius:50%; background:#f97316; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <i class="ti ti-alert-triangle" style="font-size:16px;"></i>
-              </span>
-              <div>
-                <div style="font-size:13px; font-weight:800; color:#c2410c;">Action needed</div>
-                <div style="font-size:12px; color:#9a3412; margin-top:1px;">Your completion statement is ready — review and approve to proceed.</div>
-              </div>
-            </div>
-
             <div class="action-panel" style="border-color:#f97316; border-width:1.5px;">
               <!-- Header band -->
               <div style="margin:-20px -20px 18px; padding:16px 20px; background:linear-gradient(135deg,#fff7ed,#ffedd5); border-bottom:1px solid #fed7aa; border-radius:11px 11px 0 0; display:flex; align-items:center; gap:12px;">
