@@ -45,7 +45,7 @@ const ITEM_DOC_TYPES: Record<string, string[]> = {
   search_la_r:     ['Local Authority Search', 'Searches'],
   search_water:    ['Water & Drainage Search', 'Water Search', 'Searches'],
   search_env:      ['Environmental Search', 'Searches'],
-  survey_report:   ['Survey Report', 'HomeBuyer Report', 'Structural Survey'],
+  survey_report:   ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey'],
   contract_rx:     ['Draft Contract', 'Contract Pack'],
   contract_rev:    ['Draft Contract', 'Contract Pack'],
   title_report:         ['Draft Report on Title', 'Report on Title'],

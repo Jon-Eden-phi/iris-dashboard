@@ -365,7 +365,7 @@ export class TransactionsPortalComponent {
   readonly stageDocTypes: Record<string, string[]> = {
     MemorandumOfSale: ['MoS', 'Offer Letter', 'ID Verification', 'Property Information Form', 'Other'],
     Legals:           ['Contract Pack', 'Draft Report on Title', 'Report on Title', 'Annexure', 'Searches', 'Transfer Deed', 'Enquiries', 'Replies to Enquiries', 'Other'],
-    Refurbishment:    ['Survey Report', 'Scope of Works', 'Contractor Quote', 'EPC', 'Building Regulations', 'Other'],
+    Refurbishment:    ['Survey Report', 'Asbestos Survey', 'Scope of Works', 'Contractor Quote', 'EPC', 'Building Regulations', 'Searches', 'Other'],
     Lettings:         ['Signed Contract', 'Transfer Deed', 'TR1', 'Completion Statement', 'Land Registry', 'Tenancy Agreement', 'Inventory', 'Other'],
   };
 
@@ -935,6 +935,7 @@ export class TransactionsPortalComponent {
       const keyMap: Record<string, string> = {
         'MoS': 'mos_received', 'Contract Pack': 'contract_pack',
         'Report on Title': 'final_rot_received', 'Searches': 'searches_received',
+        'Survey Report': 'survey_report_received', 'Asbestos Survey': 'survey_report_received',
         'Completion Statement': 'compl_statement_recv',
       };
       const key = keyMap[docType];
@@ -1176,7 +1177,7 @@ export class TransactionsPortalComponent {
       case 'final_rot_received': return ['Final Report on Title', 'Report on Title'];
       case 'searches_received':  return ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'];
       case 'survey_report_received':
-      case 'survey_reports_received': return ['Survey Report', 'HomeBuyer Report', 'Structural Survey'];
+      case 'survey_reports_received': return ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey'];
       case 'compl_statement_recv': return ['Completion Statement'];
       default:                   return [];
     }
