@@ -786,7 +786,7 @@ export class TransactionsPortalComponent {
     if (key === 'survey_report_received') {
       const ordered = this.surveysForProp(propId);
       if (ordered.length) return ordered.every(s => this.txHasDocs(propId, [this.surveyReportDocType(s.type)]));
-      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
+      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey']);
     }
     if (key === 'draft_rot_received')
       return this.txHasDocs(propId, ['Draft Report on Title', 'Report on Title']) || this.legalCheck(propId, 'title_report');
@@ -807,7 +807,7 @@ export class TransactionsPortalComponent {
     if (key === 'survey_reports_received') {
       const ordered = this.surveysForProp(propId);
       if (ordered.length) return ordered.every(s => this.txHasDocs(propId, [this.surveyReportDocType(s.type)]));
-      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey']);
+      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey']);
     }
     return false;
   }
