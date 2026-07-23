@@ -176,6 +176,58 @@
           }
         </div>
 
+        <!-- Portal role override -->
+        <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:6px;">Portal role</label>
+        <div style="display:flex; gap:6px; margin-bottom:14px;">
+          <button (click)="inviteRoleOverride.set('auto'); inviteDecisions.set([])"
+                  style="flex:1; padding:7px 12px; border-radius:8px; border:1.5px solid; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s;"
+                  [style.border-color]="inviteRoleOverride() === 'auto' ? 'var(--accent)' : 'var(--border)'"
+                  [style.background]="inviteRoleOverride() === 'auto' ? 'var(--accent-soft)' : '#fff'"
+                  [style.color]="inviteRoleOverride() === 'auto' ? 'var(--accent)' : 'var(--text2)'">
+            Auto-detect <span style="font-size:10px; opacity:.7;">({{ effectiveRole() }})</span>
+          </button>
+          <button (click)="inviteRoleOverride.set('Investor')"
+                  style="flex:1; padding:7px 12px; border-radius:8px; border:1.5px solid; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s;"
+                  [style.border-color]="inviteRoleOverride() === 'Investor' ? '#0e7490' : 'var(--border)'"
+                  [style.background]="inviteRoleOverride() === 'Investor' ? 'rgba(14,116,144,0.08)' : '#fff'"
+                  [style.color]="inviteRoleOverride() === 'Investor' ? '#0e7490' : 'var(--text2)'">
+            <i class="ti ti-chart-line" style="font-size:12px;"></i> Investor
+          </button>
+        </div>
+
+        <!-- Investor decisions checklist -->
+        @if (inviteRoleOverride() === 'Investor') {
+          <div style="margin-bottom:14px; border:1.5px solid rgba(14,116,144,0.25); border-radius:10px; overflow:hidden;">
+            <div style="padding:10px 14px; background:rgba(14,116,144,0.07); border-bottom:1px solid rgba(14,116,144,0.15); display:flex; align-items:center; gap:8px;">
+              <i class="ti ti-checklist" style="color:#0e7490; font-size:14px;"></i>
+              <div>
+                <div style="font-size:12px; font-weight:700; color:#0e7490;">Investor decisions</div>
+                <div style="font-size:11px; color:#0e7490; opacity:.8;">Select which decisions this investor makes directly. Unselected decisions will be made by the Investment Committee.</div>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:0;">
+              @for (d of INVESTOR_DECISIONS; track d.key; let last = $last) {
+                @let checked = inviteDecisions().includes(d.key);
+                <label style="display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer; transition:background .12s;"
+                       [style.background]="checked ? 'rgba(14,116,144,0.04)' : '#fff'"
+                       [style.border-bottom]="last ? 'none' : '1px solid rgba(14,116,144,0.1)'">
+                  <input type="checkbox" [checked]="checked" (change)="toggleDecision(d.key)"
+                         style="width:15px; height:15px; accent-color:#0e7490; flex-shrink:0;" />
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:12px; font-weight:700; color:var(--text1);">{{ d.label }}</div>
+                    <div style="font-size:11px; color:var(--text3); margin-top:1px;">{{ d.desc }}</div>
+                  </div>
+                  @if (checked) {
+                    <span style="font-size:10px; font-weight:700; color:#0e7490; white-space:nowrap;">Investor</span>
+                  } @else {
+                    <span style="font-size:10px; color:var(--text3); white-space:nowrap;">Investment Committee</span>
+                  }
+                </label>
+              }
+            </div>
+          </div>
+        }
+
         <!-- Projects -->
         <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:8px;">Projects</label>
         @if (projects.all$().length === 0) {

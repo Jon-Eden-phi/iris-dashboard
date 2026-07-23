@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { AuthService, IrisUser, UserRole } from '../../services/auth';
+import { AuthService, InvestorDecisionKey, INVESTOR_DECISION_OPTIONS, IrisUser, UserRole } from '../../services/auth';
 import { CompaniesService } from '../../services/companies';
 import { InvitesService } from '../../services/invites';
 import { ProjectsService } from '../../services/projects';
@@ -16,9 +16,11 @@ export class UsersComponent {
   invites   = inject(InvitesService);
   projects  = inject(ProjectsService);
 
+  readonly INVESTOR_DECISIONS = INVESTOR_DECISION_OPTIONS;
+
   roleFilter = signal('all');
-  readonly roles = ['all', 'Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client'];
-  readonly roleOptions: UserRole[] = ['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client'];
+  readonly roles = ['all', 'Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client', 'Investor'];
+  readonly roleOptions: UserRole[] = ['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client', 'Investor'];
 
   filtered = computed(() => {
     const r = this.roleFilter();
@@ -26,22 +28,38 @@ export class UsersComponent {
   });
 
   // ── Invite modal ──────────────────────────────────
-  showInvite        = signal(false);
-  inviteEmail       = signal('');
-  inviteOrg         = signal('');
-  inviteCompanyRole = signal('');
-  inviteFnMode      = signal<'select' | 'custom'>('select');
-  inviteFnSelect    = signal('');
-  inviteFnCustom    = signal('');
-  inviteProjects    = signal<string[]>([]);
-  inviteError       = signal('');
-  showInviteLink    = signal(false);
-  generatedLink     = signal('');
-  linkCopied        = signal(false);
+  showInvite          = signal(false);
+  inviteEmail         = signal('');
+  inviteOrg           = signal('');
+  inviteCompanyRole   = signal('');
+  inviteFnMode        = signal<'select' | 'custom'>('select');
+  inviteFnSelect      = signal('');
+  inviteFnCustom      = signal('');
+  inviteProjects      = signal<string[]>([]);
+  inviteError         = signal('');
+  showInviteLink      = signal(false);
+  generatedLink       = signal('');
+  linkCopied          = signal(false);
+  inviteRoleOverride  = signal<'auto' | 'Investor'>('auto');
+  inviteDecisions     = signal<InvestorDecisionKey[]>([]);
 
   effectiveFn = computed(() =>
     this.inviteFnMode() === 'custom' ? this.inviteFnCustom() : this.inviteFnSelect()
   );
+
+  effectiveRole = computed((): UserRole => {
+    if (this.inviteRoleOverride() === 'Investor') return 'Investor';
+    const cr = this.inviteCompanyRole();
+    return cr === 'Conveyancer' ? 'Legal Provider'
+      : (cr === 'Purchaser' || cr === 'Recipient') ? 'Client'
+      : 'Sourcing';
+  });
+
+  toggleDecision(key: InvestorDecisionKey): void {
+    this.inviteDecisions.update(list =>
+      list.includes(key) ? list.filter(k => k !== key) : [...list, key]
+    );
+  }
 
   get userFunctionsForRole(): string[] {
     const role = this.inviteCompanyRole();
@@ -78,6 +96,8 @@ export class UsersComponent {
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
     this.inviteProjects.set(this.isSimplyPhi(firstName) ? this.projects.all.map(p => p.id) : []);
+    this.inviteRoleOverride.set('auto');
+    this.inviteDecisions.set([]);
     this.inviteError.set('');
     this.showInvite.set(true);
   }
@@ -100,22 +120,22 @@ export class UsersComponent {
     if (this.invites.all.some(i => i.email === email)) {
       this.inviteError.set('An invitation has already been sent to that email.'); return;
     }
-    const token       = crypto.randomUUID();
-    const companyRole = this.inviteCompanyRole();
-    const role: UserRole = companyRole === 'Conveyancer' ? 'Legal Provider'
-      : (companyRole === 'Purchaser' || companyRole === 'Recipient') ? 'Client'
-      : 'Sourcing';
-    const inviteObj = {
+    const token = crypto.randomUUID();
+    const role  = this.effectiveRole();
+    const inviteObj: Record<string, unknown> = {
       token, email,
       organisation: this.inviteOrg(),
-      companyRole,
+      companyRole:  this.inviteCompanyRole(),
       functionArea: this.effectiveFn() || undefined,
-      projects: this.inviteProjects().length ? this.inviteProjects() : undefined,
+      projects:     this.inviteProjects().length ? this.inviteProjects() : undefined,
       isAdmin: false,
       role,
       createdAt: Date.now(),
     };
-    this.invites.add(inviteObj);
+    if (role === 'Investor') {
+      inviteObj['investorDecisions'] = this.inviteDecisions();
+    }
+    this.invites.add(inviteObj as Parameters<typeof this.invites.add>[0]);
     const encoded = btoa(JSON.stringify(inviteObj));
     this.generatedLink.set(`${window.location.origin}/setup/${token}?d=${encoded}`);
     this.showInviteLink.set(true);
@@ -191,6 +211,7 @@ export class UsersComponent {
     if (role === 'Admin Controller')  return 'var(--text2)';
     if (role === 'Legal Provider')    return '#6d28d9';
     if (role === 'Client')            return 'var(--accent)';
+    if (role === 'Investor')          return '#0e7490';
     return 'var(--text3)';
   }
 
@@ -202,6 +223,7 @@ export class UsersComponent {
     if (role === 'Admin Controller')  return 'var(--bg)';
     if (role === 'Legal Provider')    return '#f3f0ff';
     if (role === 'Client')            return 'var(--accent-soft)';
+    if (role === 'Investor')          return 'rgba(14,116,144,0.08)';
     return 'var(--bg)';
   }
 }

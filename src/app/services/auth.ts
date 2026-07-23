@@ -1,8 +1,25 @@
 import { Injectable, signal } from '@angular/core';
 
-export type UserRole = 'Sourcing' | 'Purchasing' | 'Operations' | 'Finance' | 'Admin Controller' | 'Legal Provider' | 'Client';
+export type UserRole = 'Sourcing' | 'Purchasing' | 'Operations' | 'Finance' | 'Admin Controller' | 'Legal Provider' | 'Client' | 'Investor';
 
 export const SIMPLYPHI_ROLES: ReadonlySet<UserRole> = new Set(['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller']);
+
+export type InvestorDecisionKey =
+  | 'viewing_review'
+  | 'max_price_auth'
+  | 'rot_approval'
+  | 'contract_sign'
+  | 'compl_statement_appr'
+  | 'funds_confirmation';
+
+export const INVESTOR_DECISION_OPTIONS: { key: InvestorDecisionKey; label: string; desc: string }[] = [
+  { key: 'viewing_review',       label: 'Viewing review',                    desc: 'Approve or reject at viewing stage' },
+  { key: 'max_price_auth',       label: 'Max purchase price authorisation',  desc: 'Set the maximum bid price before offer' },
+  { key: 'rot_approval',         label: 'Final Report on Title approval',    desc: 'Approve the solicitor\'s final RoT' },
+  { key: 'contract_sign',        label: 'Contract & Transfer signing',       desc: 'Sign electronically to authorise exchange' },
+  { key: 'compl_statement_appr', label: 'Completion statement approval',     desc: 'Review and approve the completion statement' },
+  { key: 'funds_confirmation',   label: 'Funds transfer confirmation',       desc: 'Confirm funds have been sent to the solicitor' },
+];
 
 export interface IrisUser {
   id: string;
@@ -19,6 +36,7 @@ export interface IrisUser {
   role: UserRole;
   isAdmin: boolean;
   password: string;
+  investorDecisions?: InvestorDecisionKey[];
 }
 
 const INITIAL_USERS: IrisUser[] = [
