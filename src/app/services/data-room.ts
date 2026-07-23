@@ -49,21 +49,24 @@ export class DataRoomStore {
   constructor() {
     if (typeof BroadcastChannel !== 'undefined') {
       this._channel = new BroadcastChannel(CHANNEL_NAME);
-      this._channel.onmessage = (ev) => this._onRemote(ev.data);
+      this._channel.onmessage = (ev) => void this._onRemote(ev.data);
     }
     this._db = this._openDb();
     this.ready = this._init();
 
-    // Persist + broadcast on every local change. Content-dedup (`_lastJson`)
-    // stops remote updates from being re-saved or echoed back (no ping-pong).
+    // Persist to IndexedDB on every local change, then notify other tabs with a
+    // TINY signal — never the data itself. IndexedDB is shared across same-origin
+    // tabs, so receivers reload from it. Broadcasting the whole dataset (base64
+    // file blobs) to every tab on every change exhausted renderer memory.
+    // Content-dedup (`_lastJson`) skips no-op writes and remote-applied states.
     effect(() => {
-      const list = this.files();          // track dependency
-      if (!this._initialized) return;      // don't propagate pre-load empty state
+      const list = this.files();           // track dependency
+      if (!this._initialized) return;       // don't propagate pre-load empty state
       const json = JSON.stringify(list);
       if (json === this._lastJson) return;
       this._lastJson = json;
       void this._persist(list);
-      this._channel?.postMessage(json);
+      this._channel?.postMessage({ t: 'changed' });
     });
   }
 
@@ -94,10 +97,15 @@ export class DataRoomStore {
     try { localStorage.removeItem(LEGACY_LS_KEY); } catch { /* ignore */ }
   }
 
-  private _onRemote(json: unknown): void {
-    if (typeof json !== 'string' || json === this._lastJson) return;
-    this._lastJson = json;
-    try { this.files.set(JSON.parse(json)); } catch { /* ignore */ }
+  private async _onRemote(msg: unknown): Promise<void> {
+    if (!msg || (msg as { t?: string }).t !== 'changed') return;
+    // Another tab changed the data room. Reload the (small) delta from the
+    // shared IndexedDB rather than receiving the payload over the channel.
+    const list = await this._loadAll();
+    const json = JSON.stringify(list);
+    if (json === this._lastJson) return;
+    this._lastJson = json;   // pre-set so our own effect skips re-persist/re-broadcast
+    this.files.set(list);
   }
 
   private _openDb(): Promise<IDBDatabase | null> {
