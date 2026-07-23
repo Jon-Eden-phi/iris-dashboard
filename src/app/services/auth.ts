@@ -26,7 +26,7 @@ const INITIAL_USERS: IrisUser[] = [
   { id: 'u2',  email: 'athesan@simplyphi.co.uk',   name: 'Athesan Guna',   role: 'Sourcing',         isAdmin: false, password: 'AG@12345'    },
   { id: 'u3',  email: 'carol@simplyphi.co.uk',     name: 'Carol Quinton',  role: 'Sourcing',         isAdmin: false, password: 'simplyphi24' },
   { id: 'u4',  email: 'demo@simplyphi.co.uk',      name: 'Demo User',      role: 'Sourcing',         isAdmin: false, password: 'demo1234'    },
-  { id: 'u5',  email: 'hayley@winksherwood.co.uk', name: 'Hayley Briggs',  role: 'Legal Provider',   isAdmin: false, password: 'legal24',    projects: ['proj-hastings-esph'] },
+  { id: 'u5',  email: 'hayley@winksherwood.co.uk', name: 'Hayley Briggs',  role: 'Legal Provider',   isAdmin: false, password: 'legal24',    projects: ['proj-hastings-esph', 'proj-bristol-p3'] },
   { id: 'u6',  email: 'holly@simplyphi.co.uk',     name: 'Holly Clarke',   role: 'Sourcing',         isAdmin: false, password: 'simplyphi24' },
   { id: 'u7',  email: 'priya@simplyphi.co.uk',     name: 'Priya Shah',     role: 'Sourcing',         isAdmin: false, password: 'simplyphi24' },
   { id: 'u8',  email: 's.jones@bristol.gov.uk',    name: 'Sarah Jones',    role: 'Client',           isAdmin: false, password: 'bristol24',   organisation: 'Bristol City Council', projects: ['proj-bristol-p3'] },
@@ -47,8 +47,14 @@ export class AuthService {
       const merged = [...stored];
       for (const seed of INITIAL_USERS) {
         const idx = merged.findIndex(u => u.id === seed.id);
-        if (idx >= 0) merged[idx] = { ...merged[idx], ...seed, projects: merged[idx].projects ?? seed.projects };
-        else merged.push(seed);
+        if (idx >= 0) {
+          // Union projects so code-side grants (e.g. adding a region) always
+          // apply, while keeping any extra projects assigned via the UI.
+          const projects = Array.from(new Set([...(merged[idx].projects ?? []), ...(seed.projects ?? [])]));
+          merged[idx] = { ...merged[idx], ...seed, projects };
+        } else {
+          merged.push(seed);
+        }
       }
       this._saveUsers(merged);
       return merged;
