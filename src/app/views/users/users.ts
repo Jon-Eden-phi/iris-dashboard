@@ -19,8 +19,9 @@ export class UsersComponent {
   readonly INVESTOR_DECISIONS = INVESTOR_DECISION_OPTIONS;
 
   roleFilter = signal('all');
-  readonly roles = ['all', 'Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client', 'Investor'];
-  readonly roleOptions: UserRole[] = ['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client', 'Investor'];
+  readonly roles = ['all', 'Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client', 'Investor', 'Investment Committee'];
+  readonly roleOptions: UserRole[] = ['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Legal Provider', 'Client', 'Investor', 'Investment Committee'];
+  readonly simplyPhiRoles: UserRole[] = ['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Investment Committee'];
 
   filtered = computed(() => {
     const r = this.roleFilter();
@@ -40,7 +41,8 @@ export class UsersComponent {
   showInviteLink      = signal(false);
   generatedLink       = signal('');
   linkCopied          = signal(false);
-  inviteDecisions = signal<InvestorDecisionKey[]>([]);
+  inviteDecisions    = signal<InvestorDecisionKey[]>([]);
+  invitePortalRole   = signal<UserRole>('Sourcing');
 
   effectiveFn = computed(() =>
     this.inviteFnMode() === 'custom' ? this.inviteFnCustom() : this.inviteFnSelect()
@@ -48,10 +50,10 @@ export class UsersComponent {
 
   effectiveRole = computed((): UserRole => {
     const cr = this.inviteCompanyRole();
-    if (cr === 'Investor')   return 'Investor';
+    if (cr === 'Investor')    return 'Investor';
     if (cr === 'Conveyancer') return 'Legal Provider';
     if (cr === 'Purchaser' || cr === 'Recipient') return 'Client';
-    return 'Sourcing';
+    return this.invitePortalRole();
   });
 
   toggleDecision(key: InvestorDecisionKey): void {
@@ -68,7 +70,7 @@ export class UsersComponent {
     ])].sort();
   }
 
-  private isSimplyPhi(name: string): boolean {
+  isSimplyPhi(name: string): boolean {
     return this.companies.getByName(name)?.companyRole === 'Project Manager';
   }
 
@@ -79,6 +81,7 @@ export class UsersComponent {
     this.inviteFnMode.set('select');
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
+    this.invitePortalRole.set('Sourcing');
     this.inviteProjects.set(this.isSimplyPhi(name) ? this.projects.all.map(p => p.id) : []);
   }
 
@@ -96,6 +99,7 @@ export class UsersComponent {
     this.inviteFnCustom.set('');
     this.inviteProjects.set(this.isSimplyPhi(firstName) ? this.projects.all.map(p => p.id) : []);
     this.inviteDecisions.set([]);
+    this.invitePortalRole.set('Sourcing');
     this.inviteError.set('');
     this.showInvite.set(true);
   }
@@ -108,10 +112,11 @@ export class UsersComponent {
 
   submitInvite(): void {
     const email = this.inviteEmail().trim().toLowerCase();
-    if (!email)                         { this.inviteError.set('Email address is required.'); return; }
-    if (!this.inviteOrg())              { this.inviteError.set('Please select a company.'); return; }
-    if (!this.effectiveFn())            { this.inviteError.set('Please select or enter a function.'); return; }
-    if (!this.inviteProjects().length)  { this.inviteError.set('Please assign at least one project.'); return; }
+    const role  = this.effectiveRole();
+    if (!email)                                                   { this.inviteError.set('Email address is required.'); return; }
+    if (!this.inviteOrg())                                        { this.inviteError.set('Please select a company.'); return; }
+    if (!this.effectiveFn() && role !== 'Investment Committee')   { this.inviteError.set('Please select or enter a function.'); return; }
+    if (!this.inviteProjects().length)                            { this.inviteError.set('Please assign at least one project.'); return; }
     if (this.auth.allUsers.some(u => u.email === email)) {
       this.inviteError.set('An account with that email already exists.'); return;
     }
@@ -119,7 +124,6 @@ export class UsersComponent {
       this.inviteError.set('An invitation has already been sent to that email.'); return;
     }
     const token = crypto.randomUUID();
-    const role  = this.effectiveRole();
     const inviteObj = {
       token, email,
       organisation: this.inviteOrg(),
@@ -207,7 +211,8 @@ export class UsersComponent {
     if (role === 'Admin Controller')  return 'var(--text2)';
     if (role === 'Legal Provider')    return '#6d28d9';
     if (role === 'Client')            return 'var(--accent)';
-    if (role === 'Investor')          return '#0e7490';
+    if (role === 'Investor')             return '#0e7490';
+    if (role === 'Investment Committee') return '#1d4ed8';
     return 'var(--text3)';
   }
 
@@ -219,7 +224,8 @@ export class UsersComponent {
     if (role === 'Admin Controller')  return 'var(--bg)';
     if (role === 'Legal Provider')    return '#f3f0ff';
     if (role === 'Client')            return 'var(--accent-soft)';
-    if (role === 'Investor')          return 'rgba(14,116,144,0.08)';
+    if (role === 'Investor')             return 'rgba(14,116,144,0.08)';
+    if (role === 'Investment Committee') return 'rgba(29,78,216,0.08)';
     return 'var(--bg)';
   }
 }

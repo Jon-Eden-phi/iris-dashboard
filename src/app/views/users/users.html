@@ -145,10 +145,18 @@
           }
         </select>
 
-        @if (inviteCompanyRole()) {
+        @if (isSimplyPhi(inviteOrg())) {
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Portal role</label>
+          <select class="form-input" style="padding:8px 10px; margin-bottom:14px;"
+                  [value]="invitePortalRole()" (change)="invitePortalRole.set($any($event.target).value)">
+            @for (r of simplyPhiRoles; track r) {
+              <option [value]="r">{{ r }}</option>
+            }
+          </select>
+        } @else if (inviteCompanyRole()) {
           <div style="display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text2); margin-bottom:14px;">
             <i class="ti ti-lock" style="font-size:12px; color:var(--text3);"></i>
-            <span style="font-weight:600;">{{ inviteCompanyRole() }}</span>
+            <span style="font-weight:600;" [style.color]="roleColor(effectiveRole())">{{ effectiveRole() }}</span>
             <span style="font-size:11px; color:var(--text3); margin-left:auto;">Auto-filled from company</span>
           </div>
         }

@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 
-export type UserRole = 'Sourcing' | 'Purchasing' | 'Operations' | 'Finance' | 'Admin Controller' | 'Legal Provider' | 'Client' | 'Investor';
+export type UserRole = 'Sourcing' | 'Purchasing' | 'Operations' | 'Finance' | 'Admin Controller' | 'Legal Provider' | 'Client' | 'Investor' | 'Investment Committee';
 
-export const SIMPLYPHI_ROLES: ReadonlySet<UserRole> = new Set(['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller']);
+export const SIMPLYPHI_ROLES: ReadonlySet<UserRole> = new Set(['Sourcing', 'Purchasing', 'Operations', 'Finance', 'Admin Controller', 'Investment Committee']);
 
 export type InvestorDecisionKey =
   | 'viewing_review'
