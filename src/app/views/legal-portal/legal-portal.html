@@ -304,11 +304,18 @@
                       </div>
                     </div>
                   }
-                  @if (group.label === 'Exchange & Completion' && hasAuthorityToExchange(p.id) && !getMatter(p.id).checklist['exchanged']) {
-                    <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
-                      <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
-                      <span><strong>Authority to exchange received</strong> — TX team has confirmed. You may now proceed to exchange.</span>
-                    </div>
+                  @if (group.label === 'Exchange & Completion' && !getMatter(p.id).checklist['exchanged']) {
+                    @if (exchangeUnlocked(p.id)) {
+                      <div style="background:rgba(22,163,74,0.08); border:1px solid rgba(22,163,74,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#15803d; display:flex; align-items:flex-start; gap:7px;">
+                        <i class="ti ti-circle-check" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                        <span><strong>Funds confirmed</strong> — you may now proceed to exchange.</span>
+                      </div>
+                    } @else {
+                      <div style="background:rgba(180,83,9,0.08); border:1px solid rgba(180,83,9,0.25); border-radius:6px; padding:9px 11px; margin-bottom:8px; font-size:12px; color:#92400e; display:flex; align-items:flex-start; gap:7px;">
+                        <i class="ti ti-lock" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+                        <span><strong>Exchange locked</strong> — confirm the client's funds before exchanging contracts.</span>
+                      </div>
+                    }
                   }
 
                   @for (item of group.items; track item.key) {
@@ -329,14 +336,16 @@
                     @let _clientFunds = item.key === 'client_funds_transferred' && !!fundTransfersSig()[p.id];
                     @let _isChecked = _autoDoc || _txAuto || _clientAppr || _clientFunds || m.checklist[item.key];
                     @let _isAuto = _autoDoc || _txAuto || _clientAppr || _clientFunds;
-                    <div class="lg-check-row" [class.checked]="_isChecked" style="margin-bottom:6px;">
+                    @let _locked = (item.key === 'exchange_ready' || item.key === 'exchanged') && !_isChecked && !exchangeUnlocked(p.id);
+                    <div class="lg-check-row" [class.checked]="_isChecked" style="margin-bottom:6px;" [style.opacity]="_locked ? '0.5' : '1'">
                       <div class="lg-check-box" [class.checked]="_isChecked"
-                           (click)="!_isAuto && toggleCheck(p.id, item.key)"
-                           [style.cursor]="_isAuto ? 'default' : 'pointer'">
+                           (click)="!_isAuto && !_locked && toggleCheck(p.id, item.key)"
+                           [style.cursor]="(_isAuto || _locked) ? 'default' : 'pointer'">
                         @if (_isChecked) { <i class="ti ti-check" style="font-size:11px;"></i> }
+                        @else if (_locked) { <i class="ti ti-lock" style="font-size:10px; color:var(--text3);"></i> }
                       </div>
-                      <span [style.cursor]="_isAuto ? 'default' : 'pointer'"
-                            (click)="!_isAuto && toggleCheck(p.id, item.key)">{{ item.label }}</span>
+                      <span [style.cursor]="(_isAuto || _locked) ? 'default' : 'pointer'"
+                            (click)="!_isAuto && !_locked && toggleCheck(p.id, item.key)">{{ item.label }}</span>
                       @if (_txAuto && !itemDocs.length) {
                         <span style="margin-left:auto; font-size:11px; color:#16a34a; font-weight:600;">Confirmed by TX team</span>
                       } @else if (item.key === 'title_report') {
@@ -357,6 +366,10 @@
                             <i class="ti ti-paperclip" style="font-size:11px;"></i> Annexure
                           </button>
                         </div>
+                      } @else if (item.key === 'exchanged' && !_isChecked && _locked) {
+                        <span style="margin-left:auto; font-size:11px; color:var(--text3); font-weight:600; display:flex; align-items:center; gap:4px;">
+                          <i class="ti ti-lock" style="font-size:11px;"></i> Awaiting funds confirmation
+                        </span>
                       } @else if (item.key === 'exchanged' && !_isChecked) {
                         <button class="lg-btn-primary" style="margin-left:auto; font-size:11px; padding:4px 12px; display:flex; align-items:center; gap:5px;"
                                 (click)="showExchangeModal.set(p.id); exchangeDateDraft.set(''); $event.stopPropagation()">

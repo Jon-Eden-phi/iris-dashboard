@@ -100,22 +100,18 @@ const CHECKLIST_GROUPS = [
     ],
   },
   {
-    label: 'Exchange',
-    icon: 'ti-exchange',
-    items: [
-      { key: 'exchange_ready', label: 'Exchange sign-off given' },
-      { key: 'exchanged',      label: 'Exchanged' },
-    ],
-  },
-  {
-    label: 'Completion',
+    label: 'Exchange & Completion',
     icon: 'ti-home-check',
     items: [
+      // Completion statement + funds are settled first ...
       { key: 'compl_statement',         label: 'Completion statement prepared' },
       { key: 'compl_statement_revised', label: 'Revised completion statement uploaded' },
       { key: 'client_compl_appr',       label: 'Completion statement approved by client' },
       { key: 'client_funds_transferred', label: 'Funds transferred by client' },
       { key: 'funds',                   label: 'Funds confirmed' },
+      // ... and only then can contracts exchange, followed by completion.
+      { key: 'exchange_ready',          label: 'Exchange sign-off given' },
+      { key: 'exchanged',               label: 'Exchanged' },
       { key: 'completed',               label: 'Completed' },
     ],
   },
@@ -341,6 +337,11 @@ export class LegalPortalComponent {
 
   hasAuthorityToExchange(propId: string): boolean {
     return !!this.txDataSig()[propId]?.authorityToExchange;
+  }
+
+  /** Exchange steps are locked until funds have been confirmed. */
+  exchangeUnlocked(propId: string): boolean {
+    return this.isItemDone(propId, 'funds');
   }
 
   txCheck(propId: string, key: string): boolean {

@@ -673,11 +673,11 @@ export class TransactionsPortalComponent {
       { key: 'contract_pack',                  label: 'Contract & Transfer prepared' },
       { key: 'authority_to_exchange',          label: 'Authority to exchange — client signed' },
       { key: 'investor_authority_to_exchange', label: 'Authority to exchange — investor approved' },
-      { key: 'exchange_completed',             label: 'Contracts exchanged' },
       { key: 'compl_statement_recv',           label: 'Completion statement received' },
       { key: 'compl_statement_appr',           label: 'Completion statement approved' },
       { key: 'funds_requested',                label: 'Funds requested from client' },
       { key: 'funds_received',                 label: 'Funds received' },
+      { key: 'exchange_completed',             label: 'Contracts exchanged' },
       { key: 'completion_confirmed',           label: 'Completion confirmed' },
     ],
   };
@@ -841,11 +841,11 @@ export class TransactionsPortalComponent {
       if (!cl['contract_pack'])                return { label: 'Contract & Transfer Pending', done: false };
       if (!cl['authority_to_exchange'])        return { label: 'Authority to Exchange – Pending Client', done: false };
       if (this.data.getProperty(propId)?.isInvestorDeal && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
-      if (!done('exchange_completed'))          return { label: 'Exchange Pending', done: false };
       if (!done('compl_statement_recv'))        return { label: 'Completion Statement Pending', done: false };
       if (!done('compl_statement_appr'))       return { label: 'Completion Statement – Pending Client Approval', done: false };
       if (!done('funds_requested'))  return { label: 'Funds to Request', done: false };
       if (!done('funds_received'))   return { label: 'Funds Pending – Awaiting Client Transfer', done: false };
+      if (!done('exchange_completed'))          return { label: 'Exchange Pending', done: false };
       if (!cl['completion_confirmed'])         return { label: 'Completion Pending', done: false };
       return { label: 'Ready for Completion', done: true };
     }

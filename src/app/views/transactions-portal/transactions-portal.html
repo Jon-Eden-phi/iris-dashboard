@@ -1027,13 +1027,15 @@
                                    || (action.key === 'funds_requested' && !!getTxData(p.id).fundsRequest)
                                    || (action.key === 'funds_received' && !!fundTransfersSig()[p.id]);
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
+                  @let _exLocked = action.key === 'exchange_completed' && !_checked && !_itemDone(p.id, 'funds_received');
                   <div
-                    (click)="!_autoChecked && toggleChecklist(p.id, action.key, action.label)"
+                    (click)="!_autoChecked && !_exLocked && toggleChecklist(p.id, action.key, action.label)"
                     style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:var(--surface); font-size:13px; transition:.12s;"
-                    [style.cursor]="_autoChecked ? 'default' : 'pointer'"
+                    [style.cursor]="(_autoChecked || _exLocked) ? 'default' : 'pointer'"
+                    [style.opacity]="_exLocked ? '0.55' : '1'"
                     [style.background]="_checked ? 'rgba(22,163,74,0.04)' : 'var(--surface)'">
                     <i style="font-size:15px; flex-shrink:0; width:16px; text-align:center;"
-                       [class]="_checked ? 'ti ti-circle-check' : 'ti ti-circle'"
+                       [class]="_checked ? 'ti ti-circle-check' : (_exLocked ? 'ti ti-lock' : 'ti ti-circle')"
                        [style.color]="_checked ? '#16a34a' : 'var(--border)'"></i>
                     <span style="flex:1; font-weight:500;"
                           [style.color]="_checked ? 'var(--text3)' : 'var(--text1)'"
@@ -1086,6 +1088,10 @@
                           @else { Done }
                         </span>
                       }
+                    } @else if (_exLocked) {
+                      <span style="font-size:11px; color:var(--text3); font-weight:600; display:flex; align-items:center; gap:4px;">
+                        <i class="ti ti-lock" style="font-size:11px;"></i> Awaiting funds
+                      </span>
                     } @else if (p.stage === 'MemorandumOfSale' && action.key === 'mos_received') {
                       @if (legalCheck(p.id, 'mos_received')) {
                         <span style="font-size:11px; color:#16a34a; font-weight:600;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Received by legal</span>
