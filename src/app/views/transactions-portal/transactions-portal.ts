@@ -797,7 +797,7 @@ export class TransactionsPortalComponent {
       return this.txHasDocs(propId, ['Completion Statement']) || this.legalCheck(propId, 'compl_statement');
     if (key === 'compl_statement_appr')
       return !!this.complApprovalsSig()[propId];
-    if (key === 'funds_requested') return !!this.getTxData(propId).fundsRequest;
+    if (key === 'funds_requested') return !!this.getTxData(propId).fundsRequest || !!this.complApprovalsSig()[propId];
     if (key === 'funds_received')  return !!this.fundTransfersSig()[propId];
     if (key === 'exchange_completed')
       return this.legalCheck(propId, 'exchanged');

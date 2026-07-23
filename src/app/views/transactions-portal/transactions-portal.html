@@ -1181,15 +1181,11 @@
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
                       </button>
-                    } @else if (p.stage === 'Lettings' && action.key === 'funds_requested') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showRequestFundsModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-cash" style="font-size:11px;"></i> Request funds
-                      </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'funds_received') {
-                      @if (getTxData(p.id).fundsRequest) {
+                      @if (_itemDone(p.id, 'funds_requested')) {
                         <span style="margin-left:auto; font-size:11px; color:#b45309; font-style:italic;">Awaiting client transfer confirmation</span>
                       } @else {
-                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Request funds first</span>
+                        <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting completion statement approval</span>
                       }
                     } @else if (p.stage === 'Lettings' && action.key === 'authority_to_exchange') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAuthorityModal.set(true); $event.stopPropagation()">
