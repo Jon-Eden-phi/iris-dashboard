@@ -32,6 +32,8 @@ export class App {
     '/projects': 'Projects',
     '/record': 'Property Detail',
     '/transactions-portal': 'Purchasing',
+    '/investor-portal': 'Investor Portal',
+    '/ic-portal': 'Investment Committee',
     '/login': 'Sign In',
   };
 

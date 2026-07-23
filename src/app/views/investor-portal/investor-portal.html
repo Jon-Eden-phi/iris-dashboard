@@ -1,0 +1,171 @@
+<!-- ── Top nav ─────────────────────────────────────────── -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">
+      <div class="logo-mark">SP</div>
+      <div>
+        <span class="brand-name">SimplyPhi</span>
+        <span class="brand-sep">/</span>
+        <span class="brand-sub">Investor Portal · Iris 2.0</span>
+      </div>
+    </div>
+    <div style="flex:1;"></div>
+    @if (user().organisation) {
+      <span style="font-size:12px; color:#0e7490; background:rgba(14,116,144,0.08); padding:4px 12px; border-radius:20px; font-weight:600;">
+        {{ user().organisation }}
+      </span>
+    }
+    <button class="sign-out-btn" (click)="logout()">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+  </div>
+</nav>
+
+<main class="portal-main">
+  <div class="content-wrap">
+
+    <!-- Welcome -->
+    <div style="margin-bottom:28px;">
+      <h1 style="font-size:24px; font-weight:800; color:#0c4a6e; margin:0 0 6px;">
+        Welcome back, {{ user().name.split(' ')[0] }}
+      </h1>
+      @if (pendingCount() > 0) {
+        <p style="font-size:14px; color:#0e7490; font-weight:600; margin:0; display:flex; align-items:center; gap:6px;">
+          <i class="ti ti-bell"></i>
+          {{ pendingCount() }} decision{{ pendingCount() === 1 ? '' : 's' }} awaiting your review
+        </p>
+      } @else if (myProjects().length > 0) {
+        <p style="font-size:14px; color:#16a34a; font-weight:600; margin:0; display:flex; align-items:center; gap:6px;">
+          <i class="ti ti-circle-check"></i>
+          All decisions up to date
+        </p>
+      }
+    </div>
+
+    <!-- No decisions assigned to investor -->
+    @if (myDecisions().length === 0) {
+      <div class="empty-state">
+        <i class="ti ti-building-community" style="font-size:36px; color:#cbd5e1; margin-bottom:12px; display:block;"></i>
+        <div style="font-size:15px; font-weight:700; color:#64748b; margin-bottom:6px;">All decisions handled by your Investment Committee</div>
+        <div style="font-size:13px; color:#94a3b8;">You haven't been assigned any decisions to make directly. SimplyPhi's Investment Committee handles the full process on your behalf.</div>
+      </div>
+
+    <!-- No projects yet -->
+    } @else if (myProjects().length === 0) {
+      <div class="empty-state">
+        <i class="ti ti-folder-off" style="font-size:36px; color:#cbd5e1; margin-bottom:12px; display:block;"></i>
+        <div style="font-size:15px; font-weight:700; color:#64748b; margin-bottom:6px;">No projects assigned yet</div>
+        <div style="font-size:13px; color:#94a3b8;">Contact SimplyPhi to have a project assigned to your account.</div>
+      </div>
+
+    } @else {
+
+      @for (proj of myProjects(); track proj.id) {
+        <div style="margin-bottom:36px;">
+
+          <!-- Project header -->
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid rgba(14,116,144,0.12);">
+            <i class="ti ti-folder-filled" style="color:#0e7490; font-size:16px;"></i>
+            <span style="font-size:13px; font-weight:800; color:#0e7490; text-transform:uppercase; letter-spacing:.07em;">{{ proj.name }}</span>
+            <span style="font-size:12px; color:#94a3b8;">
+              · {{ propertiesForProject(proj.name).length }} propert{{ propertiesForProject(proj.name).length === 1 ? 'y' : 'ies' }}
+            </span>
+          </div>
+
+          @if (propertiesForProject(proj.name).length === 0) {
+            <div style="padding:20px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; font-size:13px; color:#94a3b8; text-align:center;">
+              No active properties in this project yet.
+            </div>
+          } @else {
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              @for (prop of propertiesForProject(proj.name); track prop.id) {
+                <div class="property-card">
+
+                  <!-- Property header -->
+                  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
+                    <div>
+                      <div style="font-size:15px; font-weight:800; color:#0c4a6e;">{{ prop.address }}</div>
+                      <div style="font-size:12px; color:#64748b; margin-top:3px;">
+                        {{ prop.postcode }}&nbsp;·&nbsp;{{ prop.beds }} bed
+                        @if (prop.financial?.ap) { &nbsp;·&nbsp;{{ fmt(prop.financial.ap) }} }
+                      </div>
+                    </div>
+                    <span class="stage-badge">{{ prop.stage }}</span>
+                  </div>
+
+                  <!-- Decision steps -->
+                  <div style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+                    @for (d of myDecisions(); track d.key; let last = $last) {
+                      @let done = isDecisionDone(prop.id, d.key);
+                      <div class="decision-row"
+                           [style.background]="done ? 'rgba(22,163,74,0.04)' : '#fff'"
+                           [style.border-bottom]="last ? 'none' : '1px solid #f1f5f9'">
+
+                        <!-- Status dot -->
+                        <div class="decision-icon"
+                             [style.background]="done ? 'rgba(22,163,74,0.12)' : 'rgba(14,116,144,0.08)'"
+                             [style.color]="done ? '#16a34a' : '#0e7490'">
+                          <i class="ti" [class.ti-check]="done" [class.ti-clock]="!done" style="font-size:13px;"></i>
+                        </div>
+
+                        <!-- Label + status -->
+                        <div style="flex:1; min-width:0;">
+                          <div style="font-size:13px; font-weight:700; color:#1e293b;">{{ d.label }}</div>
+                          @if (done) {
+                            @if (d.key === 'viewing_review') {
+                              <div class="decision-done-text">
+                                {{ getDecisionData(prop.id, d.key).status | titlecase }}
+                                · {{ getDecisionData(prop.id, d.key).by }}
+                              </div>
+                            } @else if (d.key === 'max_price_auth') {
+                              <div class="decision-done-text">{{ fmt(getDecisionData(prop.id, d.key).maxPrice) }} authorised</div>
+                            } @else {
+                              <div class="decision-done-text">Completed</div>
+                            }
+                          } @else {
+                            <div style="font-size:11px; color:#94a3b8; margin-top:1px;">{{ d.desc }}</div>
+                          }
+                        </div>
+
+                        <!-- Action -->
+                        @if (!done) {
+                          <div style="flex-shrink:0;">
+                            @if (d.key === 'viewing_review') {
+                              <div style="display:flex; gap:6px;">
+                                <button class="btn-success" (click)="approveViewing(prop.id)">Approve</button>
+                                <button class="btn-danger"  (click)="rejectViewing(prop.id)">Reject</button>
+                              </div>
+                            } @else if (d.key === 'max_price_auth') {
+                              <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" placeholder="Max price £"
+                                       [value]="maxPriceInputs()[prop.id] ?? ''"
+                                       (input)="updateMaxPriceInput(prop.id, $any($event.target).value)"
+                                       class="price-input" />
+                                <button class="btn-primary" (click)="setMaxPrice(prop.id)">Authorise</button>
+                              </div>
+                            } @else if (d.key === 'rot_approval') {
+                              <button class="btn-primary" (click)="approveRoT(prop.id)">Approve RoT</button>
+                            } @else if (d.key === 'contract_sign') {
+                              <button class="btn-primary" (click)="signContract(prop.id)">Sign contract</button>
+                            } @else if (d.key === 'compl_statement_appr') {
+                              <button class="btn-primary" (click)="approveCS(prop.id)">Approve statement</button>
+                            } @else if (d.key === 'funds_confirmation') {
+                              <button class="btn-primary" (click)="confirmFunds(prop.id)">Confirm funds sent</button>
+                            }
+                          </div>
+                        }
+
+                      </div>
+                    }
+                  </div>
+
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+
+  </div>
+</main>

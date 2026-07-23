@@ -15,8 +15,10 @@ const internalGuard = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   const role = auth.currentUser()?.role;
-  if (role === 'Legal Provider') return router.createUrlTree(['/legal-portal']);
-  if (role === 'Client')         return router.createUrlTree(['/client-portal']);
+  if (role === 'Legal Provider')        return router.createUrlTree(['/legal-portal']);
+  if (role === 'Client')                return router.createUrlTree(['/client-portal']);
+  if (role === 'Investor')              return router.createUrlTree(['/investor-portal']);
+  if (role === 'Investment Committee')  return router.createUrlTree(['/ic-portal']);
   return true;
 };
 
@@ -43,9 +45,15 @@ export const routes: Routes = [
     children: [
       { path: '', canActivate: [() => {
           const role = inject(AuthService).currentUser()?.role;
-          return inject(Router).createUrlTree(role === 'Purchasing' ? ['/transactions-portal'] : ['/dashboard']);
+          const dest = role === 'Purchasing'           ? '/transactions-portal'
+                     : role === 'Investor'             ? '/investor-portal'
+                     : role === 'Investment Committee' ? '/ic-portal'
+                     : '/dashboard';
+          return inject(Router).createUrlTree([dest]);
         }], children: [] },
-      { path: 'client-portal',       loadComponent: () => import('./views/client-portal/client-portal').then(m => m.ClientPortalComponent) },
+      { path: 'client-portal',    loadComponent: () => import('./views/client-portal/client-portal').then(m => m.ClientPortalComponent) },
+      { path: 'investor-portal', loadComponent: () => import('./views/investor-portal/investor-portal').then(m => m.InvestorPortalComponent) },
+      { path: 'ic-portal',       loadComponent: () => import('./views/ic-portal/ic-portal').then(m => m.IcPortalComponent) },
       { path: 'transactions-portal', canActivate: [purchasingGuard], loadComponent: () => import('./views/transactions-portal/transactions-portal').then(m => m.TransactionsPortalComponent) },
       { path: 'legal-portal',        loadComponent: () => import('./views/legal-portal/legal-portal').then(m => m.LegalPortalComponent) },
       { path: 'dashboard', canActivate: [internalGuard, sourcingGuard], loadComponent: () => import('./views/pipeline/pipeline').then(m => m.PipelineComponent), data: { mode: 'dashboard' } },
