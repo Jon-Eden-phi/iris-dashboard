@@ -373,6 +373,24 @@
         </div>
       </div>
 
+      <!-- Tab bar -->
+      <div class="detail-tabs" style="display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:18px;">
+        @for (t of detailTabs; track t.key) {
+          <button (click)="detailTab.set(t.key)"
+                  style="background:none; border:none; padding:10px 18px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; font-family:inherit; margin-bottom:-1px;"
+                  [style.color]="detailTab() === t.key ? 'var(--accent)' : 'var(--text3)'"
+                  [style.border-bottom]="detailTab() === t.key ? '2px solid var(--accent)' : '2px solid transparent'">
+            <i class="ti {{ t.icon }}" style="font-size:15px;"></i> {{ t.label }}
+            @if (t.key === 'flow' && actionType(p)) {
+              <span style="width:7px; height:7px; border-radius:50%; background:#E8601C; display:inline-block;"></span>
+            }
+          </button>
+        }
+      </div>
+
+      <!-- ══ FLOW TAB — action banners ══ -->
+      @if (detailTab() === 'flow') {
+
       <!-- Full-width action banner (shown above everything when action is pending) -->
       @if (complStatementDocForProp(p.id) && !complStatementApproved(p.id)) {
         <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; background:#fff7ed; border:2px solid #f97316; border-radius:12px; margin-bottom:16px; cursor:pointer;" (click)="view.set('detail')">
@@ -399,10 +417,13 @@
         </div>
       }
 
-      <!-- Two-column layout -->
-      <div class="prop-layout">
+      }
+      <!-- end FLOW banners -->
 
-        <!-- Left column -->
+      <div class="prop-detail-panels">
+
+        <!-- ══ FINANCIALS TAB ══ -->
+        @if (detailTab() === 'financials') {
         <div>
           <!-- Financial summary -->
           @if (p.financial; as f) {
@@ -523,8 +544,12 @@
               }
             </div>
           }
+        </div>
+        }
 
-          <!-- Data Room -->
+        <!-- ══ DOCUMENTS TAB ══ -->
+        @if (detailTab() === 'documents') {
+        <div>
           @let propDocs = dataRoomForProp(p.id);
           <div class="detail-section">
             <div class="detail-section-title"><i class="ti ti-folder"></i> Documents</div>
@@ -556,8 +581,49 @@
             }
           </div>
         </div>
+        }
 
-        <!-- Right column: action panel -->
+        <!-- ══ CONTACTS TAB ══ -->
+        @if (detailTab() === 'contacts') {
+        <div>
+          @let contacts = projectContacts(p);
+          <div class="detail-section">
+            <div class="detail-section-title"><i class="ti ti-users"></i> Project contacts</div>
+            @if (projectPurchaser(p); as purch) {
+              <div style="font-size:12px; color:var(--text3); margin-bottom:14px;">Everyone assigned to <strong style="color:var(--text1);">{{ p.phase }}</strong> · {{ purch }}</div>
+            }
+            @if (contacts.length === 0) {
+              <div style="text-align:center; padding:16px 0; color:var(--text3);">
+                <i class="ti ti-users-off" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+                <div style="font-size:13px;">No contacts assigned to this project yet</div>
+              </div>
+            } @else {
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                @for (c of contacts; track c.email) {
+                  <div style="display:flex; align-items:center; gap:12px; padding:11px 13px; border:1px solid var(--border); border-radius:9px; background:var(--surface);">
+                    <div style="width:40px; height:40px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;">
+                      {{ c.name.charAt(0) }}
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                      <div style="font-size:13px; font-weight:700; color:var(--text1);">
+                        {{ c.name }}
+                        @if (isCurrentUser(c)) { <span style="font-size:11px; font-weight:600; color:var(--text3);">(You)</span> }
+                      </div>
+                      <div style="font-size:11px; color:var(--text3); margin-top:1px;">{{ contactRole(c) }}@if (c.organisation) { · {{ c.organisation }} }</div>
+                    </div>
+                    <a href="mailto:{{ c.email }}" style="flex-shrink:0; padding:6px 12px; border-radius:7px; border:1px solid var(--border); background:none; font-size:12px; font-weight:600; color:var(--text2); text-decoration:none; display:flex; align-items:center; gap:5px;">
+                      <i class="ti ti-mail" style="font-size:12px;"></i> Email
+                    </a>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- ══ FLOW TAB — actions ══ -->
+        @if (detailTab() === 'flow') {
         <div>
           @if (p.stage === 'ClientApproval') {
             <div class="action-panel">
@@ -923,6 +989,7 @@
             }
           }
         </div>
+        }
       </div>
 
     } @else {

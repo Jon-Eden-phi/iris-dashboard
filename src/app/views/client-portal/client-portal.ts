@@ -2,7 +2,7 @@ import { Component, computed, inject, signal, WritableSignal } from '@angular/co
 import { DatePipe, TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
-import { AuthService } from '../../services/auth';
+import { AuthService, IrisUser } from '../../services/auth';
 import { DataRoomStore } from '../../services/data-room';
 import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
@@ -42,6 +42,14 @@ export class ClientPortalComponent {
 
   view         = signal<PortalView>('dashboard');
   selectedId   = signal<string | null>(null);
+
+  detailTab    = signal<'flow' | 'financials' | 'documents' | 'contacts'>('flow');
+  readonly detailTabs = [
+    { key: 'flow',       label: 'Flow',       icon: 'ti-route' },
+    { key: 'financials', label: 'Financials', icon: 'ti-coin' },
+    { key: 'documents',  label: 'Documents',  icon: 'ti-folder' },
+    { key: 'contacts',   label: 'Contacts',   icon: 'ti-users' },
+  ] as const;
 
   filterSearch = signal('');
   filterBeds   = signal('all');
@@ -278,7 +286,36 @@ export class ClientPortalComponent {
 
   openDetail(p: Property): void {
     this.selectedId.set(p.id);
+    this.detailTab.set('flow');
     this.view.set('detail');
+  }
+
+  /** Everyone assigned to this property's project — the client's contacts. */
+  projectContacts(p: Property): IrisUser[] {
+    const proj = this.projects.all.find(pr => pr.name === p.phase);
+    if (!proj) return [];
+    const order: Record<string, number> = { 'Legal Provider': 0, 'Purchasing': 1, 'Sourcing': 2, 'Client': 3 };
+    return this.auth.allUsers
+      .filter(u => (u.projects ?? []).includes(proj.id))
+      .sort((a, b) => (order[a.role] ?? 9) - (order[b.role] ?? 9));
+  }
+
+  projectPurchaser(p: Property): string | undefined {
+    return this.projects.all.find(pr => pr.name === p.phase)?.purchaser;
+  }
+
+  isCurrentUser(u: IrisUser): boolean {
+    return u.email === this.auth.currentUser()?.email;
+  }
+
+  contactRole(u: IrisUser): string {
+    const map: Record<string, string> = {
+      'Legal Provider': 'Solicitor',
+      'Purchasing': 'Transaction Manager',
+      'Sourcing': 'Sourcing Manager',
+      'Client': 'Client Representative',
+    };
+    return map[u.role] ?? u.role;
   }
 
   approve(): void {
