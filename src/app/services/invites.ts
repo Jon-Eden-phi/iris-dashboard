@@ -11,6 +11,7 @@ export interface PendingInvite {
   isAdmin: boolean;
   role: UserRole;
   createdAt: number;
+  investorDecisions?: string[];
 }
 
 @Injectable({ providedIn: 'root' })

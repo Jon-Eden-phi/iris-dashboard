@@ -122,7 +122,7 @@ export class UsersComponent {
     }
     const token = crypto.randomUUID();
     const role  = this.effectiveRole();
-    const inviteObj: Record<string, unknown> = {
+    const inviteObj = {
       token, email,
       organisation: this.inviteOrg(),
       companyRole:  this.inviteCompanyRole(),
@@ -131,11 +131,9 @@ export class UsersComponent {
       isAdmin: false,
       role,
       createdAt: Date.now(),
+      investorDecisions: role === 'Investor' ? this.inviteDecisions() : undefined,
     };
-    if (role === 'Investor') {
-      inviteObj['investorDecisions'] = this.inviteDecisions();
-    }
-    this.invites.add(inviteObj as Parameters<typeof this.invites.add>[0]);
+    this.invites.add(inviteObj);
     const encoded = btoa(JSON.stringify(inviteObj));
     this.generatedLink.set(`${window.location.origin}/setup/${token}?d=${encoded}`);
     this.showInviteLink.set(true);
