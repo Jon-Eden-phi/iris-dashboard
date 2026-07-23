@@ -311,7 +311,7 @@ export class LegalPortalComponent {
     // Auto-check from data room docs
     const types = ITEM_DOC_TYPES[itemKey] ?? [];
     if (types.length && (itemKey === 'mos_received' || itemKey === 'contract_rx' || itemKey === 'rot_query_addressed' || itemKey === 'contract_transfer' || itemKey === 'compl_statement' || TX_UPLOADED_ITEMS.has(itemKey))) {
-      if (this.dataRoom().some(f => f.propertyId === propId && types.some(t => f.docType.toLowerCase().includes(t.toLowerCase())))) return true;
+      if (this.dataRoom().some(f => f.propertyId === propId && types.some(t => this._docTypeMatches(f.docType, t)))) return true;
     }
     // Auto-check from TX portal actions
     if (itemKey === 'search_la' || itemKey === 'survey_instructed') {
@@ -403,8 +403,20 @@ export class LegalPortalComponent {
     const types = ITEM_DOC_TYPES[itemKey] ?? [];
     if (!types.length) return [];
     return this.dataRoom().filter(
-      f => f.propertyId === propId && types.some(t => f.docType.toLowerCase().includes(t.toLowerCase()))
+      f => f.propertyId === propId && types.some(t => this._docTypeMatches(f.docType, t))
     );
+  }
+
+  /**
+   * A data-room doc matches a checklist doc type if the type matches exactly,
+   * or the doc is a "<type> - <variant>" of it (e.g. 'Survey Report - HomeBuyer'
+   * matches 'Survey Report'). Deliberately NOT a substring match — that made
+   * 'Contract Pack' satisfy the Finance 'Contract' type.
+   */
+  private _docTypeMatches(docType: string, type: string): boolean {
+    const d = (docType ?? '').toLowerCase().trim();
+    const t = (type ?? '').toLowerCase().trim();
+    return d === t || d.startsWith(t + ' - ');
   }
 
   openReview(propId: string, itemKey: string, itemLabel: string, files: DataRoomFile[]): void {
