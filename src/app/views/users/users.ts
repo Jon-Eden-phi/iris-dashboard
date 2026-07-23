@@ -40,19 +40,18 @@ export class UsersComponent {
   showInviteLink      = signal(false);
   generatedLink       = signal('');
   linkCopied          = signal(false);
-  inviteRoleOverride  = signal<'auto' | 'Investor'>('auto');
-  inviteDecisions     = signal<InvestorDecisionKey[]>([]);
+  inviteDecisions = signal<InvestorDecisionKey[]>([]);
 
   effectiveFn = computed(() =>
     this.inviteFnMode() === 'custom' ? this.inviteFnCustom() : this.inviteFnSelect()
   );
 
   effectiveRole = computed((): UserRole => {
-    if (this.inviteRoleOverride() === 'Investor') return 'Investor';
     const cr = this.inviteCompanyRole();
-    return cr === 'Conveyancer' ? 'Legal Provider'
-      : (cr === 'Purchaser' || cr === 'Recipient') ? 'Client'
-      : 'Sourcing';
+    if (cr === 'Investor')   return 'Investor';
+    if (cr === 'Conveyancer') return 'Legal Provider';
+    if (cr === 'Purchaser' || cr === 'Recipient') return 'Client';
+    return 'Sourcing';
   });
 
   toggleDecision(key: InvestorDecisionKey): void {
@@ -96,7 +95,6 @@ export class UsersComponent {
     this.inviteFnSelect.set('');
     this.inviteFnCustom.set('');
     this.inviteProjects.set(this.isSimplyPhi(firstName) ? this.projects.all.map(p => p.id) : []);
-    this.inviteRoleOverride.set('auto');
     this.inviteDecisions.set([]);
     this.inviteError.set('');
     this.showInvite.set(true);

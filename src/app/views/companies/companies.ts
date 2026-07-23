@@ -20,7 +20,7 @@ export class CompaniesComponent {
   });
 
   get uniqueRoles(): string[] {
-    return [...new Set(this.availableRoles())].sort();
+    return [...new Set([...this.availableRoles(), 'Investor', 'Conveyancer', 'Purchaser'])].sort();
   }
   get uniqueFunctions(): string[] {
     return [...new Set(this.availableFunctions())].sort();
@@ -120,7 +120,7 @@ export class CompaniesComponent {
     const fn   = this.effectiveFn().trim();
     if (!name) { this.addError.set('Company name is required.'); return; }
     if (!role) { this.addError.set('Company role is required.'); return; }
-    if (!fn)   { this.addError.set('Function is required.'); return; }
+    if (!fn && role !== 'Investor') { this.addError.set('Function is required.'); return; }
     const id = this.editingId();
     if (this.companies.all.some(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== id)) {
       this.addError.set('A company with that name already exists.'); return;
