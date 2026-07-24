@@ -19,6 +19,13 @@ export class ProjectsComponent {
       .sort()
   );
 
+  investorCompanies = computed(() =>
+    this.companies.all$()
+      .filter(c => c.companyRole === 'Investor')
+      .map(c => c.name)
+      .sort()
+  );
+
   // ── Add modal ──────────────────────────────────────
   showAdd             = signal(false);
   addName             = signal('');
@@ -27,6 +34,7 @@ export class ProjectsComponent {
   addPurchaserCustom  = signal('');
   addError            = signal('');
   addIsInvestorDeal   = signal(false);
+  addInvestorCompany  = signal('');
   editingId           = signal<string | null>(null);
   get isEditing(): boolean { return this.editingId() !== null; }
 
@@ -43,6 +51,7 @@ export class ProjectsComponent {
     this.addPurchaserSelect.set(this.availablePurchasers()[0] ?? '');
     this.addPurchaserCustom.set('');
     this.addIsInvestorDeal.set(false);
+    this.addInvestorCompany.set(this.investorCompanies()[0] ?? '');
     this.addError.set('');
     this.showAdd.set(true);
   }
@@ -54,6 +63,7 @@ export class ProjectsComponent {
     this.addPurchaserSelect.set(p.purchaser);
     this.addPurchaserCustom.set('');
     this.addIsInvestorDeal.set(p.isInvestorDeal ?? false);
+    this.addInvestorCompany.set(p.investorCompany ?? this.investorCompanies()[0] ?? '');
     this.addError.set('');
     this.showAdd.set(true);
   }
@@ -65,10 +75,11 @@ export class ProjectsComponent {
     if (!purchaser) { this.addError.set('Purchaser is required.'); return; }
     const id = this.editingId();
     const isInvestorDeal = this.addIsInvestorDeal();
+    const investorCompany = isInvestorDeal ? this.addInvestorCompany() : undefined;
     if (id) {
-      this.projects.update(id, { name, purchaser, isInvestorDeal });
+      this.projects.update(id, { name, purchaser, isInvestorDeal, investorCompany });
     } else {
-      this.projects.add({ id: crypto.randomUUID(), name, purchaser, isInvestorDeal });
+      this.projects.add({ id: crypto.randomUUID(), name, purchaser, isInvestorDeal, investorCompany });
     }
     this.showAdd.set(false);
   }

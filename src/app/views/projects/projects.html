@@ -32,7 +32,8 @@
             <td>
               @if (p.isInvestorDeal) {
                 <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(29,78,216,0.08); color:#1d4ed8; border:1px solid rgba(29,78,216,0.15);">
-                  <i class="ti ti-chart-line" style="font-size:10px;"></i> Investor
+                  <i class="ti ti-chart-line" style="font-size:10px;"></i>
+                  {{ p.investorCompany || 'Investor' }}
                 </span>
               }
             </td>
@@ -118,6 +119,25 @@
                 [style.left]="addIsInvestorDeal() ? '19px' : '3px'"></span>
         </label>
       </div>
+
+      @if (addIsInvestorDeal()) {
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px; font-weight:600; color:var(--text2); display:block; margin-bottom:5px;">Investor</label>
+          @if (investorCompanies().length > 0) {
+            <select class="form-input"
+                    [value]="addInvestorCompany()"
+                    (change)="addInvestorCompany.set($any($event.target).value)">
+              @for (c of investorCompanies(); track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          } @else {
+            <div style="padding:10px 12px; border-radius:8px; border:1px dashed var(--border); font-size:12px; color:var(--text3);">
+              No investor companies yet — add one under <strong>Companies</strong> with role "Investor".
+            </div>
+          }
+        </div>
+      }
 
       @if (addError()) {
         <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:7px; padding:8px 12px; font-size:12px; color:#ef4444; margin-bottom:14px;">

@@ -5,6 +5,7 @@ export interface IrisProject {
   name: string;
   purchaser: string;
   isInvestorDeal?: boolean;
+  investorCompany?: string;
 }
 
 const SEED_PROJECTS: IrisProject[] = [
