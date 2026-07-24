@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "node generate-env.js && npm run build",
   "outputDirectory": "dist/iris-dashboard/browser",
   "framework": "angular",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
