@@ -16,6 +16,7 @@
         <tr>
           <th>Project name</th>
           <th>Purchaser</th>
+          <th>Type</th>
           <th></th>
         </tr>
       </thead>
@@ -27,6 +28,13 @@
               <span style="display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border); color:var(--text2);">
                 <i class="ti ti-building" style="margin-right:5px; font-size:11px;"></i>{{ p.purchaser }}
               </span>
+            </td>
+            <td>
+              @if (p.isInvestorDeal) {
+                <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(29,78,216,0.08); color:#1d4ed8; border:1px solid rgba(29,78,216,0.15);">
+                  <i class="ti ti-chart-line" style="font-size:10px;"></i> Investor
+                </span>
+              }
             </td>
             <td style="text-align:right;">
               <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
@@ -90,6 +98,25 @@
                   (click)="addPurchaserMode.set('select')"
                   style="width:38px; flex-shrink:0; border-radius:8px; border:1.5px solid var(--border); background:none; color:var(--text3); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">&times;</button>
         }
+      </div>
+
+      <!-- Investor deal toggle -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:9px; border:1.5px solid; margin-bottom:14px;"
+           [style.border-color]="addIsInvestorDeal() ? 'rgba(29,78,216,0.3)' : 'var(--border)'"
+           [style.background]="addIsInvestorDeal() ? 'rgba(29,78,216,0.04)' : 'var(--bg)'">
+        <div>
+          <div style="font-size:12px; font-weight:700; color:var(--text1);">Investor deal</div>
+          <div style="font-size:11px; color:var(--text3); margin-top:1px;">Enables investor &amp; IC portals for this project</div>
+        </div>
+        <label style="position:relative; display:inline-block; width:38px; height:22px; flex-shrink:0; cursor:pointer;">
+          <input type="checkbox" style="opacity:0; width:0; height:0; position:absolute;"
+                 [checked]="addIsInvestorDeal()"
+                 (change)="addIsInvestorDeal.set($any($event.target).checked)" />
+          <span style="position:absolute; inset:0; border-radius:22px; transition:background .2s;"
+                [style.background]="addIsInvestorDeal() ? '#1d4ed8' : '#cbd5e1'"></span>
+          <span style="position:absolute; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2);"
+                [style.left]="addIsInvestorDeal() ? '19px' : '3px'"></span>
+        </label>
       </div>
 
       @if (addError()) {

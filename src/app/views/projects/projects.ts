@@ -26,6 +26,7 @@ export class ProjectsComponent {
   addPurchaserSelect  = signal('');
   addPurchaserCustom  = signal('');
   addError            = signal('');
+  addIsInvestorDeal   = signal(false);
   editingId           = signal<string | null>(null);
   get isEditing(): boolean { return this.editingId() !== null; }
 
@@ -41,6 +42,7 @@ export class ProjectsComponent {
     this.addPurchaserMode.set('select');
     this.addPurchaserSelect.set(this.availablePurchasers()[0] ?? '');
     this.addPurchaserCustom.set('');
+    this.addIsInvestorDeal.set(false);
     this.addError.set('');
     this.showAdd.set(true);
   }
@@ -51,6 +53,7 @@ export class ProjectsComponent {
     this.addPurchaserMode.set('select');
     this.addPurchaserSelect.set(p.purchaser);
     this.addPurchaserCustom.set('');
+    this.addIsInvestorDeal.set(p.isInvestorDeal ?? false);
     this.addError.set('');
     this.showAdd.set(true);
   }
@@ -61,10 +64,11 @@ export class ProjectsComponent {
     if (!name)      { this.addError.set('Project name is required.'); return; }
     if (!purchaser) { this.addError.set('Purchaser is required.'); return; }
     const id = this.editingId();
+    const isInvestorDeal = this.addIsInvestorDeal();
     if (id) {
-      this.projects.update(id, { name, purchaser });
+      this.projects.update(id, { name, purchaser, isInvestorDeal });
     } else {
-      this.projects.add({ id: crypto.randomUUID(), name, purchaser });
+      this.projects.add({ id: crypto.randomUUID(), name, purchaser, isInvestorDeal });
     }
     this.showAdd.set(false);
   }
