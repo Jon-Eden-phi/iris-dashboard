@@ -79,6 +79,7 @@ export class SetupComponent implements OnInit {
       isAdmin: inv.isAdmin,
       password: pass,
       notificationPrefs: this.notifPrefs(),
+      investorDecisions: inv.investorDecisions as any,
     });
     this.invites.markUsed(inv.token);
     this.invites.remove(inv.token);
