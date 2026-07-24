@@ -11,6 +11,10 @@ const ROT_KEY       = 'iris_rot_approvals';
 const CONTRACT_KEY  = 'iris_contract_signs';
 const COMPL_KEY     = 'iris_compl_approvals';
 const FUNDS_KEY     = 'iris_funds_transfers';
+const TX_DATA_KEY   = 'iris_tx_data';
+
+const STAGE_ORDER = ['Draft', 'ClientApproval', 'Viewing', 'Negotiations', 'MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings'];
+function stageIdx(s: string): number { return STAGE_ORDER.indexOf(s); }
 
 @Component({
   selector: 'app-investor-portal',
@@ -41,6 +45,7 @@ export class InvestorPortalComponent {
   private contractData = signal<Record<string, any>>(JSON.parse(localStorage.getItem(CONTRACT_KEY)  ?? '{}'));
   private complData    = signal<Record<string, any>>(JSON.parse(localStorage.getItem(COMPL_KEY)     ?? '{}'));
   private fundsData    = signal<Record<string, any>>(JSON.parse(localStorage.getItem(FUNDS_KEY)     ?? '{}'));
+  private txData       = signal<Record<string, any>>(JSON.parse(localStorage.getItem(TX_DATA_KEY)   ?? '{}'));
 
   maxPriceInputs = signal<Record<string, string>>({});
 
@@ -53,6 +58,28 @@ export class InvestorPortalComponent {
       case 'compl_statement_appr': return !!this.complData()[propId];
       case 'funds_confirmation':   return !!this.fundsData()[propId];
     }
+  }
+
+  // A decision is "live" when the property has reached the relevant stage
+  isDecisionLive(prop: any, key: InvestorDecisionKey): boolean {
+    if (this.isDecisionDone(prop.id, key)) return true;
+    const si = stageIdx(prop.stage);
+    switch (key) {
+      case 'viewing_review':       return si >= stageIdx('Viewing');
+      case 'max_price_auth':       return si >= stageIdx('Negotiations');
+      case 'rot_approval':         return si >= stageIdx('Legals');
+      case 'contract_sign':        return si >= stageIdx('Legals');
+      case 'compl_statement_appr': return si >= stageIdx('Legals') && !!this.txData()[prop.id]?.completionStatement;
+      case 'funds_confirmation':   return !!this.complData()[prop.id];
+    }
+  }
+
+  liveDecisions(prop: any) {
+    return this.myDecisions().filter(d => this.isDecisionLive(prop, d.key));
+  }
+
+  pendingForProp(prop: any): number {
+    return this.liveDecisions(prop).filter(d => !this.isDecisionDone(prop.id, d.key)).length;
   }
 
   getDecisionData(propId: string, key: InvestorDecisionKey): any {
@@ -70,9 +97,7 @@ export class InvestorPortalComponent {
     let n = 0;
     for (const proj of this.myProjects()) {
       for (const prop of this.propertiesForProject(proj.name)) {
-        for (const key of this.myDecisionKeys()) {
-          if (!this.isDecisionDone(prop.id, key)) n++;
-        }
+        n += this.pendingForProp(prop);
       }
     }
     return n;

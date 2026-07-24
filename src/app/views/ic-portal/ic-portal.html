@@ -97,12 +97,26 @@
                         @if (prop.financial?.ap) { &nbsp;·&nbsp;{{ fmt(prop.financial.ap) }} }
                       </div>
                     </div>
-                    <span class="stage-badge">{{ prop.stage }}</span>
+                    <div style="display:flex; align-items:center; gap:7px; flex-shrink:0;">
+                      @if (pendingForProp(prop, proj.id) > 0) {
+                        <span style="padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; background:rgba(234,88,12,0.1); color:#ea580c; display:flex; align-items:center; gap:4px;">
+                          <i class="ti ti-alert-circle" style="font-size:11px;"></i>
+                          {{ pendingForProp(prop, proj.id) }} action{{ pendingForProp(prop, proj.id) === 1 ? '' : 's' }} required
+                        </span>
+                      }
+                      <span class="stage-badge">{{ prop.stage }}</span>
+                    </div>
                   </div>
 
-                  <!-- Decision steps -->
+                  <!-- Decision steps — only live decisions -->
+                  @if (liveDecisionsForProp(prop, proj.id).length === 0) {
+                    <div style="padding:12px 14px; background:#f8fafc; border-radius:9px; border:1px solid #e2e8f0; font-size:12px; color:#94a3b8; display:flex; align-items:center; gap:8px;">
+                      <i class="ti ti-clock" style="font-size:13px;"></i>
+                      No IC decisions required yet at this stage.
+                    </div>
+                  } @else {
                   <div style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
-                    @for (d of decisions; track d.key; let last = $last) {
+                    @for (d of liveDecisionsForProp(prop, proj.id); track d.key; let last = $last) {
                       @let done = isDecisionDone(prop.id, d.key);
                       <div class="decision-row"
                            [style.background]="done ? 'rgba(22,163,74,0.04)' : '#fff'"
@@ -165,6 +179,7 @@
                       </div>
                     }
                   </div>
+                  } <!-- end @else liveDecisions -->
 
                 </div>
               }
