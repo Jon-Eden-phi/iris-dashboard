@@ -51,6 +51,7 @@ const INITIAL_USERS: IrisUser[] = [
   { id: 'u9',  email: 'sukritibisht4@gmail.com',   name: 'Sukriti Bisht',  role: 'Sourcing',         isAdmin: false, password: 'simplyphi24' },
   { id: 'u10', email: 'jiya@simplyphi.co.uk',      name: 'Jiya Chowdhury', role: 'Purchasing',       isAdmin: false, password: 'tx24'        },
   { id: 'u11', email: 'marcus@simplyphi.co.uk',    name: 'Marcus Webb',    role: 'Purchasing',       isAdmin: false, password: 'tx24'        },
+  { id: 'u12', email: 'ic@simplyphi.co.uk',        name: 'IC Member',      role: 'Investment Committee', isAdmin: false, password: 'ic2024', organisation: 'SimplyPhi', projects: ['proj-bristol-p3', 'proj-merton-lahf', 'proj-hastings-esph', 'proj-leeds-p1'] },
 ];
 
 @Injectable({ providedIn: 'root' })
