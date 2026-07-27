@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { MockDataService } from '../../services/mock-data';
 import { DataRoomStore } from '../../services/data-room';
+import { DecisionsService } from '../../services/decisions';
+import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
 type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record' | 'pipeline';
@@ -115,9 +117,11 @@ interface DataRoomFile {
   styleUrl: './transactions-portal.scss',
 })
 export class TransactionsPortalComponent {
-  auth   = inject(AuthService);
-  data   = inject(MockDataService);
-  router = inject(Router);
+  auth      = inject(AuthService);
+  data      = inject(MockDataService);
+  router    = inject(Router);
+  decisions = inject(DecisionsService);
+  projects  = inject(ProjectsService);
   private doc = inject(DOCUMENT);
   private drStore = inject(DataRoomStore);
 
@@ -1522,6 +1526,14 @@ export class TransactionsPortalComponent {
   }
 
   advanceStage(id: string): void {
+    const prop = this.data.properties.find(p => p.id === id);
+    if (prop?.stage === 'Legals') {
+      const project = this.projects.all.find(p => p.name === prop.phase);
+      if (project?.isInvestorDeal && !this.decisions.isDone(id, 'contract_sign')) {
+        this.showToast('Contract must be signed by the investor or IC before advancing to Refurbishment', 'ti-lock');
+        return;
+      }
+    }
     this.data.advanceStage(id, this.auth.currentUser()?.name ?? 'TX Team');
     this.showToast('Stage advanced', 'ti-arrow-right');
   }

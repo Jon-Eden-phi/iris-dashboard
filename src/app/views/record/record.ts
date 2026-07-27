@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { AuthService } from '../../services/auth';
 import { ProjectsService } from '../../services/projects';
+import { DecisionsService } from '../../services/decisions';
 import { MoneyPipe } from '../../shared/pipes/money-pipe';
 import { ActivityNote, Offer, PropertyDocument } from '../../models/property.model';
 
@@ -17,11 +18,12 @@ const SOURCING_STAGES = new Set(['Draft', 'ClientApproval', 'Viewing', 'Negotiat
   styleUrl: './record.scss',
 })
 export class RecordComponent {
-  data     = inject(MockDataService);
-  auth     = inject(AuthService);
-  projects = inject(ProjectsService);
-  route    = inject(ActivatedRoute);
-  router   = inject(Router);
+  data      = inject(MockDataService);
+  auth      = inject(AuthService);
+  projects  = inject(ProjectsService);
+  decisions = inject(DecisionsService);
+  route     = inject(ActivatedRoute);
+  router    = inject(Router);
 
   get propId(): string | null { return this.route.snapshot.paramMap.get('id'); }
 
@@ -56,6 +58,37 @@ export class RecordComponent {
     Refurbishment: 'Mark as Lettings',
   };
 
+  isInvestorProject = computed(() => {
+    const phase = this.property()?.phase;
+    if (!phase) return false;
+    return this.projects.all.find(p => p.name === phase)?.isInvestorDeal ?? false;
+  });
+
+  // Returns a blocker message if an investor/IC decision is required before advancing
+  advanceBlocker = computed((): string | null => {
+    if (!this.isInvestorProject()) return null;
+    const p = this.property();
+    if (!p) return null;
+    if (p.stage === 'Viewing' && !this.decisions.isViewingApproved(p.id)) {
+      return 'Viewing review must be approved by the investor or IC before moving to Negotiations.';
+    }
+    if (p.stage === 'Legals' && !this.decisions.isDone(p.id, 'contract_sign')) {
+      return 'Contract must be signed by the investor or IC before moving to Refurbishment.';
+    }
+    return null;
+  });
+
+  // Returns a blocker message if max price hasn't been authorised before accepting an offer
+  offerBlocker = computed((): string | null => {
+    if (!this.isInvestorProject()) return null;
+    const p = this.property();
+    if (!p || p.stage !== 'Negotiations') return null;
+    if (!this.decisions.isDone(p.id, 'max_price_auth')) {
+      return 'Max purchase price must be authorised by the investor or IC before accepting an offer.';
+    }
+    return null;
+  });
+
   canAdvance = computed(() => {
     const p = this.property();
     if (!p || p.status !== 'active') return false;
@@ -64,6 +97,7 @@ export class RecordComponent {
     const role = this.auth.currentUser()?.role ?? '';
     if (TX_STAGES.has(p.stage)       && !['Purchasing', 'Admin Controller'].includes(role)) return false;
     if (SOURCING_STAGES.has(p.stage) && !['Sourcing',   'Admin Controller'].includes(role)) return false;
+    if (this.advanceBlocker()) return false;
     return true;
   });
 
@@ -196,6 +230,10 @@ export class RecordComponent {
   resolveOffer(offerId: string, status: 'accepted' | 'rejected' | 'withdrawn'): void {
     const id = this.propId;
     if (!id) return;
+    if (status === 'accepted' && this.offerBlocker()) {
+      alert(this.offerBlocker());
+      return;
+    }
     this.data.updateOffer(id, offerId, status, this._userName);
     if (status === 'accepted' && this.property()?.stage === 'Negotiations') {
       this.data.advanceStage(id, this._userName);

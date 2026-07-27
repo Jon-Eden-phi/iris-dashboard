@@ -89,6 +89,14 @@
         }
       </div>
 
+      <!-- Investor/IC advance blocker message -->
+      @if (advanceBlocker()) {
+        <div style="margin-top:14px; padding:10px 14px; border-radius:8px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.35); display:flex; align-items:center; gap:10px;">
+          <i class="ti ti-lock" style="color:#d97706; font-size:15px; flex-shrink:0;"></i>
+          <span style="font-size:13px; color:#92400e;">{{ advanceBlocker() }}</span>
+        </div>
+      }
+
       <!-- Advance button (hidden on stages that have their own dedicated cards) -->
       @if (canAdvance() && p.stage !== 'Draft' && p.stage !== 'ClientApproval' && p.stage !== 'Viewing' && p.stage !== 'Negotiations') {
         <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:flex-end; gap:10px;">

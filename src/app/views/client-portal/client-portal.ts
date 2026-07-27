@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { AuthService, IrisUser } from '../../services/auth';
 import { DataRoomStore } from '../../services/data-room';
+import { DecisionsService } from '../../services/decisions';
 import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
@@ -33,10 +34,11 @@ type PortalView = 'dashboard' | 'properties' | 'detail';
   styleUrl: './client-portal.scss',
 })
 export class ClientPortalComponent {
-  data     = inject(MockDataService);
-  auth     = inject(AuthService);
-  router   = inject(Router);
-  projects = inject(ProjectsService);
+  data      = inject(MockDataService);
+  auth      = inject(AuthService);
+  router    = inject(Router);
+  decisions = inject(DecisionsService);
+  projects  = inject(ProjectsService);
   private drStore = inject(DataRoomStore);
   private get _userName(): string { return this.auth.currentUser()?.name ?? 'Client'; }
 
@@ -353,6 +355,14 @@ export class ClientPortalComponent {
   approveViewing(): void {
     const p = this.activeProperty();
     if (!p) return;
+    const project = this.projects.all.find(proj => proj.name === p.phase);
+    if (project?.isInvestorDeal) {
+      this.decisions.reload();
+      if (!this.decisions.isViewingApproved(p.id)) {
+        alert('The investor or investment committee must approve the viewing review before you can proceed to negotiations.');
+        return;
+      }
+    }
     this.data.approveViewing(p.id, this._userName);
     this.showViewingApproveModal.set(false);
     this.view.set('dashboard');
