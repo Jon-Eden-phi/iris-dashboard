@@ -21,7 +21,7 @@ export class ProjectsComponent {
 
   investorCompanies = computed(() =>
     this.companies.all$()
-      .filter(c => c.companyRole === 'Investor')
+      .filter(c => c.isInvestor === true)
       .map(c => c.name)
       .sort()
   );

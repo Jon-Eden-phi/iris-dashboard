@@ -7,6 +7,7 @@ export interface IrisCompany {
   companyRole: string;
   functionArea?: string;
   logo?: string;
+  isInvestor?: boolean;
 }
 
 const DEFAULT_COMPANIES: IrisCompany[] = [

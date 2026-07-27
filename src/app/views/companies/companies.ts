@@ -20,7 +20,7 @@ export class CompaniesComponent {
   });
 
   get uniqueRoles(): string[] {
-    return [...new Set([...this.availableRoles(), 'Investor', 'Conveyancer', 'Purchaser'])].sort();
+    return [...new Set([...this.availableRoles(), 'Conveyancer', 'Purchaser'])].sort();
   }
   get uniqueFunctions(): string[] {
     return [...new Set(this.availableFunctions())].sort();
@@ -41,6 +41,7 @@ export class CompaniesComponent {
   addFnSelect     = signal('');
   addFnCustom     = signal('');
 
+  addIsInvestor   = signal(false);
   addError        = signal('');
   editingId       = signal<string | null>(null);
   get isEditing(): boolean { return this.editingId() !== null; }
@@ -99,6 +100,7 @@ export class CompaniesComponent {
     this.addName.set(''); this.addAddress.set(''); this.addLogo.set('');
     this.addRoleMode.set('select'); this.addRoleSelect.set(''); this.addRoleCustom.set('');
     this.addFnMode.set('select'); this.addFnSelect.set(''); this.addFnCustom.set('');
+    this.addIsInvestor.set(false);
     this.addError.set('');
     this.showAdd.set(true);
   }
@@ -110,6 +112,7 @@ export class CompaniesComponent {
     this.addLogo.set(c.logo || '');
     this.addRoleMode.set('select'); this.addRoleSelect.set(c.companyRole); this.addRoleCustom.set('');
     this.addFnMode.set('select'); this.addFnSelect.set(c.functionArea || ''); this.addFnCustom.set('');
+    this.addIsInvestor.set(c.isInvestor ?? false);
     this.addError.set('');
     this.showAdd.set(true);
   }
@@ -120,15 +123,16 @@ export class CompaniesComponent {
     const fn   = this.effectiveFn().trim();
     if (!name) { this.addError.set('Company name is required.'); return; }
     if (!role) { this.addError.set('Company role is required.'); return; }
-    if (!fn && role !== 'Investor') { this.addError.set('Function is required.'); return; }
+    if (!fn && role === 'Purchaser' && !this.addIsInvestor()) { this.addError.set('Function is required.'); return; }
     const id = this.editingId();
     if (this.companies.all.some(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== id)) {
       this.addError.set('A company with that name already exists.'); return;
     }
+    const isInvestor = this.addIsInvestor();
     if (id) {
-      this.companies.update(id, { name, address: this.addAddress().trim(), companyRole: role, functionArea: fn, logo: this.addLogo() || undefined });
+      this.companies.update(id, { name, address: this.addAddress().trim(), companyRole: role, functionArea: fn, logo: this.addLogo() || undefined, isInvestor });
     } else {
-      this.companies.add({ id: crypto.randomUUID(), name, address: this.addAddress().trim(), companyRole: role, functionArea: fn, logo: this.addLogo() || undefined });
+      this.companies.add({ id: crypto.randomUUID(), name, address: this.addAddress().trim(), companyRole: role, functionArea: fn, logo: this.addLogo() || undefined, isInvestor });
     }
     this.showAdd.set(false);
   }
