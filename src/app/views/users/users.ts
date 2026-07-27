@@ -50,7 +50,8 @@ export class UsersComponent {
 
   effectiveRole = computed((): UserRole => {
     const cr = this.inviteCompanyRole();
-    if (cr === 'Investor')    return 'Investor';
+    const company = this.companies.getByName(this.inviteOrg());
+    if (company?.isInvestor)  return 'Investor';
     if (cr === 'Conveyancer') return 'Legal Provider';
     if (cr === 'Purchaser' || cr === 'Recipient') return 'Client';
     return this.invitePortalRole();
