@@ -1,5 +1,5 @@
-import { Injectable, signal } from '@angular/core';
-import { InvestorDecisionKey } from './auth';
+import { Injectable, inject, signal } from '@angular/core';
+import { AuthService, InvestorDecisionKey } from './auth';
 
 const VIEWING_KEY   = 'iris_viewing_decisions';
 const MAX_PRICE_KEY = 'iris_max_price_auth';
@@ -15,6 +15,7 @@ function load(key: string): Record<string, any> {
 
 @Injectable({ providedIn: 'root' })
 export class DecisionsService {
+  private auth = inject(AuthService);
   viewing  = signal<Record<string, any>>(load(VIEWING_KEY));
   maxPrice = signal<Record<string, any>>(load(MAX_PRICE_KEY));
   rot      = signal<Record<string, any>>(load(ROT_KEY));
@@ -51,6 +52,18 @@ export class DecisionsService {
     this.compl.set(load(COMPL_KEY));
     this.funds.set(load(FUNDS_KEY));
     this.txData.set(load(TX_DATA_KEY));
+  }
+
+  // Returns true if this decision key is assigned to an investor or IC user on this project.
+  // A decision is required if: the investor opted into it, OR the IC covers it (investor didn't opt in),
+  // OR there's no investor but an IC user exists. If neither investor nor IC is on the project, no gate.
+  isDecisionRequired(projectId: string, key: InvestorDecisionKey): boolean {
+    const users = this.auth.allUsers;
+    const investor = users.find(u => u.role === 'Investor' && (u.projects ?? []).includes(projectId));
+    const ic       = users.find(u => u.role === 'Investment Committee' && (u.projects ?? []).includes(projectId));
+    if (!investor && !ic) return false;
+    if (investor?.investorDecisions?.includes(key)) return true;
+    return !!ic; // IC covers any key the investor didn't opt into
   }
 
   save(key: InvestorDecisionKey, propId: string, value: any): void {

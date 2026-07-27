@@ -355,10 +355,11 @@ export class ClientPortalComponent {
   approveViewing(): void {
     const p = this.activeProperty();
     if (!p) return;
-    const project = this.projects.all.find(proj => proj.name === p.phase);
-    if (project?.isInvestorDeal) {
+    const project = this.projects.all.find(proj => proj.name === p.phase && proj.isInvestorDeal);
+    if (project) {
       this.decisions.reload();
-      if (!this.decisions.isViewingApproved(p.id)) {
+      if (this.decisions.isDecisionRequired(project.id, 'viewing_review')
+          && !this.decisions.isViewingApproved(p.id)) {
         alert('The investor or investment committee must approve the viewing review before you can proceed to negotiations.');
         return;
       }

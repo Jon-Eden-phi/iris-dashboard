@@ -1528,8 +1528,10 @@ export class TransactionsPortalComponent {
   advanceStage(id: string): void {
     const prop = this.data.properties.find(p => p.id === id);
     if (prop?.stage === 'Legals') {
-      const project = this.projects.all.find(p => p.name === prop.phase);
-      if (project?.isInvestorDeal && !this.decisions.isDone(id, 'contract_sign')) {
+      const project = this.projects.all.find(p => p.name === prop.phase && p.isInvestorDeal);
+      if (project
+          && this.decisions.isDecisionRequired(project.id, 'contract_sign')
+          && !this.decisions.isDone(id, 'contract_sign')) {
         this.showToast('Contract must be signed by the investor or IC before advancing to Refurbishment', 'ti-lock');
         return;
       }

@@ -58,21 +58,28 @@ export class RecordComponent {
     Refurbishment: 'Mark as Lettings',
   };
 
-  isInvestorProject = computed(() => {
+  investorProject = computed(() => {
     const phase = this.property()?.phase;
-    if (!phase) return false;
-    return this.projects.all.find(p => p.name === phase)?.isInvestorDeal ?? false;
+    if (!phase) return null;
+    return this.projects.all.find(p => p.name === phase && p.isInvestorDeal) ?? null;
   });
+
+  isInvestorProject = computed(() => !!this.investorProject());
 
   // Returns a blocker message if an investor/IC decision is required before advancing
   advanceBlocker = computed((): string | null => {
-    if (!this.isInvestorProject()) return null;
+    const proj = this.investorProject();
+    if (!proj) return null;
     const p = this.property();
     if (!p) return null;
-    if (p.stage === 'Viewing' && !this.decisions.isViewingApproved(p.id)) {
+    if (p.stage === 'Viewing'
+        && this.decisions.isDecisionRequired(proj.id, 'viewing_review')
+        && !this.decisions.isViewingApproved(p.id)) {
       return 'Viewing review must be approved by the investor or IC before moving to Negotiations.';
     }
-    if (p.stage === 'Legals' && !this.decisions.isDone(p.id, 'contract_sign')) {
+    if (p.stage === 'Legals'
+        && this.decisions.isDecisionRequired(proj.id, 'contract_sign')
+        && !this.decisions.isDone(p.id, 'contract_sign')) {
       return 'Contract must be signed by the investor or IC before moving to Refurbishment.';
     }
     return null;
@@ -80,10 +87,12 @@ export class RecordComponent {
 
   // Returns a blocker message if max price hasn't been authorised before accepting an offer
   offerBlocker = computed((): string | null => {
-    if (!this.isInvestorProject()) return null;
+    const proj = this.investorProject();
+    if (!proj) return null;
     const p = this.property();
     if (!p || p.stage !== 'Negotiations') return null;
-    if (!this.decisions.isDone(p.id, 'max_price_auth')) {
+    if (this.decisions.isDecisionRequired(proj.id, 'max_price_auth')
+        && !this.decisions.isDone(p.id, 'max_price_auth')) {
       return 'Max purchase price must be authorised by the investor or IC before accepting an offer.';
     }
     return null;
