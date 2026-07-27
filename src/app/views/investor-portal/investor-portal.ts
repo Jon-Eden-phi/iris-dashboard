@@ -69,17 +69,18 @@ export class InvestorPortalComponent {
     return DECISION_ORDER.slice(idx + 1).some(k => this._isDirectlyDone(propId, k));
   }
 
-  // A decision is "live" when the property has reached the relevant stage
+  // A decision is "live" when the stage is reached AND the prior step in the chain is done
   isDecisionLive(prop: any, key: InvestorDecisionKey): boolean {
     if (this.isDecisionDone(prop.id, key)) return true;
     const si = stageIdx(prop.stage);
+    const done = (k: InvestorDecisionKey) => this._isDirectlyDone(prop.id, k);
     switch (key) {
       case 'viewing_review':       return si >= stageIdx('Viewing');
       case 'max_price_auth':       return si >= stageIdx('Negotiations');
-      case 'rot_approval':         return si >= stageIdx('Legals');
-      case 'contract_sign':        return si >= stageIdx('Legals');
-      case 'compl_statement_appr': return si >= stageIdx('Legals') && !!this.txData()[prop.id]?.completionStatement;
-      case 'funds_confirmation':   return !!this.complData()[prop.id];
+      case 'rot_approval':         return si >= stageIdx('Legals') && done('max_price_auth');
+      case 'contract_sign':        return si >= stageIdx('Legals') && done('rot_approval');
+      case 'compl_statement_appr': return done('contract_sign') && !!this.txData()[prop.id]?.completionStatement;
+      case 'funds_confirmation':   return done('compl_statement_appr');
     }
   }
 
