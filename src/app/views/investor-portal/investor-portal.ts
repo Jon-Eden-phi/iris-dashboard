@@ -16,6 +16,8 @@ const TX_DATA_KEY   = 'iris_tx_data';
 const STAGE_ORDER = ['Draft', 'ClientApproval', 'Viewing', 'Negotiations', 'MemorandumOfSale', 'Legals', 'Refurbishment', 'Lettings'];
 function stageIdx(s: string): number { return STAGE_ORDER.indexOf(s); }
 
+const DECISION_ORDER: InvestorDecisionKey[] = ['viewing_review', 'max_price_auth', 'rot_approval', 'contract_sign', 'compl_statement_appr', 'funds_confirmation'];
+
 @Component({
   selector: 'app-investor-portal',
   imports: [TitleCasePipe],
@@ -49,7 +51,7 @@ export class InvestorPortalComponent {
 
   maxPriceInputs = signal<Record<string, string>>({});
 
-  isDecisionDone(propId: string, key: InvestorDecisionKey): boolean {
+  private _isDirectlyDone(propId: string, key: InvestorDecisionKey): boolean {
     switch (key) {
       case 'viewing_review':       return !!this.viewingData()[propId];
       case 'max_price_auth':       return !!this.maxPriceData()[propId];
@@ -58,6 +60,13 @@ export class InvestorPortalComponent {
       case 'compl_statement_appr': return !!this.complData()[propId];
       case 'funds_confirmation':   return !!this.fundsData()[propId];
     }
+  }
+
+  isDecisionDone(propId: string, key: InvestorDecisionKey): boolean {
+    if (this._isDirectlyDone(propId, key)) return true;
+    // If any later decision is done, this one is implicitly done
+    const idx = DECISION_ORDER.indexOf(key);
+    return DECISION_ORDER.slice(idx + 1).some(k => this._isDirectlyDone(propId, k));
   }
 
   // A decision is "live" when the property has reached the relevant stage
