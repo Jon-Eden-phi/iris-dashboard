@@ -24,7 +24,7 @@ ng test            # Karma unit tests (minimal coverage currently)
 - No comments unless the WHY is non-obvious
 
 ### Data layer (current state)
-Everything persists to **localStorage**. Supabase is wired up (`src/app/services/supabase.ts`, `src/environments/environment.ts`) but no service has been migrated yet — all reads/writes still go through the localStorage services listed below.
+Everything persists to **localStorage**. There is no backend — all reads/writes go through the localStorage services listed below. The next major engineering task is choosing and wiring a real backend.
 
 ### Services
 | File | Responsibility | Storage key prefix |
@@ -36,7 +36,6 @@ Everything persists to **localStorage**. Supabase is wired up (`src/app/services
 | `mock-data.ts` | All property/pipeline data | multiple |
 | `decisions.ts` | Investor/IC decision state | `iris_viewing_decisions` etc. |
 | `data-room.ts` | Document upload store | `iris-data-room-v1` |
-| `supabase.ts` | Supabase client wrapper (unused) | — |
 
 ### Investor/IC decision gating
 `DecisionsService.isDecisionRequired(projectId, key)` is the single source of truth for whether a decision gate is active. Call this before blocking any stage transition. See `docs/decision-log.md` for the full business rules.
@@ -47,7 +46,7 @@ Everything persists to **localStorage**. Supabase is wired up (`src/app/services
 - `sourcingGuard` / `purchasingGuard` — separates Sourcing and Purchasing internal teams
 
 ### Vercel deployment
-`generate-env.js` runs before `ng build` and writes `src/environments/environment.ts` from `NG_APP_SUPABASE_URL` and `NG_APP_SUPABASE_ANON_KEY` env vars. These are set in Vercel dashboard. The file is gitignored locally — set real values there manually.
+Push to `main` → Vercel auto-deploys. Build command is `npm run build`. No env vars required — the app has no backend.
 
 ## Seed accounts (localStorage — reset by clearing browser storage)
 | Email | Password | Role |

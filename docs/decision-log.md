@@ -94,28 +94,20 @@ viewing_review → max_price_auth → rot_approval → contract_sign → compl_s
 
 ---
 
-## DEC-006 — localStorage as interim data layer; Supabase as migration target
+## DEC-006 — localStorage as current data layer; backend TBD
 
 **Date:** July 2026  
-**Status:** Supabase partially set up; migration not started
+**Status:** Active — no backend chosen
 
-**Decision:** All data currently persists to localStorage. Supabase (managed Postgres + Auth) is the agreed migration target.
+**Decision:** All data persists to localStorage for now. The app was built to validate product design quickly without backend overhead. Backend selection is deferred until the product is further along.
 
-**Why:** The app was built to validate product design quickly without backend overhead. Supabase maps well to the existing relational data model, has a JavaScript SDK, built-in auth, and a free tier for early-stage use.
+**What this means for the next developer:**
+- All data is browser-local and clears with browser storage
+- No data is shared between users or devices
+- Passwords are plaintext in localStorage — not suitable for real users
+- The data model is clean and relational; it will map well to any Postgres-compatible backend when the time comes
 
-**What's done:**
-- `@supabase/supabase-js` installed
-- `SupabaseService` created (`src/app/services/supabase.ts`)
-- Vercel env vars configured (`NG_APP_SUPABASE_URL`, `NG_APP_SUPABASE_ANON_KEY`)
-- `generate-env.js` injects them at build time
-- Supabase project created; DB tables created in SQL Editor
-
-**What's not done:**
-- No service has been migrated — all still use localStorage
-- RLS policies not configured
-- Supabase Auth not wired (passwords still plaintext in localStorage)
-
-**Migration order (recommended):** Auth → Companies → Projects → Properties → Invites → Decisions
+**Recommended migration order when ready:** Auth → Companies → Projects → Properties → Invites → Decisions
 
 ---
 

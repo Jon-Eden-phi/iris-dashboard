@@ -42,10 +42,8 @@ The `record` view (acquisitions) and `transactions-portal` view each own their h
 |-------|-----------|
 | Framework | Angular 22, standalone components, signals |
 | Styling | Custom CSS with design tokens, Tabler Icons |
-| Data (current) | localStorage — all data is browser-local |
-| Data (intended) | Supabase (Postgres + Auth) — partially set up, not yet wired |
+| Data | localStorage — all data is browser-local, no backend |
 | Deployment | Vercel (auto-deploy from GitHub `main`) |
-| Environment | `generate-env.js` pre-build script writes `environment.ts` from Vercel env vars |
 
 ---
 
@@ -117,13 +115,8 @@ src/app/
 - Amber blocker banner shown in the acquisitions record view when a gate is active
 - Gate fires only if an investor or IC user is actually assigned to the project AND responsible for that specific decision
 
-### Supabase setup (partial — not wired in yet)
-- `@supabase/supabase-js` installed
-- `SupabaseService` created
-- `generate-env.js` pre-build script writes `environment.ts` from Vercel env vars (`NG_APP_SUPABASE_URL`, `NG_APP_SUPABASE_ANON_KEY`)
-- `vercel.json` updated with correct output directory and SPA rewrite rule
-- Supabase project created, DB tables created in SQL Editor
-- All services still read/write localStorage — migration not started
+### Vercel config
+- `vercel.json` updated with correct output directory (`dist/iris-dashboard/browser`) and SPA rewrite rule
 
 ### Seed data
 - Added IC seed user: `ic@simplyphi.co.uk` / `ic2024` (Investment Committee, Bristol P3)
@@ -134,20 +127,20 @@ src/app/
 ## 5. Outstanding tasks
 
 ### High priority
-1. **Supabase migration** — replace each localStorage service with Supabase client calls, starting with `auth.ts` (use Supabase Auth), then `companies`, `projects`, `mock-data` (properties), `invites`, `decisions`. Set up Row Level Security on each table.
+1. **Backend** — all data is currently localStorage. The next major task is choosing a backend and migrating each service. Data model is clean and relational; any Postgres-compatible solution fits well.
 2. **Investor/IC portal signals** — `investor-portal.ts` and `ic-portal.ts` each have their own inline localStorage signals duplicating `DecisionsService`. Refactor them to inject and use `DecisionsService` signals so all portals stay in sync.
-3. **Real property data** — `mock-data.ts` contains placeholder properties. Replace with real SimplyPhi pipeline data once Supabase is live.
+3. **Real property data** — `mock-data.ts` contains placeholder properties. Replace with real SimplyPhi pipeline data once a backend is live.
 
 ### Medium priority
 4. **Decision status on pipeline cards** — show a "Pending investor decision" badge on property cards in the pipeline view when a gate is blocking
 5. **Transactions portal** — surface max price authorisation and completion statement link in the TX record view
 6. **Legal portal** — show RoT approval and contract sign status from `DecisionsService` so the legal team can see what's pending
-7. **Invite flow UX** — the invite link currently generates a token stored in localStorage; this needs to become a real email send (Supabase transactional email or Resend)
+7. **Invite flow UX** — the invite link currently generates a token stored in localStorage; this needs to become a real email send (e.g. via Resend or similar)
 
 ### Lower priority
 8. **Operations portal** — not yet built. Covers the post-completion phase (check-in, repairs, lettings management). The UX spec exists in the HTML template files from the design phase
 9. **Role-based feature restrictions** — currently only Admin vs non-Admin is enforced at the data level. Finer-grained restrictions (e.g. Finance can only see financial data) are not yet implemented
-10. **Passwordless auth** — `IrisUser.password` is plaintext in localStorage. Must be replaced with Supabase Auth before any real users are onboarded
+10. **Real auth** — `IrisUser.password` is plaintext in localStorage. Must be replaced with a proper auth solution before any real users are onboarded
 
 ---
 
@@ -158,7 +151,7 @@ src/app/
 | Decision signals don't auto-sync | `investor-portal.ts`, `ic-portal.ts` | Both portals load localStorage into their own signals on mount. If decisions are made in one portal tab and you switch to another, data is stale until the page reloads. Fix: inject `DecisionsService` and use its signals |
 | `isDone()` TypeScript warning | `decisions.ts:27` | Switch statement has no default branch — TypeScript may warn about implicit return in strict mode |
 | `canAdvance()` Viewing stage | `record.ts` | `advanceBlocker` returns a message for Viewing stage but the advance button is already hidden for Viewing (client-controlled). The banner is still useful but `canAdvance()` returning false for Viewing is redundant |
-| localStorage cleared = all data lost | All | No persistence across devices or after browser storage clear. Blocked on Supabase migration |
+| localStorage cleared = all data lost | All | No persistence across devices or after browser storage clear. Requires a real backend to fix |
 | No email delivery | `users.ts` | Invite links are generated but displayed on screen (copy-paste). No actual email is sent |
 
 ---
@@ -170,15 +163,6 @@ src/app/
 git clone https://github.com/aryansimplyphi/iris-dashboard
 cd iris-dashboard
 npm install
-```
-
-Create `src/environments/environment.ts` with your Supabase credentials:
-```ts
-export const environment = {
-  production: false,
-  supabaseUrl: 'YOUR_SUPABASE_URL',
-  supabaseKey: 'YOUR_SUPABASE_ANON_KEY',
-};
 ```
 
 ```bash
@@ -196,13 +180,7 @@ ng test   # Karma — minimal test coverage currently
 ```
 
 ### Vercel deployment
-Push to `main` → Vercel auto-deploys. The build command in `vercel.json` is:
-```
-node generate-env.js && npm run build
-```
-Required env vars in Vercel dashboard:
-- `NG_APP_SUPABASE_URL`
-- `NG_APP_SUPABASE_ANON_KEY`
+Push to `main` → Vercel auto-deploys. Build command is `npm run build`. No env vars required.
 
 ---
 
