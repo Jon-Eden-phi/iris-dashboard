@@ -46,7 +46,7 @@
     <div class="lg-topbar">
       @if (view() === 'matters') {
         <span class="lg-topbar-title">Active matters</span>
-        <span class="lg-topbar-sub">{{ activeMatters().length }} properties in conveyancing</span>
+        <span class="lg-topbar-sub">{{ filteredMatters().length }} of {{ activeMatters().length }} properties in conveyancing</span>
       }
       @if (view() === 'record' && selectedProperty(); as p) {
         <span class="lg-topbar-title">{{ p.address }}</span>
@@ -69,8 +69,38 @@
             <div style="font-size:12px; color:var(--text3); margin-top:4px;">Properties appear here when the Transactions team advances them to Legals stage.</div>
           </div>
         } @else {
+          <!-- Client filter -->
+          <div class="card" style="padding:10px 16px; margin-bottom:14px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span style="font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Client</span>
+              <button class="lg-btn-outline" style="font-size:12px; padding:5px 12px; border-radius:20px;"
+                      [style.background]="clientFilter() === 'all' ? 'rgba(15,124,107,0.1)' : 'transparent'"
+                      [style.color]="clientFilter() === 'all' ? '#0f7c6b' : 'var(--text2)'"
+                      [style.border-color]="clientFilter() === 'all' ? '#0f7c6b' : 'var(--border)'"
+                      (click)="clientFilter.set('all')">
+                All clients
+              </button>
+              @for (c of availableClients(); track c) {
+                <button class="lg-btn-outline" style="font-size:12px; padding:5px 12px; border-radius:20px;"
+                        [style.background]="clientFilter() === c ? 'rgba(15,124,107,0.1)' : 'transparent'"
+                        [style.color]="clientFilter() === c ? '#0f7c6b' : 'var(--text2)'"
+                        [style.border-color]="clientFilter() === c ? '#0f7c6b' : 'var(--border)'"
+                        (click)="clientFilter.set(c)">
+                  {{ c }}
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (filteredMatters().length === 0) {
+            <div class="lg-empty">
+              <i class="ti ti-filter-off" style="font-size:32px; color:var(--text3); margin-bottom:12px;"></i>
+              <div style="font-size:14px; font-weight:600; color:var(--text2);">No matters for this client</div>
+              <div style="font-size:12px; color:var(--text3); margin-top:4px;">Try a different client filter.</div>
+            </div>
+          } @else {
           <div class="lg-matter-grid">
-            @for (p of activeMatters(); track p.id) {
+            @for (p of filteredMatters(); track p.id) {
               @let prog = checkProgress(p.id);
               @let ready = isExchangeReady(p.id);
               @let _hasQuery = !!txRotQuery(p.id) && !getMatter(p.id).checklist['rot_query_addressed'];
@@ -156,6 +186,7 @@
               </div>
             }
           </div>
+          }
         }
       }
 

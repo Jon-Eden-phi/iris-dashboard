@@ -262,6 +262,23 @@ export class LegalPortalComponent {
     );
   });
 
+  clientFilter = signal('all');
+
+  clientForProperty(p: Property): string {
+    return this.projects.all.find(proj => proj.name === p.phase)?.purchaser ?? 'Unknown';
+  }
+
+  availableClients = computed(() => {
+    const clients = new Set(this.activeMatters().map(p => this.clientForProperty(p)));
+    return Array.from(clients).sort();
+  });
+
+  filteredMatters = computed(() => {
+    const client = this.clientFilter();
+    if (client === 'all') return this.activeMatters();
+    return this.activeMatters().filter(p => this.clientForProperty(p) === client);
+  });
+
   selectedProperty = computed(() => {
     const id = this.selectedId();
     return id ? this.data.getProperty(id) : undefined;
