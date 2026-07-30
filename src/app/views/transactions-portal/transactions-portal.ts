@@ -1077,8 +1077,35 @@ export class TransactionsPortalComponent {
     });
   }
 
+  surveyOrderPropertyId = signal<string | null>(null);
+
+  /** Active TX properties the solicitor has cleared red flag review on — only these can have surveys instructed. */
+  eligibleSurveyProperties = computed(() =>
+    this.data.properties.filter(p =>
+      p.status === 'active' &&
+      this.txStages.includes(p.stage) &&
+      this._itemDone(p.id, 'red_flag_cleared')
+    )
+  );
+
+  openInstructSurveysModal(propId?: string): void {
+    const eligible = this.eligibleSurveyProperties();
+    const preferred = propId && eligible.some(p => p.id === propId) ? propId : (eligible[0]?.id ?? null);
+    this.surveyOrderPropertyId.set(preferred);
+    this.surveyOrderAssignee.set(preferred ? this.solicitorNameFor(preferred) : '');
+    this.selectedSurveyOrders.set(new Set());
+    this.surveyOrderComments.set('');
+    this.showInstructSurveysModal.set(true);
+  }
+
+  onSurveyOrderPropertyChange(propId: string): void {
+    this.surveyOrderPropertyId.set(propId);
+    this.surveyOrderAssignee.set(this.solicitorNameFor(propId));
+  }
+
   instructSurveyOrder(): void {
-    const p = this.selectedProperty();
+    const propId = this.surveyOrderPropertyId();
+    const p = propId ? this.data.getProperty(propId) : undefined;
     if (!p) return;
     const surveyTypes = Array.from(this.selectedSurveyOrders());
     if (!surveyTypes.length) return;
@@ -1115,6 +1142,7 @@ export class TransactionsPortalComponent {
     this.selectedSurveyOrders.set(new Set());
     this.surveyOrderAssignee.set('');
     this.surveyOrderComments.set('');
+    this.surveyOrderPropertyId.set(null);
     this.showToast('Surveys instructed — order created', 'ti-clipboard-check');
   }
 

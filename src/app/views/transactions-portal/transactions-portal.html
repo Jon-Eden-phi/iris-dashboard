@@ -355,7 +355,7 @@
         <div class="card">
           <div class="tx-section-header">
             <span class="tx-section-title"><i class="ti ti-clipboard-list"></i> All surveys</span>
-            <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="showInstructSurveysModal.set(true)"><i class="ti ti-plus" style="font-size:12px;"></i> Instruct survey</button>
+            <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="openInstructSurveysModal()"><i class="ti ti-plus" style="font-size:12px;"></i> Instruct survey</button>
           </div>
           <table>
             <thead><tr><th>Property</th><th>Report type</th><th>Provider</th><th>Instructed</th><th>Site visit</th><th>Returned</th><th>Status</th><th class="num-cell">Cost</th></tr></thead>
@@ -768,7 +768,7 @@
                             [style.color]="svChecked ? 'var(--text3)' : 'var(--text1)'"
                             [style.text-decoration]="svChecked ? 'line-through' : 'none'">{{ action.label }}</span>
                       @if (svIsOrderBtn) {
-                        <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
+                        <button class="btn-ghost" style="font-size:11px; padding:3px 10px;" (click)="openInstructSurveysModal(p.id); $event.stopPropagation()">
                           <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order survey
                         </button>
                       } @else if (svChecked) {
@@ -1141,7 +1141,7 @@
                         <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting from lawyers</span>
                       }
                     } @else if (p.stage === 'Legals' && action.key === 'surveys_ordered') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showInstructSurveysModal.set(true); $event.stopPropagation()">
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="openInstructSurveysModal(p.id); $event.stopPropagation()">
                         <i class="ti ti-clipboard-plus" style="font-size:11px;"></i> Order survey
                       </button>
                     } @else if (p.stage === 'Legals' && action.key === 'final_rot_received') {
@@ -2515,6 +2515,19 @@
       <button class="tx-modal-close" (click)="showInstructSurveysModal.set(false)"><i class="ti ti-x"></i></button>
     </div>
     <div class="tx-modal-body">
+      <label class="form-label">Property</label>
+      @if (eligibleSurveyProperties().length === 0) {
+        <div style="background:rgba(180,83,9,0.07); border:1px solid rgba(180,83,9,0.2); border-radius:7px; padding:10px 12px; margin-bottom:14px; font-size:12px; color:#92400e; display:flex; align-items:flex-start; gap:7px;">
+          <i class="ti ti-lock" style="font-size:14px; flex-shrink:0; margin-top:1px;"></i>
+          <span>No properties are ready yet — the solicitor must mark <strong>red flag review</strong> as complete in the Legal Portal before a survey can be instructed.</span>
+        </div>
+      } @else {
+        <select class="form-select" style="margin-bottom:14px;" [value]="surveyOrderPropertyId() ?? ''" (change)="onSurveyOrderPropertyChange($any($event.target).value)">
+          @for (p of eligibleSurveyProperties(); track p.id) {
+            <option [value]="p.id">{{ p.address }} — {{ p.phase }}</option>
+          }
+        </select>
+      }
       <label class="form-label">Assignee</label>
       <select class="form-select" style="margin-bottom:14px;" [value]="surveyOrderAssignee()" (change)="surveyOrderAssignee.set($any($event.target).value)">
         <option value="">Select assignee</option>
@@ -2552,7 +2565,7 @@
     </div>
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showInstructSurveysModal.set(false)">Cancel</button>
-      <button class="btn-primary" [disabled]="selectedSurveyOrders().size === 0" (click)="instructSurveyOrder()">
+      <button class="btn-primary" [disabled]="!surveyOrderPropertyId() || selectedSurveyOrders().size === 0" (click)="instructSurveyOrder()">
         <i class="ti ti-send" style="font-size:13px;"></i> Create order
       </button>
     </div>
