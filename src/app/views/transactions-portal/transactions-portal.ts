@@ -502,11 +502,42 @@ export class TransactionsPortalComponent {
     { address: '9 Church Road', postcode: 'BS5 9JE', reason: 'Survey — structural / environmental concern', detail: 'Japanese knotweed identified — remediation cost made deal unviable.', date: '29/03/2026', stageWhenLost: 'Refurbishment' },
   ]);
 
-  readonly surveyorDirectory = [
+  surveyorDirectory = signal([
     { name: 'Aziza Surveys', specialism: 'Electrical, gas, condition', contact: 'Aziza Khan',      email: 'aziza@azizasurveys.co.uk',    phone: '0117 405 2210', active: 7 },
     { name: 'BRE',           specialism: 'Structural, roof, damp',     contact: 'David Forsythe',  email: 'd.forsythe@bre.co.uk',        phone: '0190 866 0666', active: 4 },
     { name: 'Savills',       specialism: 'Valuation',                  contact: 'Imogen Pratt',    email: 'imogen.pratt@savills.com',    phone: '0117 910 2200', active: 3 },
-  ];
+  ]);
+
+  showAddSupplierModal  = signal(false);
+  supplierName          = signal('');
+  supplierSpecialism    = signal('');
+  supplierContact       = signal('');
+  supplierEmail         = signal('');
+  supplierPhone         = signal('');
+
+  openAddSupplierModal(): void {
+    this.supplierName.set('');
+    this.supplierSpecialism.set('');
+    this.supplierContact.set('');
+    this.supplierEmail.set('');
+    this.supplierPhone.set('');
+    this.showAddSupplierModal.set(true);
+  }
+
+  addSupplier(): void {
+    const name = this.supplierName().trim();
+    if (!name) return;
+    this.surveyorDirectory.update(list => [...list, {
+      name,
+      specialism: this.supplierSpecialism().trim() || 'General',
+      contact: this.supplierContact().trim() || '—',
+      email: this.supplierEmail().trim(),
+      phone: this.supplierPhone().trim(),
+      active: 0,
+    }]);
+    this.showAddSupplierModal.set(false);
+    this.showToast(name + ' added to the surveyor directory', 'ti-address-book');
+  }
 
   readonly teamWorkload = [
     { name: 'Jiya Chowdhury', count: 6 },

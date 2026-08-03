@@ -411,11 +411,14 @@
         <div class="card">
           <div class="tx-section-header">
             <span class="tx-section-title"><i class="ti ti-address-book"></i> Approved surveying suppliers</span>
+            <button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="openAddSupplierModal()">
+              <i class="ti ti-plus" style="font-size:12px;"></i> Add supplier
+            </button>
           </div>
           <table>
             <thead><tr><th>Provider</th><th>Specialism</th><th>Contact</th><th>Email</th><th>Phone</th><th class="num-cell">Active surveys</th></tr></thead>
             <tbody>
-              @for (s of surveyorDirectory; track s.name) {
+              @for (s of surveyorDirectory(); track s.name) {
                 <tr>
                   <td>{{ s.name }}</td><td>{{ s.specialism }}</td><td>{{ s.contact }}</td>
                   <td style="color:var(--blue);">{{ s.email }}</td><td>{{ s.phone }}</td>
@@ -2702,6 +2705,45 @@
           <i class="ti ti-scale" style="font-size:13px;"></i> Instruct solicitor
         </button>
       }
+    </div>
+  </div>
+}
+
+@if (showAddSupplierModal()) {
+  <div class="tx-modal-backdrop" (click)="showAddSupplierModal.set(false)"></div>
+  <div class="tx-modal" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-address-book" style="font-size:14px; margin-right:6px;"></i>Add surveying supplier</span>
+      <button class="tx-modal-close" (click)="showAddSupplierModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body">
+      <label class="form-label">Provider name <span style="color:#dc2626;">*</span></label>
+      <input class="form-input" type="text" style="margin-bottom:12px;" placeholder="e.g. Cotswold Surveying Ltd"
+             [value]="supplierName()" (input)="supplierName.set($any($event.target).value)">
+      <label class="form-label">Specialism</label>
+      <input class="form-input" type="text" style="margin-bottom:12px;" placeholder="e.g. Structural, damp, EPC"
+             [value]="supplierSpecialism()" (input)="supplierSpecialism.set($any($event.target).value)">
+      <label class="form-label">Contact name</label>
+      <input class="form-input" type="text" style="margin-bottom:12px;" placeholder="e.g. Sam Whitlock"
+             [value]="supplierContact()" (input)="supplierContact.set($any($event.target).value)">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" placeholder="e.g. sam@cotswoldsurveying.co.uk"
+                 [value]="supplierEmail()" (input)="supplierEmail.set($any($event.target).value)">
+        </div>
+        <div>
+          <label class="form-label">Phone</label>
+          <input class="form-input" type="text" placeholder="e.g. 01452 123 456"
+                 [value]="supplierPhone()" (input)="supplierPhone.set($any($event.target).value)">
+        </div>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showAddSupplierModal.set(false)">Cancel</button>
+      <button class="btn-primary" [disabled]="!supplierName().trim()" (click)="addSupplier()">
+        <i class="ti ti-plus" style="font-size:13px;"></i> Add supplier
+      </button>
     </div>
   </div>
 }
