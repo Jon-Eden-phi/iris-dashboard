@@ -198,7 +198,7 @@
               <tbody>
                 @for (p of filteredProperties(); track p.id) {
                   @let legalsProg = checklistProgress(p.id, 'Legals');
-                  @let scopingProg = checklistProgress(p.id, 'Refurbishment');
+                  @let scopingStat = scopingStatus(p.id);
                   <tr (click)="openRecord(p)" style="cursor:pointer;">
                     <td>
                       <div style="font-weight:600;">{{ p.address }}</div>
@@ -213,8 +213,12 @@
                       </span>
                     </td>
                     <td>
-                      <span class="badge" [class.badge-green]="scopingProg.done === scopingProg.total" [class.badge-gray]="scopingProg.done !== scopingProg.total">
-                        {{ scopingProg.done }}/{{ scopingProg.total }}
+                      <span class="badge"
+                            [class.badge-gray]="scopingStat === 'Surveys Required'"
+                            [class.badge-blue]="scopingStat === 'Surveys Instructed' || scopingStat === 'Issued for Approval'"
+                            [class.badge-orange]="scopingStat === 'Scope Required'"
+                            [class.badge-green]="scopingStat === 'Approved'">
+                        {{ scopingStat }}
                       </span>
                     </td>
                     <td>{{ p.beds ?? '—' }}</td>

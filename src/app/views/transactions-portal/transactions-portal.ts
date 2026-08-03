@@ -703,6 +703,7 @@ export class TransactionsPortalComponent {
     Refurbishment: [
       { key: 'site_visits_booked', label: 'Site visits booked' },
       { key: 'scope_prepared',     label: 'Scope of works prepared' },
+      { key: 'scope_approved',     label: 'Scope of works approved' },
     ],
     Lettings: [
       { key: 'contract_pack',                  label: 'Contract & Transfer prepared' },
@@ -870,6 +871,7 @@ export class TransactionsPortalComponent {
       if (!cl['site_visits_booked'])      return { label: 'Site Visits to Book', done: false };
       if (!done('survey_reports_received')) return { label: 'Survey Reports Pending', done: false };
       if (!cl['scope_prepared'])          return { label: 'Scope of Works Pending', done: false };
+      if (!cl['scope_approved'])          return { label: 'Scope of Works – Pending Approval', done: false };
       return { label: 'Surveys Complete', done: true };
     }
     if (stage === 'Lettings') {
@@ -890,6 +892,21 @@ export class TransactionsPortalComponent {
   checklistProgress(propId: string, stage: string): { done: number; total: number } {
     const actions = this.stageActions[stage] ?? [];
     return { done: actions.filter(a => this._itemDone(propId, a.key)).length, total: actions.length };
+  }
+
+  /**
+   * Scope-of-works status for the Scoping dashboard column — one of the refurbishment workflow steps.
+   * "Site visits booked" (site_visits_booked) means all necessary surveys have been instructed
+   * with our suppliers — until then, properties sit in "Surveys Required" (nothing instructed yet)
+   * or "Surveys Instructed" (at least one survey ordered via the Survey Tracker, not yet all booked).
+   */
+  scopingStatus(propId: string): 'Surveys Required' | 'Surveys Instructed' | 'Scope Required' | 'Issued for Approval' | 'Approved' {
+    if (!this._itemDone(propId, 'site_visits_booked')) {
+      return this.surveysForProp(propId).length === 0 ? 'Surveys Required' : 'Surveys Instructed';
+    }
+    if (!this._itemDone(propId, 'scope_prepared'))     return 'Scope Required';
+    if (!this._itemDone(propId, 'scope_approved'))     return 'Issued for Approval';
+    return 'Approved';
   }
 
   toggleChecklist(propId: string, key: string, label: string): void {
