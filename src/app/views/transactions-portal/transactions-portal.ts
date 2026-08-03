@@ -889,8 +889,7 @@ export class TransactionsPortalComponent {
 
   checklistProgress(propId: string, stage: string): { done: number; total: number } {
     const actions = this.stageActions[stage] ?? [];
-    const cl = this.getTxData(propId).checklist;
-    return { done: actions.filter(a => cl[a.key]).length, total: actions.length };
+    return { done: actions.filter(a => this._itemDone(propId, a.key)).length, total: actions.length };
   }
 
   toggleChecklist(propId: string, key: string, label: string): void {
