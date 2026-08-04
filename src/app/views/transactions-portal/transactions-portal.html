@@ -2545,7 +2545,7 @@
           }
         </select>
       }
-      <label class="form-label">Assignee</label>
+      <label class="form-label">Default assignee <span style="font-weight:400; color:var(--text3);">(used for any survey below without its own assignee)</span></label>
       <select class="form-select" style="margin-bottom:14px;" [value]="surveyOrderAssignee()" (change)="surveyOrderAssignee.set($any($event.target).value)">
         <option value="">Select assignee</option>
         <option>Aziza Surveys</option>
@@ -2555,14 +2555,15 @@
       </select>
       <label class="form-label" style="margin-bottom:8px;">Available surveys</label>
       <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:14px;">
-        <div style="display:grid; grid-template-columns:1fr 1fr; background:var(--surface2, var(--surface));">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; background:var(--surface2, var(--surface));">
           <div style="padding:8px 12px; font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; border-right:1px solid var(--border);">Available surveys</div>
-          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:#7c3aed; text-transform:uppercase; letter-spacing:.05em;">Selected surveys</div>
+          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:#7c3aed; text-transform:uppercase; letter-spacing:.05em; border-right:1px solid var(--border);">Selected surveys</div>
+          <div style="padding:8px 12px; font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.05em;">Select assignee</div>
         </div>
         @for (s of availableSurveyTypes; track s) {
-          <div style="display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--border);">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border-top:1px solid var(--border);">
             <div style="padding:9px 12px; font-size:13px; border-right:1px solid var(--border);">{{ s }}</div>
-            <div style="padding:9px 12px; display:flex; align-items:center;">
+            <div style="padding:9px 12px; display:flex; align-items:center; border-right:1px solid var(--border);">
               <button (click)="toggleSurveyOrder(s)"
                 style="width:20px; height:20px; border-radius:4px; border:2px solid; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.12s; flex-shrink:0;"
                 [style.border-color]="selectedSurveyOrders().has(s) ? '#7c3aed' : 'var(--border)'"
@@ -2571,6 +2572,21 @@
               </button>
               @if (selectedSurveyOrders().has(s)) {
                 <span style="font-size:12px; color:#7c3aed; margin-left:8px;">{{ s }}</span>
+              }
+            </div>
+            <div style="padding:6px 8px; display:flex; align-items:center;">
+              @if (selectedSurveyOrders().has(s)) {
+                <select class="form-select" style="font-size:12px; padding:5px 8px;"
+                        [value]="surveyTypeAssignees()[s] ?? ''"
+                        (change)="setSurveyTypeAssignee(s, $any($event.target).value)">
+                  <option value="">Use default</option>
+                  <option>Aziza Surveys</option>
+                  <option>BRE</option>
+                  <option>Savills</option>
+                  <option>RICS Chartered (independent)</option>
+                </select>
+              } @else {
+                <span style="font-size:11px; color:var(--text3);">—</span>
               }
             </div>
           </div>

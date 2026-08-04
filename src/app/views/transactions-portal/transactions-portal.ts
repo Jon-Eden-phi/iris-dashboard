@@ -1124,6 +1124,12 @@ export class TransactionsPortalComponent {
     });
   }
 
+  surveyTypeAssignees = signal<Record<string, string>>({});
+
+  setSurveyTypeAssignee(type: string, assignee: string): void {
+    this.surveyTypeAssignees.update(m => ({ ...m, [type]: assignee }));
+  }
+
   surveyOrderPropertyId = signal<string | null>(null);
 
   /** Active TX properties the solicitor has cleared red flag review on — only these can have surveys instructed. */
@@ -1141,6 +1147,7 @@ export class TransactionsPortalComponent {
     this.surveyOrderPropertyId.set(preferred);
     this.surveyOrderAssignee.set(preferred ? this.solicitorNameFor(preferred) : '');
     this.selectedSurveyOrders.set(new Set());
+    this.surveyTypeAssignees.set({});
     this.surveyOrderComments.set('');
     this.showInstructSurveysModal.set(true);
   }
@@ -1156,10 +1163,12 @@ export class TransactionsPortalComponent {
     if (!p) return;
     const surveyTypes = Array.from(this.selectedSurveyOrders());
     if (!surveyTypes.length) return;
-    const assignee = this.surveyOrderAssignee() || 'Aziza Surveys';
+    const defaultAssignee = this.surveyOrderAssignee() || 'Aziza Surveys';
+    const typeAssignees = this.surveyTypeAssignees();
+    const assigneeFor = (type: string) => typeAssignees[type] || defaultAssignee;
     const comments = this.surveyOrderComments().trim();
     const today = new Date().toLocaleDateString('en-GB');
-    const logText = `Surveys instructed (${surveyTypes.join(', ')}) — assigned to ${assignee}${comments ? '. ' + comments : ''}`;
+    const logText = `Surveys instructed (${surveyTypes.map(t => `${t} → ${assigneeFor(t)}`).join(', ')})${comments ? '. ' + comments : ''}`;
     this.data.addActivity(p.id, {
       id: 'surveys_' + Date.now(),
       text: logText,
@@ -1174,7 +1183,7 @@ export class TransactionsPortalComponent {
         property: p.address,
         propertyId: p.id,
         type,
-        provider: assignee,
+        provider: assigneeFor(type),
         instructed: today,
         siteVisit: null,
         returned: null,
@@ -1188,6 +1197,7 @@ export class TransactionsPortalComponent {
     this.showInstructSurveysModal.set(false);
     this.selectedSurveyOrders.set(new Set());
     this.surveyOrderAssignee.set('');
+    this.surveyTypeAssignees.set({});
     this.surveyOrderComments.set('');
     this.surveyOrderPropertyId.set(null);
     this.showToast('Surveys instructed — order created', 'ti-clipboard-check');
