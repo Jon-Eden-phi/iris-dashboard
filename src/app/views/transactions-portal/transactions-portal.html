@@ -2548,10 +2548,9 @@
       <label class="form-label">Default assignee <span style="font-weight:400; color:var(--text3);">(used for any survey below without its own assignee)</span></label>
       <select class="form-select" style="margin-bottom:14px;" [value]="surveyOrderAssignee()" (change)="surveyOrderAssignee.set($any($event.target).value)">
         <option value="">Select assignee</option>
-        <option>Aziza Surveys</option>
-        <option>BRE</option>
-        <option>Savills</option>
-        <option>RICS Chartered (independent)</option>
+        @for (s of surveyorDirectory(); track s.name) {
+          <option [value]="s.name">{{ s.name }}</option>
+        }
       </select>
       <label class="form-label" style="margin-bottom:8px;">Available surveys</label>
       <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:14px;">
@@ -2580,10 +2579,9 @@
                         [value]="surveyTypeAssignees()[s] ?? ''"
                         (change)="setSurveyTypeAssignee(s, $any($event.target).value)">
                   <option value="">Use default</option>
-                  <option>Aziza Surveys</option>
-                  <option>BRE</option>
-                  <option>Savills</option>
-                  <option>RICS Chartered (independent)</option>
+                  @for (sv of surveyorDirectory(); track sv.name) {
+                    <option [value]="sv.name">{{ sv.name }}</option>
+                  }
                 </select>
               } @else {
                 <span style="font-size:11px; color:var(--text3);">—</span>
