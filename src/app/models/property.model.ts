@@ -106,4 +106,5 @@ export interface Property {
   builtYear?: string;
   estateManagementCharges?: number | string;
   documents?: PropertyDocument[];
+  valuation?: number;
 }

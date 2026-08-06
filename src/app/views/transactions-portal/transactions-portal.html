@@ -1984,6 +1984,9 @@
                   <th class="num-cell" (click)="pipeSortBy('purchasePrice')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     Purchase Price <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='purchasePrice' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
+                  <th class="num-cell" (click)="pipeSortBy('valuation')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Valuation <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='valuation' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  </th>
                   <th class="num-cell" (click)="pipeSortBy('tc')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     AIC <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='tc' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
@@ -2036,6 +2039,15 @@
                     <td>{{ p.beds ?? '—' }}</td>
                     <td>{{ p.type ?? '—' }}</td>
                     <td class="num-cell">{{ (p.agreedPrice ?? p.financial?.ap) ? ('£' + (p.agreedPrice ?? p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
+                    <td class="num-cell" (click)="$event.stopPropagation()">
+                      <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
+                        <span style="color:var(--text3);">£</span>
+                        <input type="number" class="form-input" style="width:100px; text-align:right; padding:4px 6px; font-size:12px;"
+                               placeholder="—"
+                               [value]="p.valuation ?? ''"
+                               (change)="updateValuation(p.id, $any($event.target).value)">
+                      </div>
+                    </td>
                     <td class="num-cell">{{ p.financial?.tc ? ('£' + (p.financial!.tc!).toLocaleString('en-GB')) : '—' }}</td>
                     <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
                     <td>
@@ -2049,7 +2061,7 @@
                     </td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="12" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
+                  <tr><td colspan="13" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
                 }
               </tbody>
             </table>

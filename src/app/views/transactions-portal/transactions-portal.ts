@@ -267,6 +267,7 @@ export class TransactionsPortalComponent {
       case 'epcAfter':  return this.EPC_RANK[p.epcAfter?.r ?? ''] ?? 99;
       case 'ap':        return p.financial?.ap ?? 0;
       case 'purchasePrice': return p.agreedPrice ?? p.financial?.ap ?? 0;
+      case 'valuation': return p.valuation ?? 0;
       case 'yield':     return p.financial?.yield ?? 0;
       case 'dept':      return this.txSourceStages.has(p.stage) ? 'Sourcing' : 'Purchasing';
       case 'type':      return p.type ?? '';
@@ -912,6 +913,11 @@ export class TransactionsPortalComponent {
   /** Whether the vendor's solicitor contract pack has been received for this property. */
   contractPackStatus(propId: string): 'Not Received' | 'Received' {
     return this._itemDone(propId, 'contract_pack_received') ? 'Received' : 'Not Received';
+  }
+
+  updateValuation(propId: string, raw: string): void {
+    const cleaned = raw.replace(/[^0-9.]/g, '');
+    this.data.updateProperty(propId, { valuation: cleaned ? parseFloat(cleaned) : undefined });
   }
 
   toggleChecklist(propId: string, key: string, label: string): void {
