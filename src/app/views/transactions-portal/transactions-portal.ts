@@ -266,6 +266,7 @@ export class TransactionsPortalComponent {
       case 'epcBefore': return this.EPC_RANK[p.epcBefore?.r ?? ''] ?? 99;
       case 'epcAfter':  return this.EPC_RANK[p.epcAfter?.r ?? ''] ?? 99;
       case 'ap':        return p.financial?.ap ?? 0;
+      case 'purchasePrice': return p.agreedPrice ?? p.financial?.ap ?? 0;
       case 'yield':     return p.financial?.yield ?? 0;
       case 'dept':      return this.txSourceStages.has(p.stage) ? 'Sourcing' : 'Purchasing';
       case 'type':      return p.type ?? '';

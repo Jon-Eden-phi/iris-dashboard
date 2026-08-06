@@ -1981,8 +1981,8 @@
                   <th (click)="pipeSortBy('type')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     Type <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='type' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
-                  <th class="num-cell" (click)="pipeSortBy('ap')" style="cursor:pointer; user-select:none; background:var(--surface);">
-                    Asking Price <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='ap' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
+                  <th class="num-cell" (click)="pipeSortBy('purchasePrice')" style="cursor:pointer; user-select:none; background:var(--surface);">
+                    Purchase Price <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='purchasePrice' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
                   <th class="num-cell" (click)="pipeSortBy('tc')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     AIC <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='tc' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
@@ -2035,7 +2035,7 @@
                     </td>
                     <td>{{ p.beds ?? '—' }}</td>
                     <td>{{ p.type ?? '—' }}</td>
-                    <td class="num-cell">{{ p.financial?.ap ? ('£' + (p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
+                    <td class="num-cell">{{ (p.agreedPrice ?? p.financial?.ap) ? ('£' + (p.agreedPrice ?? p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
                     <td class="num-cell">{{ p.financial?.tc ? ('£' + (p.financial!.tc!).toLocaleString('en-GB')) : '—' }}</td>
                     <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
                     <td>
