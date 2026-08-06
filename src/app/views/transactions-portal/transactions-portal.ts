@@ -1130,6 +1130,11 @@ export class TransactionsPortalComponent {
     this.surveyTypeAssignees.update(m => ({ ...m, [type]: assignee }));
   }
 
+  allSelectedSurveysHaveAssignee(): boolean {
+    const assignees = this.surveyTypeAssignees();
+    return Array.from(this.selectedSurveyOrders()).every(t => !!assignees[t]);
+  }
+
   surveyOrderPropertyId = signal<string | null>(null);
 
   /** Active TX properties the solicitor has cleared red flag review on — only these can have surveys instructed. */
@@ -1145,7 +1150,6 @@ export class TransactionsPortalComponent {
     const eligible = this.eligibleSurveyProperties();
     const preferred = propId && eligible.some(p => p.id === propId) ? propId : (eligible[0]?.id ?? null);
     this.surveyOrderPropertyId.set(preferred);
-    this.surveyOrderAssignee.set(preferred ? this.solicitorNameFor(preferred) : '');
     this.selectedSurveyOrders.set(new Set());
     this.surveyTypeAssignees.set({});
     this.surveyOrderComments.set('');
@@ -1154,7 +1158,6 @@ export class TransactionsPortalComponent {
 
   onSurveyOrderPropertyChange(propId: string): void {
     this.surveyOrderPropertyId.set(propId);
-    this.surveyOrderAssignee.set(this.solicitorNameFor(propId));
   }
 
   instructSurveyOrder(): void {
@@ -1163,9 +1166,8 @@ export class TransactionsPortalComponent {
     if (!p) return;
     const surveyTypes = Array.from(this.selectedSurveyOrders());
     if (!surveyTypes.length) return;
-    const defaultAssignee = this.surveyOrderAssignee() || 'Aziza Surveys';
     const typeAssignees = this.surveyTypeAssignees();
-    const assigneeFor = (type: string) => typeAssignees[type] || defaultAssignee;
+    const assigneeFor = (type: string) => typeAssignees[type] || 'Unassigned';
     const comments = this.surveyOrderComments().trim();
     const today = new Date().toLocaleDateString('en-GB');
     const logText = `Surveys instructed (${surveyTypes.map(t => `${t} → ${assigneeFor(t)}`).join(', ')})${comments ? '. ' + comments : ''}`;
@@ -1196,7 +1198,6 @@ export class TransactionsPortalComponent {
     }
     this.showInstructSurveysModal.set(false);
     this.selectedSurveyOrders.set(new Set());
-    this.surveyOrderAssignee.set('');
     this.surveyTypeAssignees.set({});
     this.surveyOrderComments.set('');
     this.surveyOrderPropertyId.set(null);

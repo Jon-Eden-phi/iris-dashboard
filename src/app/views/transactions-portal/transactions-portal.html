@@ -2545,13 +2545,6 @@
           }
         </select>
       }
-      <label class="form-label">Default assignee <span style="font-weight:400; color:var(--text3);">(used for any survey below without its own assignee)</span></label>
-      <select class="form-select" style="margin-bottom:14px;" [value]="surveyOrderAssignee()" (change)="surveyOrderAssignee.set($any($event.target).value)">
-        <option value="">Select assignee</option>
-        @for (s of surveyorDirectory(); track s.name) {
-          <option [value]="s.name">{{ s.name }}</option>
-        }
-      </select>
       <label class="form-label" style="margin-bottom:8px;">Available surveys</label>
       <div style="border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:14px;">
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; background:var(--surface2, var(--surface));">
@@ -2578,7 +2571,7 @@
                 <select class="form-select" style="font-size:12px; padding:5px 8px;"
                         [value]="surveyTypeAssignees()[s] ?? ''"
                         (change)="setSurveyTypeAssignee(s, $any($event.target).value)">
-                  <option value="">Use default</option>
+                  <option value="">Select assignee</option>
                   @for (sv of surveyorDirectory(); track sv.name) {
                     <option [value]="sv.name">{{ sv.name }}</option>
                   }
@@ -2596,7 +2589,9 @@
     </div>
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showInstructSurveysModal.set(false)">Cancel</button>
-      <button class="btn-primary" [disabled]="!surveyOrderPropertyId() || selectedSurveyOrders().size === 0" (click)="instructSurveyOrder()">
+      <button class="btn-primary"
+              [disabled]="!surveyOrderPropertyId() || selectedSurveyOrders().size === 0 || !allSelectedSurveysHaveAssignee()"
+              (click)="instructSurveyOrder()">
         <i class="ti ti-send" style="font-size:13px;"></i> Create order
       </button>
     </div>
