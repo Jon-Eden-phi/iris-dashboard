@@ -76,6 +76,7 @@ export class PipelineComponent {
       case 'epcBefore': return EPC_RANK[p.epcBefore?.r ?? ''] ?? 99;
       case 'epcAfter':  return EPC_RANK[p.epcAfter?.r ?? ''] ?? 99;
       case 'ap':        return p.financial?.ap ?? 0;
+      case 'purchasePrice': return p.agreedPrice ?? p.financial?.ap ?? 0;
       case 'yield':     return p.financial?.yield ?? 0;
       case 'dept':      return this.sourcingStageSet.has(p.stage) ? 'Sourcing' : 'Purchasing';
       case 'type':      return p.type ?? '';
