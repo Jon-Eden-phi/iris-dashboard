@@ -347,13 +347,12 @@ export class TransactionsPortalComponent {
   readonly availableSurveyTypes = [
     'Electrical (EICR)',
     'Gas safety',
-    'Condition survey',
+    'Home Buyers and Valuation',
     'Structural',
     'Roof condition',
     'Damp / EPC follow-up',
     'Fire risk assessment',
     'Asbestos',
-    'Valuation',
   ];
   uploadRotNote         = signal('');
   uploadRotFileName     = signal('');
@@ -483,9 +482,9 @@ export class TransactionsPortalComponent {
   private readonly _surveySeed: Survey[] = [
     { property: '19 Beaumont Road',   propertyId: '', type: 'Electrical (EICR)',    provider: 'Aziza Surveys', instructed: '23/06/2026', siteVisit: '27/06/2026', returned: null,          status: 'Booked',          cost: 180 },
     { property: '19 Beaumont Road',   propertyId: '', type: 'Gas safety',           provider: 'Aziza Surveys', instructed: '23/06/2026', siteVisit: '27/06/2026', returned: null,          status: 'Booked',          cost: 90  },
-    { property: '675 Whitchurch Lane',propertyId: '', type: 'Condition survey',     provider: 'BRE',           instructed: '14/06/2026', siteVisit: '18/06/2026', returned: '24/06/2026',  status: 'Returned',        cost: 420 },
+    { property: '675 Whitchurch Lane',propertyId: '', type: 'Home Buyers and Valuation', provider: 'BRE',      instructed: '14/06/2026', siteVisit: '18/06/2026', returned: '24/06/2026',  status: 'Returned',        cost: 420 },
     { property: '675 Whitchurch Lane',propertyId: '', type: 'Roof condition',       provider: 'BRE',           instructed: '25/06/2026', siteVisit: null,          returned: null,          status: 'Instructed',      cost: 240 },
-    { property: '14 Lanercost Road',  propertyId: '', type: 'Valuation',            provider: 'Savills',       instructed: '10/06/2026', siteVisit: '13/06/2026', returned: '17/06/2026',  status: 'Returned',        cost: 350 },
+    { property: '14 Lanercost Road',  propertyId: '', type: 'Home Buyers and Valuation', provider: 'Savills',  instructed: '10/06/2026', siteVisit: '13/06/2026', returned: '17/06/2026',  status: 'Returned',        cost: 350 },
     { property: '14 Lanercost Road',  propertyId: '', type: 'Structural',           provider: 'BRE',           instructed: '18/06/2026', siteVisit: '22/06/2026', returned: null,          status: 'Awaiting report', cost: 580 },
   ];
   surveys = signal<Survey[]>(
