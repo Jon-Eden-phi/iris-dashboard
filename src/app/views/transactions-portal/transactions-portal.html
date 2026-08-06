@@ -1974,6 +1974,7 @@
                     Stage <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='stage' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
                   <th style="background:var(--surface);">Survey Stage</th>
+                  <th style="background:var(--surface);">Contract Pack</th>
                   <th (click)="pipeSortBy('beds')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     Beds <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='beds' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
@@ -1997,6 +1998,7 @@
               <tbody>
                 @for (p of pipelineAllProperties(); track p.id) {
                   @let pipeSurveyStat = scopingStatus(p.id);
+                  @let pipeContractPackStat = contractPackStatus(p.id);
                   <tr (click)="navigateToRecord(p)" style="cursor:pointer;">
                     <td>
                       <div style="font-weight:600;">{{ p.address }}</div>
@@ -2023,6 +2025,14 @@
                         {{ pipeSurveyStat }}
                       </span>
                     </td>
+                    <td>
+                      <span class="badge"
+                            [class.badge-gray]="pipeContractPackStat === 'Not Received'"
+                            [class.badge-green]="pipeContractPackStat === 'Received'"
+                            style="font-size:10px;">
+                        {{ pipeContractPackStat }}
+                      </span>
+                    </td>
                     <td>{{ p.beds ?? '—' }}</td>
                     <td>{{ p.type ?? '—' }}</td>
                     <td class="num-cell">{{ p.financial?.ap ? ('£' + (p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
@@ -2039,7 +2049,7 @@
                     </td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="11" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
+                  <tr><td colspan="12" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
                 }
               </tbody>
             </table>

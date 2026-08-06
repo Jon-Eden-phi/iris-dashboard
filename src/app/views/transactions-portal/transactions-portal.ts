@@ -908,6 +908,11 @@ export class TransactionsPortalComponent {
     return 'Approved';
   }
 
+  /** Whether the vendor's solicitor contract pack has been received for this property. */
+  contractPackStatus(propId: string): 'Not Received' | 'Received' {
+    return this._itemDone(propId, 'contract_pack_received') ? 'Received' : 'Not Received';
+  }
+
   toggleChecklist(propId: string, key: string, label: string): void {
     const current = this.getTxData(propId).checklist[key] ?? false;
     const newVal = !current;
