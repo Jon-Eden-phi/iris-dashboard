@@ -712,6 +712,8 @@ export class TransactionsPortalComponent {
       { key: 'compl_statement_approved_legals',  label: 'Completion statement approved' },
       { key: 'compl_statement_client_approval',  label: 'Completion statement client approval' },
       { key: 'authority_to_exchange_requested',  label: 'Request authority to exchange — pending client approval' },
+      { key: 'exchanged_legals',                 label: 'Exchanged' },
+      { key: 'completed_legals',                 label: 'Completed' },
     ],
     Refurbishment: [],
     Lettings: [
