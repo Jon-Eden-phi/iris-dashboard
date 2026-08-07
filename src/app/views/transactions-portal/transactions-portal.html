@@ -1983,6 +1983,7 @@
                   </th>
                   <th style="background:var(--surface);">Survey Stage</th>
                   <th style="background:var(--surface);">Contract Pack</th>
+                  <th style="background:var(--surface);">ROT Status</th>
                   <th (click)="pipeSortBy('beds')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     Beds <span style="opacity:.45; font-size:10px;">{{ pipeSortCol()==='beds' ? (pipeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
@@ -2010,6 +2011,7 @@
                 @for (p of pipelineAllProperties(); track p.id) {
                   @let pipeSurveyStat = scopingStatus(p.id);
                   @let pipeContractPackStat = contractPackStatus(p.id);
+                  @let pipeRotStat = rotStatus(p.id);
                   <tr (click)="navigateToRecord(p)" style="cursor:pointer;">
                     <td>
                       <div style="font-weight:600;">{{ p.address }}</div>
@@ -2044,6 +2046,16 @@
                         {{ pipeContractPackStat }}
                       </span>
                     </td>
+                    <td>
+                      <span class="badge"
+                            [class.badge-gray]="pipeRotStat === 'Not Started'"
+                            [class.badge-blue]="pipeRotStat === 'Draft Received'"
+                            [class.badge-orange]="pipeRotStat === 'Final Received'"
+                            [class.badge-green]="pipeRotStat === 'Approved'"
+                            style="font-size:10px;">
+                        {{ pipeRotStat }}
+                      </span>
+                    </td>
                     <td>{{ p.beds ?? '—' }}</td>
                     <td>{{ p.type ?? '—' }}</td>
                     <td class="num-cell">{{ (p.agreedPrice ?? p.financial?.ap) ? ('£' + (p.agreedPrice ?? p.financial!.ap!).toLocaleString('en-GB')) : '—' }}</td>
@@ -2069,7 +2081,7 @@
                     </td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="13" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
+                  <tr><td colspan="14" style="text-align:center; padding:32px; color:var(--text3);">No active properties found.</td></tr>
                 }
               </tbody>
             </table>

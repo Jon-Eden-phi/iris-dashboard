@@ -705,9 +705,12 @@ export class TransactionsPortalComponent {
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
     ],
     Refurbishment: [
-      { key: 'site_visits_booked', label: 'Site visits booked' },
-      { key: 'scope_prepared',     label: 'Scope of works prepared' },
-      { key: 'scope_approved',     label: 'Scope of works approved' },
+      { key: 'site_visits_booked',       label: 'Site visits booked' },
+      { key: 'scope_prepared',           label: 'Scope of works prepared' },
+      { key: 'scope_approved',           label: 'Scope of works approved' },
+      { key: 'scoping_required',         label: 'Scoping required' },
+      { key: 'draft_scope_issued',       label: 'Draft scope issued for approval' },
+      { key: 'draft_scope_approved',     label: 'Draft scope approved' },
     ],
     Lettings: [
       { key: 'contract_pack',                  label: 'Contract & Transfer prepared' },
@@ -920,6 +923,14 @@ export class TransactionsPortalComponent {
   /** Whether the vendor's solicitor contract pack has been received for this property. */
   contractPackStatus(propId: string): 'Not Received' | 'Received' {
     return this._itemDone(propId, 'contract_pack_received') ? 'Received' : 'Not Received';
+  }
+
+  /** Report on Title (RoT) status for the Purchasing Pipeline dashboard column. */
+  rotStatus(propId: string): 'Not Started' | 'Draft Received' | 'Final Received' | 'Approved' {
+    if (this._itemDone(propId, 'final_rot_approved'))  return 'Approved';
+    if (this._itemDone(propId, 'final_rot_received'))  return 'Final Received';
+    if (this._itemDone(propId, 'draft_rot_received'))  return 'Draft Received';
+    return 'Not Started';
   }
 
   updateValuation(propId: string, raw: string): void {
