@@ -929,14 +929,7 @@
               <div class="card" style="padding:14px 16px;">
                 <div style="background:rgba(124,58,237,0.07); border:1px solid rgba(124,58,237,0.18); border-radius:8px; padding:10px 14px; display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;">
                   <i class="ti ti-tools" style="color:#7c3aed; font-size:15px; flex-shrink:0; margin-top:1px;"></i>
-                  <span><strong>Refurbishment underway.</strong> Track contractor sign-offs and surveys through to practical completion.</span>
-                  @if (stageStatus(p.id, p.stage); as st) {
-                    <span style="margin-left:auto; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;"
-                          [style.background]="st.done ? 'rgba(22,163,74,0.1)' : 'rgba(124,58,237,0.1)'"
-                          [style.color]="st.done ? '#16a34a' : '#7c3aed'">
-                      <i [class]="st.done ? 'ti ti-circle-check' : 'ti ti-clock'" style="font-size:10px;"></i> {{ st.label }}
-                    </span>
-                  }
+                  <span><strong>Refurbishment underway.</strong> Scoping and legals are handled earlier in Legals — track contractor sign-offs through to practical completion.</span>
                 </div>
               </div>
             }
@@ -959,6 +952,7 @@
             }
 
             <!-- ── Stage milestones ── -->
+            @if (actions.length) {
             <div class="card">
               <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
                 <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Stage milestones</div>
@@ -1186,11 +1180,11 @@
                       } @else {
                         <span style="margin-left:auto; font-size:11px; color:var(--text3);">Awaiting from lawyers</span>
                       }
-                    } @else if (p.stage === 'Refurbishment' && action.key === 'scope_prepared') {
+                    } @else if (p.stage === 'Legals' && action.key === 'scope_prepared') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAdditionalWorksModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-tools" style="font-size:11px;"></i> Request additional works
                       </button>
-                    } @else if (p.stage === 'Refurbishment' && action.key === 'survey_reports_received') {
+                    } @else if (p.stage === 'Legals' && action.key === 'survey_reports_received') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); showUploadModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey reports
                       </button>
@@ -1248,6 +1242,7 @@
                 }
               </div>
             </div>
+            } <!-- end @if (actions.length) -->
 
             <!-- Key dates -->
             <div class="card">

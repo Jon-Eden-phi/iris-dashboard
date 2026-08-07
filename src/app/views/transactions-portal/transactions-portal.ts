@@ -703,15 +703,15 @@ export class TransactionsPortalComponent {
       { key: 'draft_rot_received',     label: 'Draft RoT received from lawyers' },
       { key: 'final_rot_received',     label: 'Final RoT received from lawyers' },
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
-    ],
-    Refurbishment: [
       { key: 'site_visits_booked',       label: 'Site visits booked' },
+      { key: 'survey_reports_received',  label: 'Survey reports received' },
       { key: 'scope_prepared',           label: 'Scope of works prepared' },
       { key: 'scope_approved',           label: 'Scope of works approved' },
       { key: 'scoping_required',         label: 'Scoping required' },
       { key: 'draft_scope_issued',       label: 'Draft scope issued for approval' },
       { key: 'draft_scope_approved',     label: 'Draft scope approved' },
     ],
+    Refurbishment: [],
     Lettings: [
       { key: 'contract_pack',                  label: 'Contract & Transfer prepared' },
       { key: 'authority_to_exchange',          label: 'Authority to exchange — client signed' },
@@ -875,14 +875,14 @@ export class TransactionsPortalComponent {
       if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_received'))       return { label: 'Final RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_approved'))      return { label: 'Final RoT – Pending Approval', done: false };
-      return { label: 'Conveyancing Complete', done: true };
-    }
-    if (stage === 'Refurbishment') {
-      if (!cl['site_visits_booked'])      return { label: 'Site Visits to Book', done: false };
+      if (!cl['site_visits_booked'])        return { label: 'Site Visits to Book', done: false };
       if (!done('survey_reports_received')) return { label: 'Survey Reports Pending', done: false };
+      if (!cl['scoping_required'])          return { label: 'Scoping Required', done: false };
       if (!cl['scope_prepared'])          return { label: 'Scope of Works Pending', done: false };
+      if (!cl['draft_scope_issued'])        return { label: 'Draft Scope – Pending Approval', done: false };
       if (!cl['scope_approved'])          return { label: 'Scope of Works – Pending Approval', done: false };
-      return { label: 'Surveys Complete', done: true };
+      if (!cl['draft_scope_approved'])      return { label: 'Draft Scope – Pending Sign-off', done: false };
+      return { label: 'Conveyancing Complete', done: true };
     }
     if (stage === 'Lettings') {
       if (!cl['contract_pack'])                return { label: 'Contract & Transfer Pending', done: false };
@@ -906,7 +906,7 @@ export class TransactionsPortalComponent {
   }
 
   /**
-   * Scope-of-works status for the Scoping dashboard column — one of the refurbishment workflow steps.
+   * Scope-of-works status for the Scoping dashboard column — part of the Legals-stage checklist.
    * "Site visits booked" (site_visits_booked) means all necessary surveys have been instructed
    * with our suppliers — until then, properties sit in "Surveys Required" (nothing instructed yet)
    * or "Surveys Instructed" (at least one survey ordered via the Survey Tracker, not yet all booked).
