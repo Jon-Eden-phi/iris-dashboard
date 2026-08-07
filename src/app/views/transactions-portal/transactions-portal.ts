@@ -696,20 +696,17 @@ export class TransactionsPortalComponent {
     Legals: [
       { key: 'contract_pack_received', label: 'Contract pack received' },
       { key: 'red_flag_cleared',       label: 'Red flag review cleared' },
-      { key: 'searches_ordered',       label: 'Searches & survey instructed' },
-      { key: 'surveys_ordered',        label: 'Survey instructed' },
+      { key: 'searches_ordered',       label: 'Searches Ordered' },
+      { key: 'surveys_ordered',        label: 'Surveys instructed' },
       { key: 'survey_report_received', label: 'Survey report received' },
+      { key: 'scoping_required',       label: 'Scoping required' },
+      { key: 'scope_prepared',         label: 'Draft Scope of works prepared' },
+      { key: 'draft_scope_issued',     label: 'Draft scope issued for approval' },
+      { key: 'scope_approved',         label: 'Draft Scope of works approved' },
       { key: 'searches_received',      label: 'Search results received' },
       { key: 'draft_rot_received',     label: 'Draft RoT received from lawyers' },
       { key: 'final_rot_received',     label: 'Final RoT received from lawyers' },
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
-      { key: 'site_visits_booked',       label: 'Site visits booked' },
-      { key: 'survey_reports_received',  label: 'Survey reports received' },
-      { key: 'scope_prepared',           label: 'Scope of works prepared' },
-      { key: 'scope_approved',           label: 'Scope of works approved' },
-      { key: 'scoping_required',         label: 'Scoping required' },
-      { key: 'draft_scope_issued',       label: 'Draft scope issued for approval' },
-      { key: 'draft_scope_approved',     label: 'Draft scope approved' },
     ],
     Refurbishment: [],
     Lettings: [
@@ -847,11 +844,6 @@ export class TransactionsPortalComponent {
     if (key === 'funds_received')  return !!this.fundTransfersSig()[propId];
     if (key === 'exchange_completed')
       return this.legalCheck(propId, 'exchanged');
-    if (key === 'survey_reports_received') {
-      const ordered = this.surveysForProp(propId);
-      if (ordered.length) return ordered.every(s => this.txHasDocs(propId, [this.surveyReportDocType(s.type)]));
-      return this.txHasDocs(propId, ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey']);
-    }
     return false;
   }
 
@@ -868,20 +860,17 @@ export class TransactionsPortalComponent {
     if (stage === 'Legals') {
       if (!done('contract_pack_received'))  return { label: 'Contract Pack Pending', done: false };
       if (!done('red_flag_cleared'))         return { label: 'Red Flag Review Pending', done: false };
-      if (!cl['searches_ordered'])          return { label: 'Searches & Survey to Instruct', done: false };
+      if (!cl['searches_ordered'])          return { label: 'Searches to Order', done: false };
       if (!cl['surveys_ordered'])           return { label: 'Survey to Instruct', done: false };
       if (!done('survey_report_received'))  return { label: 'Survey Report Pending', done: false };
+      if (!cl['scoping_required'])          return { label: 'Scoping Required', done: false };
+      if (!cl['scope_prepared'])          return { label: 'Draft Scope of Works Pending', done: false };
+      if (!cl['draft_scope_issued'])        return { label: 'Draft Scope – Pending Approval', done: false };
+      if (!cl['scope_approved'])          return { label: 'Draft Scope of Works – Pending Approval', done: false };
       if (!done('searches_received'))        return { label: 'Searches in Progress', done: false };
       if (!done('draft_rot_received'))       return { label: 'Draft RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_received'))       return { label: 'Final RoT Awaited from Lawyers', done: false };
       if (!done('final_rot_approved'))      return { label: 'Final RoT – Pending Approval', done: false };
-      if (!cl['site_visits_booked'])        return { label: 'Site Visits to Book', done: false };
-      if (!done('survey_reports_received')) return { label: 'Survey Reports Pending', done: false };
-      if (!cl['scoping_required'])          return { label: 'Scoping Required', done: false };
-      if (!cl['scope_prepared'])          return { label: 'Scope of Works Pending', done: false };
-      if (!cl['draft_scope_issued'])        return { label: 'Draft Scope – Pending Approval', done: false };
-      if (!cl['scope_approved'])          return { label: 'Scope of Works – Pending Approval', done: false };
-      if (!cl['draft_scope_approved'])      return { label: 'Draft Scope – Pending Sign-off', done: false };
       return { label: 'Conveyancing Complete', done: true };
     }
     if (stage === 'Lettings') {
@@ -907,12 +896,12 @@ export class TransactionsPortalComponent {
 
   /**
    * Scope-of-works status for the Scoping dashboard column — part of the Legals-stage checklist.
-   * "Site visits booked" (site_visits_booked) means all necessary surveys have been instructed
+   * "Scoping required" (scoping_required) means all necessary surveys have been instructed
    * with our suppliers — until then, properties sit in "Surveys Required" (nothing instructed yet)
    * or "Surveys Instructed" (at least one survey ordered via the Survey Tracker, not yet all booked).
    */
   scopingStatus(propId: string): 'Surveys Required' | 'Surveys Instructed' | 'Scope Required' | 'Issued for Approval' | 'Approved' {
-    if (!this._itemDone(propId, 'site_visits_booked')) {
+    if (!this._itemDone(propId, 'scoping_required')) {
       return this.surveysForProp(propId).length === 0 ? 'Surveys Required' : 'Surveys Instructed';
     }
     if (!this._itemDone(propId, 'scope_prepared'))     return 'Scope Required';
@@ -1293,8 +1282,7 @@ export class TransactionsPortalComponent {
       case 'draft_rot_received': return ['Draft Report on Title', 'Report on Title'];
       case 'final_rot_received': return ['Final Report on Title', 'Report on Title'];
       case 'searches_received':  return ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'];
-      case 'survey_report_received':
-      case 'survey_reports_received': return ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey'];
+      case 'survey_report_received': return ['Survey Report', 'HomeBuyer Report', 'Structural Survey', 'Asbestos Survey'];
       case 'compl_statement_recv': return ['Completion Statement'];
       default:                   return [];
     }

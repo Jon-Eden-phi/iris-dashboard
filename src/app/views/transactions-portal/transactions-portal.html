@@ -742,7 +742,7 @@
                     @let svChecked = _itemDone(p.id, action.key);
                     @let svSurveysOrdered = _itemDone(p.id, 'surveys_ordered');
                     @let svIsOrderBtn = sv === 'Legals' && action.key === 'surveys_ordered' && !svChecked;
-                    @let svIsSurveyReport = action.key === 'survey_report_received' || action.key === 'survey_reports_received';
+                    @let svIsSurveyReport = action.key === 'survey_report_received';
                     @let svOrderedSurveys = surveysForProp(p.id);
                     @if (svIsSurveyReport && svOrderedSurveys.length) {
                       <!-- per-survey report rows in history panel -->
@@ -1004,7 +1004,7 @@
                   }
 
                   @if (action.key !== 'investor_authority_to_exchange' || p.isInvestorDeal) {
-                  @let _isSurveyReportRow = action.key === 'survey_report_received' || action.key === 'survey_reports_received';
+                  @let _isSurveyReportRow = action.key === 'survey_report_received';
                   @let _orderedSurveys = surveysForProp(p.id);
                   @if (_isSurveyReportRow && _orderedSurveys.length) {
                     <!-- per-survey report rows -->
@@ -1042,7 +1042,6 @@
                                    || (action.key === 'survey_report_received' && _surveyDoc)
                                    || (action.key === 'searches_received' && txHasAllSearches(p.id))
                                    || (action.key === 'final_rot_approved' && isRotApproved(p.id))
-                                   || (action.key === 'survey_reports_received' && _surveyDoc)
                                    || (action.key === 'contract_pack' && (legalCheck(p.id, 'contract_transfer') || _contractSignedDoc))
                                    || (action.key === 'compl_statement_recv' && (legalCheck(p.id, 'compl_statement') || txHasDocs(p.id, ['Completion Statement'])))
                                    || (action.key === 'authority_to_exchange' && isContractSigned(p.id))
@@ -1068,7 +1067,7 @@
                       {{ action.label }}
                     </span>
                     @if (_checked) {
-                      @if (_autoChecked && (action.key === 'mos_received' || action.key === 'contract_pack_received' || action.key === 'survey_report_received' || action.key === 'searches_received' || action.key === 'survey_reports_received')) {
+                      @if (_autoChecked && (action.key === 'mos_received' || action.key === 'contract_pack_received' || action.key === 'survey_report_received' || action.key === 'searches_received')) {
                         <button class="btn-ghost" style="font-size:11px; padding:3px 8px; color:#16a34a; border-color:rgba(22,163,74,0.3);"
                                 (click)="openReviewModal(p.id, action.key, action.label, action.label, action.key === 'mos_received' ? ['Memorandum of Sale', 'MoS'] : action.key === 'survey_report_received' ? ['Survey Report', 'HomeBuyer Report', 'Structural Survey'] : action.key === 'searches_received' ? ['Local Authority Search', 'Water & Drainage Search', 'Water Search', 'Environmental Search', 'Searches'] : ['Contract Pack', 'Draft Contract']); $event.stopPropagation()">
                           <i class="ti ti-eye" style="font-size:11px;"></i> View doc
@@ -1183,10 +1182,6 @@
                     } @else if (p.stage === 'Legals' && action.key === 'scope_prepared') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showAdditionalWorksModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-tools" style="font-size:11px;"></i> Request additional works
-                      </button>
-                    } @else if (p.stage === 'Legals' && action.key === 'survey_reports_received') {
-                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="uploadDocType.set('Survey Report'); showUploadModal.set(true); $event.stopPropagation()">
-                        <i class="ti ti-upload" style="font-size:11px;"></i> Upload survey reports
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_recv') {
                       <span style="margin-left:auto; font-size:11px; color:var(--text3);">Uploaded by solicitor when ready</span>
