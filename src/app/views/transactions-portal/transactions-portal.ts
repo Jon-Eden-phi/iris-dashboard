@@ -95,6 +95,7 @@ interface TxPropertyData {
   rotQueryResponse?: string;
   complStatementQuery?: string;
   complStatementSentToClient?: boolean;
+  complStatementRequest?: { requestedAt: string; note?: string };
   fundsRequest?: { amount: number; requestedAt: string; note?: string };
 }
 
@@ -324,6 +325,8 @@ export class TransactionsPortalComponent {
   instructSolicitorName       = signal('');
   showReviewDocModal          = signal(false);
   showRequestFundsModal           = signal(false);
+  showRequestComplStatementModal  = signal(false);
+  requestComplStatementNote       = signal('');
   showAuthorityModal              = signal(false);
   showInvestorAuthorityModal      = signal(false);
   showExchangeDateModal           = signal(false);
@@ -710,6 +713,7 @@ export class TransactionsPortalComponent {
       { key: 'contract_pack',                  label: 'Contract & Transfer prepared' },
       { key: 'authority_to_exchange',          label: 'Authority to exchange — client signed' },
       { key: 'investor_authority_to_exchange', label: 'Authority to exchange — investor approved' },
+      { key: 'compl_statement_requested',      label: 'Completion statement requested' },
       { key: 'compl_statement_recv',           label: 'Completion statement received' },
       { key: 'compl_statement_appr',           label: 'Completion statement approved' },
       { key: 'funds_requested',                label: 'Funds requested from client' },
@@ -830,6 +834,8 @@ export class TransactionsPortalComponent {
       return this.rotApprovalsSig()[propId]?.status === 'approved';
     if (key === 'searches_received')
       return this.txHasAllSearches(propId);
+    if (key === 'compl_statement_requested')
+      return !!this.getTxData(propId).complStatementRequest;
     if (key === 'compl_statement_recv')
       return this.txHasDocs(propId, ['Completion Statement']) || this.legalCheck(propId, 'compl_statement');
     if (key === 'compl_statement_appr')
@@ -879,6 +885,7 @@ export class TransactionsPortalComponent {
       if (!cl['contract_pack'])                return { label: 'Contract & Transfer Pending', done: false };
       if (!cl['authority_to_exchange'])        return { label: 'Authority to Exchange – Pending Client', done: false };
       if (this.data.getProperty(propId)?.isInvestorDeal && !cl['investor_authority_to_exchange']) return { label: 'Authority to Exchange – Pending Investor', done: false };
+      if (!done('compl_statement_requested'))   return { label: 'Completion Statement to Request', done: false };
       if (!done('compl_statement_recv'))        return { label: 'Completion Statement Pending', done: false };
       if (!done('compl_statement_appr'))       return { label: 'Completion Statement – Pending Client Approval', done: false };
       if (!done('funds_requested'))  return { label: 'Funds to Request', done: false };
@@ -1406,6 +1413,24 @@ export class TransactionsPortalComponent {
     this.contractPackFileName.set('');
     this.contractReceivedDate.set('');
     this.showToast('Contract pack received — logged to Data Room', 'ti-file-check');
+  }
+
+  requestComplStatement(): void {
+    const p = this.selectedProperty();
+    if (!p) return;
+    const note = this.requestComplStatementNote().trim();
+    const today = new Date().toLocaleDateString('en-GB');
+    this.setTxData(p.id, { complStatementRequest: { requestedAt: today, note: note || undefined } });
+    this.data.addActivity(p.id, {
+      id: 'compl_statement_req_' + Date.now(),
+      text: `Completion statement requested from solicitor${note ? '. Note: ' + note : ''}`,
+      author: this.auth.currentUser()?.name ?? 'TX Team',
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+    this.showRequestComplStatementModal.set(false);
+    this.requestComplStatementNote.set('');
+    this.showToast('Completion statement requested — solicitor notified', 'ti-file-text');
   }
 
   requestFunds(): void {

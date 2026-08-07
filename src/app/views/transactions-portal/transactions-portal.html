@@ -1042,6 +1042,7 @@
                                    || (action.key === 'exchange_completed' && legalCheck(p.id, 'exchanged'))
                                    || (action.key === 'compl_statement_appr' && !!complApprovalsSig()[p.id])
                                    || (action.key === 'funds_requested' && !!getTxData(p.id).fundsRequest)
+                                   || (action.key === 'compl_statement_requested' && !!getTxData(p.id).complStatementRequest)
                                    || (action.key === 'funds_received' && !!fundTransfersSig()[p.id]);
                   @let _checked = _autoChecked ? true : getTxData(p.id).checklist[action.key];
                   @let _exLocked = action.key === 'exchange_completed' && !_checked && !_itemDone(p.id, 'funds_received');
@@ -1099,6 +1100,9 @@
                           @else if (_autoChecked && action.key === 'compl_statement_appr') { Approved by client }
                           @else if (_autoChecked && action.key === 'funds_requested') {
                             Requested · <span style="font-weight:400;">£{{ getTxData(p.id).fundsRequest!.amount.toLocaleString('en-GB') }}</span>
+                          }
+                          @else if (_autoChecked && action.key === 'compl_statement_requested') {
+                            Requested · <span style="font-weight:400;">{{ getTxData(p.id).complStatementRequest!.requestedAt }}</span>
                           }
                           @else if (_autoChecked && action.key === 'funds_received') { Confirmed by client }
                           @else if (_autoChecked) { Confirmed by solicitor }
@@ -1197,6 +1201,10 @@
                     } @else if (p.stage === 'Lettings' && action.key === 'contract_pack') {
                       <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showContractPackModal.set(true); $event.stopPropagation()">
                         <i class="ti ti-file-check" style="font-size:11px;"></i> Upload contract pack
+                      </button>
+                    } @else if (p.stage === 'Lettings' && action.key === 'compl_statement_requested') {
+                      <button class="btn-ghost" style="margin-left:auto; font-size:11px; padding:3px 10px;" (click)="showRequestComplStatementModal.set(true); $event.stopPropagation()">
+                        <i class="ti ti-file-text" style="font-size:11px;"></i> Request completion statement
                       </button>
                     } @else if (p.stage === 'Lettings' && action.key === 'funds_received') {
                       @if (_itemDone(p.id, 'funds_requested')) {
@@ -2465,6 +2473,29 @@
     <div class="tx-modal-footer">
       <button class="btn-ghost" (click)="showRequestFundsModal.set(false)">Cancel</button>
       <button class="btn-primary" [disabled]="!requestFundsAmount()" (click)="requestFunds()">
+        <i class="ti ti-send" style="font-size:13px;"></i> Send request
+      </button>
+    </div>
+  </div>
+}
+
+@if (showRequestComplStatementModal()) {
+  <div class="tx-modal-backdrop" (click)="showRequestComplStatementModal.set(false)"></div>
+  <div class="tx-modal" style="max-width:440px;" (click)="$event.stopPropagation()">
+    <div class="tx-modal-header">
+      <span class="tx-modal-title"><i class="ti ti-file-text" style="font-size:14px; margin-right:6px;"></i>Request completion statement</span>
+      <button class="tx-modal-close" (click)="showRequestComplStatementModal.set(false)"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tx-modal-body" style="display:flex; flex-direction:column; gap:14px;">
+      <p style="font-size:13px; color:var(--text2); margin:0;">This will log a request to the activity feed and notify the solicitor to prepare the completion statement.</p>
+      <div>
+        <label class="tx-form-label">Note (optional)</label>
+        <textarea class="form-control tx-textarea" placeholder="Any relevant instructions for the solicitor…" [value]="requestComplStatementNote()" (input)="requestComplStatementNote.set($any($event.target).value)"></textarea>
+      </div>
+    </div>
+    <div class="tx-modal-footer">
+      <button class="btn-ghost" (click)="showRequestComplStatementModal.set(false)">Cancel</button>
+      <button class="btn-primary" (click)="requestComplStatement()">
         <i class="ti ti-send" style="font-size:13px;"></i> Send request
       </button>
     </div>
