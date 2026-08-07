@@ -579,6 +579,28 @@ export class ClientPortalComponent {
     const signs = { ...this.contractSigns(), [propId]: { signedAt: new Date().toLocaleDateString('en-GB'), signature } };
     localStorage.setItem(CONTRACT_SIGNS_KEY, JSON.stringify(signs));
     this.contractSigns.set(signs);
+    this._notifyReadyToExchange(propId);
+  }
+
+  private _notifyReadyToExchange(propId: string): void {
+    const property = this.data.getProperty(propId);
+    if (!property) return;
+    const text = `${this._userName} has confirmed ${property.address} is ready to exchange, please arrange for funds to be released`;
+
+    this.data.addActivity(propId, {
+      id: 'exchange_ready_' + Date.now(),
+      text,
+      author: this._userName,
+      timestamp: new Date().toISOString(),
+      label: 'action',
+    });
+
+    const legal = { ...this.legalData() };
+    const m = { ...(legal[propId] ?? { solicitorRef: '', checklist: {}, notes: [], targetExchange: '', targetCompletion: '' }) };
+    m.notes = [{ id: 'exchange_ready_' + Date.now(), text, author: this._userName, ts: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) }, ...(m.notes ?? [])];
+    legal[propId] = m;
+    localStorage.setItem(LEGAL_DATA_KEY, JSON.stringify(legal));
+    this.legalData.set(legal);
   }
 
   rotApprovalStatus(propId: string): string | undefined {
