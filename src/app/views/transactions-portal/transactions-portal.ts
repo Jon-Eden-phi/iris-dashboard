@@ -707,6 +707,7 @@ export class TransactionsPortalComponent {
       { key: 'draft_rot_received',     label: 'Draft RoT received from lawyers' },
       { key: 'final_rot_received',     label: 'Final RoT received from lawyers' },
       { key: 'final_rot_approved',     label: 'Final RoT approved' },
+      { key: 'final_rot_client_approval', label: 'Final RoT - Client approval' },
       { key: 'compl_statement_requested_legals', label: 'Completion statement requested' },
       { key: 'compl_statement_approved_legals',  label: 'Completion statement approved' },
       { key: 'compl_statement_client_approval',  label: 'Completion statement client approval' },
