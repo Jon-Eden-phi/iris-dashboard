@@ -960,7 +960,20 @@
 
             <!-- ── Stage milestones ── -->
             <div class="card">
-              <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-bottom:14px;">Stage milestones</div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3);">Stage milestones</div>
+                @if (p.stage === 'Legals') {
+                  @let _rotStat = rotStatus(p.id);
+                  <span class="badge"
+                        [class.badge-gray]="_rotStat === 'Not Started'"
+                        [class.badge-blue]="_rotStat === 'Draft Received'"
+                        [class.badge-orange]="_rotStat === 'Final Received'"
+                        [class.badge-green]="_rotStat === 'Approved'"
+                        style="font-size:10px;">
+                    ROT Status: {{ _rotStat }}
+                  </span>
+                }
+              </div>
               <div style="display:flex; flex-direction:column; gap:1px; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
                 @for (action of actions; track action.key) {
 
