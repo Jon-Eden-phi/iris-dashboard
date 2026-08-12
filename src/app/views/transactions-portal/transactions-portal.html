@@ -197,7 +197,7 @@
               </thead>
               <tbody>
                 @for (p of filteredProperties(); track p.id) {
-                  @let legalsProg = checklistProgress(p.id, 'Legals');
+                  @let legalsStat = stageStatus(p.id, 'Legals');
                   @let scopingStat = scopingStatus(p.id);
                   <tr (click)="openRecord(p)" style="cursor:pointer;">
                     <td>
@@ -208,8 +208,8 @@
                     </td>
                     <td><span class="badge badge-blue">{{ p.phase }}</span></td>
                     <td>
-                      <span class="badge" [class.badge-green]="legalsProg.done === legalsProg.total" [class.badge-gray]="legalsProg.done !== legalsProg.total">
-                        {{ legalsProg.done }}/{{ legalsProg.total }}
+                      <span class="badge" [class.badge-green]="legalsStat.done" [class.badge-gray]="!legalsStat.done" style="font-size:10px;">
+                        {{ legalsStat.label }}
                       </span>
                     </td>
                     <td>
