@@ -30,6 +30,11 @@
       <i class="ti ti-archive"></i> Aborted transactions
     </a>
 
+    <div class="nav-section">Reports</div>
+    <a class="nav-item" [class.active]="view() === 'exchanges'" (click)="navTo('exchanges')">
+      <i class="ti ti-calendar-stats"></i> Monthly exchanges
+    </a>
+
     <div class="nav-section">Team</div>
     <a class="nav-item" [class.active]="view() === 'surveys'" (click)="navTo('surveys')">
       <i class="ti ti-clipboard-list"></i> Survey tracker
@@ -77,6 +82,7 @@
       @if (view() === 'homes')     { <span class="tx-topbar-title">Dashboard</span><span class="tx-topbar-sub">{{ filteredProperties().length }} of {{ txProperties().length }} in Purchasing</span> }
       @if (view() === 'queries')   { <span class="tx-topbar-title">My queries</span><span class="tx-topbar-sub">{{ openQueryCount }} open</span> }
       @if (view() === 'lost')      { <span class="tx-topbar-title">Aborted purchasing</span><span class="tx-topbar-sub">{{ lostTx().length }} aborted</span> }
+      @if (view() === 'exchanges') { <span class="tx-topbar-title">Monthly exchanges</span><span class="tx-topbar-sub">{{ monthlyExchangesTotal() }} exchanges recorded</span> }
       @if (view() === 'surveys')   { <span class="tx-topbar-title">Survey tracker</span><span class="tx-topbar-sub">Technical surveys across all active purchasing</span> }
       @if (view() === 'teamdash')  { <span class="tx-topbar-title">Team dashboard</span><span class="tx-topbar-sub">Workload across the Purchasing team</span> }
       @if (view() === 'suppliers') { <span class="tx-topbar-title">Surveyor directory</span><span class="tx-topbar-sub">Approved surveying suppliers</span> }
@@ -338,6 +344,56 @@
                     <td>{{ p.date }}</td>
                     <td><button class="btn-ghost" style="font-size:12px; padding:5px 10px;" (click)="revertLost(i)"><i class="ti ti-arrow-back-up" style="font-size:12px;"></i> Revert</button></td>
                   </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+
+      <!-- ── VIEW: MONTHLY EXCHANGES ───────────────────── -->
+      @if (view() === 'exchanges') {
+        <div class="card">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-calendar-stats"></i> Exchanges by month</span>
+            <span class="badge badge-gray">{{ monthlyExchangesTotal() }} total</span>
+          </div>
+          @if (monthlyExchanges().length === 0) {
+            <div class="tx-empty"><i class="ti ti-calendar-stats"></i>No exchanges recorded yet</div>
+          } @else {
+            <div style="display:flex; align-items:flex-end; gap:20px; height:190px; padding:16px 8px 0; overflow-x:auto;">
+              @for (m of monthlyExchanges(); track m.key) {
+                <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:44px; flex-shrink:0;">
+                  <div style="font-size:12px; font-weight:700; color:var(--text1);">{{ m.count }}</div>
+                  <div style="width:32px; border-radius:6px 6px 0 0; background:var(--teal);"
+                       [style.height.px]="barHeight(m.count)"></div>
+                  <div style="font-size:11px; color:var(--text3); white-space:nowrap;">{{ m.label }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="card flush" style="margin-top:16px;">
+          <div class="tx-section-header">
+            <span class="tx-section-title"><i class="ti ti-list"></i> Exchanged properties</span>
+          </div>
+          @if (monthlyExchanges().length === 0) {
+            <div class="tx-empty"><i class="ti ti-home-off"></i>No exchanges recorded yet</div>
+          } @else {
+            <table>
+              <thead><tr><th>Month</th><th>Address</th><th>Exchange date</th></tr></thead>
+              <tbody>
+                @for (m of monthlyExchanges(); track m.key) {
+                  @for (prop of m.properties; track prop.id; let first = $first) {
+                    <tr (click)="openRecordById(prop.id)" style="cursor:pointer;">
+                      @if (first) {
+                        <td [attr.rowspan]="m.properties.length" style="font-weight:700; vertical-align:top; background:var(--surface);">{{ m.label }}</td>
+                      }
+                      <td>{{ prop.address }}</td>
+                      <td>{{ prop.date | date:'d MMM y' }}</td>
+                    </tr>
+                  }
                 }
               </tbody>
             </table>

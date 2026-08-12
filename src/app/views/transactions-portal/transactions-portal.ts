@@ -10,7 +10,7 @@ import { DecisionsService } from '../../services/decisions';
 import { ProjectsService } from '../../services/projects';
 import { Property } from '../../models/property.model';
 
-type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record' | 'pipeline';
+type TxView = 'homes' | 'queries' | 'lost' | 'surveys' | 'teamdash' | 'suppliers' | 'record' | 'acquisitions' | 'acq-record' | 'pipeline' | 'exchanges';
 
 const SURVEYS_KEY = 'iris_surveys';
 
@@ -1253,6 +1253,40 @@ export class TransactionsPortalComponent {
 
   legalExchangedDate(propId: string): string | undefined {
     return this.legalDataSig()[propId]?.exchangedDate;
+  }
+
+  monthlyExchanges = computed(() => {
+    const legal = this.legalDataSig();
+    const groups = new Map<string, { key: string; label: string; count: number; properties: { id: string; address: string; date: string }[] }>();
+    for (const p of this.data.properties) {
+      const dateStr = legal[p.id]?.exchangedDate;
+      if (!dateStr) continue;
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!groups.has(key)) {
+        groups.set(key, { key, label: d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }), count: 0, properties: [] });
+      }
+      const g = groups.get(key)!;
+      g.count++;
+      g.properties.push({ id: p.id, address: p.address, date: dateStr });
+    }
+    return Array.from(groups.values())
+      .sort((a, b) => a.key.localeCompare(b.key))
+      .map(g => ({ ...g, properties: g.properties.sort((a, b) => a.date.localeCompare(b.date)) }));
+  });
+
+  monthlyExchangesMax = computed(() => Math.max(1, ...this.monthlyExchanges().map(m => m.count)));
+
+  monthlyExchangesTotal = computed(() => this.monthlyExchanges().reduce((sum, m) => sum + m.count, 0));
+
+  barHeight(count: number): number {
+    return Math.max(6, (count / this.monthlyExchangesMax()) * 130);
+  }
+
+  openRecordById(propId: string): void {
+    const p = this.data.properties.find(x => x.id === propId);
+    if (p) this.openRecord(p);
   }
 
   legalAllSearchesDone(propId: string): boolean {
