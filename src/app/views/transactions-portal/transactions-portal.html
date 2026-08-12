@@ -228,7 +228,11 @@
                       }
                     </td>
                     <td class="num-cell">{{ p.financial?.ap | money }}</td>
-                    <td class="num-cell">{{ p.valuation ? (p.valuation | money) : '—' }}</td>
+                    <td class="num-cell">
+                      <span [style.color]="(p.valuation && p.agreedPrice && p.valuation < p.agreedPrice) ? '#dc2626' : 'inherit'">
+                        {{ p.valuation ? (p.valuation | money) : '—' }}
+                      </span>
+                    </td>
                     <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
                   </tr>
                 } @empty {
