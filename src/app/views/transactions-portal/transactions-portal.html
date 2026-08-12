@@ -187,9 +187,6 @@
                   <th (click)="homeSortBy('beds')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     Beds <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='beds' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
-                  <th (click)="homeSortBy('epcBefore')" style="cursor:pointer; user-select:none; background:var(--surface);">
-                    EPC Before <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='epcBefore' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
-                  </th>
                   <th class="num-cell" (click)="homeSortBy('ap')" style="cursor:pointer; user-select:none; background:var(--surface);">
                     Asking Price <span style="opacity:.45; font-size:10px;">{{ homeSortCol()==='ap' ? (homeSortDir()==='asc' ? '↑' : '↓') : '↕' }}</span>
                   </th>
@@ -228,11 +225,6 @@
                       </span>
                     </td>
                     <td>{{ p.beds ?? '—' }}</td>
-                    <td>
-                      @if (p.epcBefore) {
-                        <span class="epc-pill badge-{{ p.epcBefore.r }}">{{ p.epcBefore.r }} ({{ p.epcBefore.s }})</span>
-                      }
-                    </td>
                     <td class="num-cell">{{ p.financial?.ap | money }}</td>
                     <td class="num-cell">
                       <span [style.color]="(p.valuation && p.agreedPrice && p.valuation < p.agreedPrice) ? '#dc2626' : 'inherit'">
@@ -242,7 +234,7 @@
                     <td class="num-cell">{{ p.financial?.yield ? p.financial!.yield!.toFixed(1) + '%' : '—' }}</td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="10" style="text-align:center; padding:32px; color:var(--text3);">No properties match the current filters.</td></tr>
+                  <tr><td colspan="9" style="text-align:center; padding:32px; color:var(--text3);">No properties match the current filters.</td></tr>
                 }
               </tbody>
             </table>
