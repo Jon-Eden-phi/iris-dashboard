@@ -818,6 +818,16 @@
               @if (p.agreedPrice) {
                 <div class="tx-qs-cell"><div class="tx-qs-label">Agreed price</div><div class="tx-qs-value" style="color:var(--teal);">£{{ p.agreedPrice.toLocaleString('en-GB') }}</div></div>
               }
+              <div class="tx-qs-cell" (click)="$event.stopPropagation()">
+                <div class="tx-qs-label">Valuation</div>
+                <div class="tx-qs-value" style="display:flex; align-items:center; gap:2px;">
+                  <span style="color:var(--text3);">£</span>
+                  <input type="number" style="width:100%; border:none; background:transparent; padding:0; font-size:inherit; font-weight:inherit; color:inherit;"
+                         placeholder="—"
+                         [value]="p.valuation ?? ''"
+                         (change)="updateValuation(p.id, $any($event.target).value)">
+                </div>
+              </div>
               @if (p.financial.capex) {
                 <div class="tx-qs-cell"><div class="tx-qs-label">Capex</div><div class="tx-qs-value">£{{ p.financial.capex.toLocaleString('en-GB') }}</div></div>
               }
